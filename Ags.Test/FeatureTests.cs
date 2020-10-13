@@ -1,9 +1,8 @@
-﻿using System;
+﻿using geographia.ags;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using geographia.ags;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Ags.Test
 {

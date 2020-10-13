@@ -1,11 +1,8 @@
 ﻿using geographia.ags;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Ags.Test
@@ -29,7 +26,7 @@ namespace Ags.Test
             "https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"
         };
 
-        public static IEnumerable<object[]> GetProviders ()
+        public static IEnumerable<object[]> GetProviders()
         {
             foreach (var p in parcels)
                 yield return new object[] { p };

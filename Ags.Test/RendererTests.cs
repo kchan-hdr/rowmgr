@@ -1,10 +1,7 @@
 ﻿using geographia.ags;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Ags.Test
@@ -22,7 +19,7 @@ namespace Ags.Test
             var r1 = await s.GetDomainValues(0);
             Assert.IsTrue(r1.Any());
 
-            foreach( var v in r1)
+            foreach (var v in r1)
             {
                 Trace.WriteLine(v);
             }
