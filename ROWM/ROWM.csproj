@@ -16,6 +16,7 @@
     <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM-mezzy - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\rowmgr2 - Web Deploy.pubxml" />
+    <None Remove="ReportTemplates\contact_log_template.docx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.4.0-beta.1" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.1.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.12.1" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
@@ -53,6 +55,9 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ReportTemplates\contact_log_template.docx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />

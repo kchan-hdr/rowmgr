@@ -1,6 +1,7 @@
 using geographia.ags;
 using Microsoft.AspNetCore.Mvc;
 using ROWM.Dal;
+using ROWM.Models;
 using SharePointInterface;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace ROWM.Controllers
         static readonly string _APP_NAME = "ROWM";
 
         #region ctor
+        readonly SiteDecoration _decoration;
         readonly ROWM_Context _ctx;
         readonly OwnerRepository _repo;
         readonly ContactInfoRepository _contactRepo;
@@ -27,8 +29,9 @@ namespace ROWM.Controllers
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
 
-        public RowmController(ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(SiteDecoration dec, ROWM_Context ctx, OwnerRepository r, ContactInfoRepository c, StatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
         {
+            _decoration = dec;
             _ctx = ctx;
             _repo = r;
             _contactRepo = c;
@@ -577,6 +580,21 @@ namespace ROWM.Controllers
                 Title = log.Title
             };
         }
+
+        [Route("parcels/{pid}/logs"), HttpGet]
+        public async Task<IActionResult> ExportContactLogs(string pid)
+        {
+            if (string.IsNullOrWhiteSpace(pid))
+                return BadRequest();
+
+            var p = await _repo.GetParcel(pid);
+
+            var h = new ContactLogHelper(_decoration.SiteTitle());
+            var docx = await h.GeterateImpl(p);
+
+            return File(docx, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"{pid} Agent Log.docx");
+        }
+
         #region contact status helper
         /// <summary>
         /// update db and feature to Owner_Contacted, if was No_Activities
