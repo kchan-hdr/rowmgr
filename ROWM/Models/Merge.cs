@@ -143,7 +143,19 @@ namespace ROWM.Models
                 var dateCell = new TableCell(d);
                 dateCell.AppendChild(dateProperties.CloneNode(true));
 
-                var logCell = new TableCell(new Paragraph(new Run(new Text(log.Notes))));
+                var nr = new Run();
+                if (!string.IsNullOrWhiteSpace(log.Title))
+                    nr.Append(new Text($"Title: {log.Title}"), new Break());
+
+                if (!string.IsNullOrWhiteSpace(log.ContactChannel))
+                    nr.Append(new Text($"Contact Method: {log.ContactChannel}"), new Break());
+
+                if (nr.HasChildren)
+                    nr.AppendChild(new Break());
+
+                nr.AppendChild(new Text(log.Notes));
+                var n = new Paragraph(nr);
+                var logCell = new TableCell(n); //  new Paragraph(new Run(new Text(log.Notes))));
                 logCell.AppendChild(logProperties.CloneNode(true));
 
                 r.Append(dateCell, logCell);
