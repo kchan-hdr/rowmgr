@@ -588,6 +588,8 @@ namespace ROWM.Controllers
                 return BadRequest();
 
             var p = await _repo.GetParcel(pid);
+            var o = await _repo.GetOwner(p.Ownership.FirstOrDefault()?.OwnerId ?? default);
+            p.ParcelContacts = o?.ContactInfo;
 
             var h = new ContactLogHelper(_decoration.SiteTitle());
             var docx = await h.GeterateImpl(p);
