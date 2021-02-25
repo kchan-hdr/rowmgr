@@ -25,6 +25,7 @@ namespace ROWM.Dal
         public string Description { get; set; }
 
         public int DisplayOrder { get; set; }
+        public bool ShowInPieChart { get; set; } = true;
 
         public bool IsActive { get; set; }
 

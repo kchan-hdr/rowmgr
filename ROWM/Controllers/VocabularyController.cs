@@ -70,7 +70,7 @@ namespace ROWM.Controllers
             var ss = from p in pStatus
                      join sy in sym on p.DomainValue equals sy.Code into rr
                      from rrx in rr.DefaultIfEmpty()
-                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.ParentStatusCode, rrx?.Hex ?? "#ffffff");
+                     select new StatusDto(p.DisplayOrder, p.ShowInPieChart, p.Code, p.Description, p.ParentStatusCode, rrx?.Hex ?? "#ffffff");
 
             return ss;
         }
@@ -89,13 +89,14 @@ namespace ROWM.Controllers
         public class StatusDto
         {
             public int DisplayOrder { get; private set; }
+            public bool ShowInPie { get; private set; }
             public string Code { get; private set; }
             public string Caption { get; private set; }
             public string Color { get; private set; }
 
             public string ParentCode { get; private set; }
 
-            internal StatusDto(int i, string value, string label, string parent, string hex) => (DisplayOrder, Code, Caption, ParentCode, Color) = (i, value, label, parent, hex);
+            internal StatusDto(int i, bool s, string value, string label, string parent, string hex) => (DisplayOrder, ShowInPie, Code, Caption, ParentCode, Color) = (i, s, value, label, parent, hex);
         }
         #region lookups
         public class Lookup
