@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="**/appsettings*.json" CopyToPublishFolder="Never" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Content Include="AtcSharePointConfig.cs" />
   </ItemGroup>
 
@@ -73,6 +77,12 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.Ally.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.Atc862.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Update="appsettings.AtcChc.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
