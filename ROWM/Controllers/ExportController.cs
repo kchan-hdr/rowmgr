@@ -61,6 +61,13 @@ namespace ROWM.Controllers
             var payload = await _reports.GenerateReport(r);
             return File(payload.Content, payload.Mime, payload.Filename);
         }
+
+        [HttpGet("export/status/{milestone}")]
+        public async Task<IActionResult> StatusDetails(string milestone)
+        {
+            var payload = await _reports.GenerateReport(new ReportDef { ReportCode = "status", ReportUrl = milestone });
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
         #endregion
 
         /// <summary>

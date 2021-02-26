@@ -6,8 +6,8 @@ using OfficeOpenXml.Style;
 using ROWM.Dal;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Drawing;
@@ -83,6 +83,9 @@ namespace ROWM.Reports
             };
         }
 
+        
+        static readonly TimeZoneInfo _CST = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+
         #region styling
         #endregion
         #endregion
@@ -97,6 +100,7 @@ namespace ROWM.Reports
                 case "glance": return DoGlance();
                 case "internal": return DoInternal();
                 case "external": return DoExternal();
+                case "status": return DoStatusDetails(d.ReportUrl);
                 default:
                     throw new KeyNotFoundException($"report not implemented");
             }
@@ -285,6 +289,73 @@ namespace ROWM.Reports
         {
             var payload = await DoInternal();
             return payload;
+        }
+
+        public async Task<ReportPayload> DoStatusDetails(string milestoneCode)
+        {
+            var milestone = await _context.Parcel_Status.SingleOrDefaultAsync(sx => sx.Code == milestoneCode) ?? throw new ArgumentOutOfRangeException($"bad milestone requested {milestoneCode}");
+
+            var details = from stages in _context.Parcel_Status
+                          where stages.IsActive && stages.ParentStatusCode == milestoneCode
+                          orderby stages.DisplayOrder
+                          select stages;
+
+            var parcels = await _context.Parcel.AsNoTracking()
+                .Include(px => px.Activities)
+                .Where(px => px.IsActive && !px.IsDeleted)
+                .OrderBy(px => px.Tracking_Number)
+                .Select(px => new { px.Tracking_Number, px.Assessor_Parcel_Number, px.ParcelId, px.Activities })
+                .ToArrayAsync();
+
+            var lines = new List<string>
+            {
+                $"Parcel Status Details Report,{milestone.Description}",
+                $"Date Printed,{DateTime.Now}",
+                $"Tracking Number,APN,{string.Join(",", details.Select(sx => sx.Description))}"
+            };
+
+            foreach (var parcel in parcels)
+            {
+                Trace.WriteLine($"{parcel.Tracking_Number}  {parcel.Assessor_Parcel_Number}");
+
+                var d = new List<string>();
+                d.Add(parcel.Tracking_Number);
+                d.Add(parcel.Assessor_Parcel_Number);
+
+                foreach(Parcel_Status s in details)
+                {
+                    if ( parcel.Activities.Any(ax => ax.ParcelStatusCode == s.Code))
+                    {
+                        var utc = parcel.Activities.Where(ax => ax.ParcelStatusCode == s.Code).Max(ax => ax.ActivityDate);
+                        var dt = TimeZoneInfo.ConvertTimeFromUtc(utc.DateTime, _CST);
+                        d.Add(dt.ToShortDateString());
+                    }
+                    else
+                    {
+                        d.Add( string.Empty );
+                    }
+                }
+
+                lines.Add(string.Join(",", d));
+            }
+
+            using (var mem = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(mem))
+                {
+                    foreach(string l in lines)
+                        writer.WriteLine(l);
+
+                    writer.Close();
+
+                    return new ReportPayload
+                    {
+                        Filename = $"Parcel Status - {milestoneCode}.csv",
+                        Mime = "text/csv",
+                        Content = mem.GetBuffer()
+                    };
+                }
+            }
         }
         #endregion
 
