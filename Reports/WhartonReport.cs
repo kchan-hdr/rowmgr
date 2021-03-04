@@ -286,10 +286,10 @@ namespace ROWM.Reports
 
         public async Task<ReportPayload> DoStatus()
         {
-            var parcels = await _context.Parcel.AsNoTracking()
-                .Where(px => px.IsActive && !px.IsDeleted)
-                .Select(px => new { px.Tracking_Number, px.Assessor_Parcel_Number, px.Parcel_Status.Description })
-                .ToArrayAsync();
+            var parcels = await (from p in _context.Parcel.AsNoTracking()
+                                 where p.IsActive && !p.IsDeleted
+                                 join c in _context.Parcel_Status on p.Parcel_Status.ParentStatusCode equals c.Code
+                                 select new { p.Tracking_Number, p.Assessor_Parcel_Number, c.Description }).ToArrayAsync();
 
             var lines = new List<string>
             {
