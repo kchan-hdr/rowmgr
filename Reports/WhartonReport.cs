@@ -1,29 +1,30 @@
 ﻿using OfficeOpenXml;
-using OfficeOpenXml.Drawing.Chart;
-using OfficeOpenXml.FormulaParsing;
-using OfficeOpenXml.FormulaParsing.Excel;
 using OfficeOpenXml.Style;
 using ROWM.Dal;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Data.Entity;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml;
 
 namespace ROWM.Reports
 {
     public class WhartonReport : IRowmReports
     {
         #region static init
-        static readonly IEnumerable<ReportDef> _Reports;
+        static readonly IEnumerable<ReportDef> _Reports = new List<ReportDef>
+            {
+                new ReportDef { Caption = "At A Glance Report", DisplayOrder = 1, ReportCode = "glance"},
+                new ReportDef { Caption = "Internal Status Report", DisplayOrder = 2, ReportCode = "internal"},
+                new ReportDef { Caption = "Excternal Status Report", DisplayOrder = 3, ReportCode = "external"},
+                new ReportDef { Caption = "Status Summary", DisplayOrder = 4, ReportCode = "snapshot" }
+            };
+
         static readonly IEnumerable<ColumnMapping> _atAGlance = new List<ColumnMapping>
         {
             new ColumnMapping{ TemplateColumnIndex = "B", TemplateColumnName = "City Survey Completed", StatusCode = "Survey_City_Approved" },
@@ -73,15 +74,6 @@ namespace ROWM.Reports
             new ColumnMapping{ TemplateColumnIndex = "BN", TemplateColumnName = "Recorded Deed", StatusCode = "" },
 
         };
-        static WhartonReport()
-        {
-            _Reports = new List<ReportDef>
-            {
-                new ReportDef { Caption = "At A Glance Report", DisplayOrder = 1, ReportCode = "glance"},
-                new ReportDef { Caption = "Internal Status Report", DisplayOrder = 2, ReportCode = "internal"},
-                new ReportDef { Caption = "Excternal Status Report", DisplayOrder = 3, ReportCode = "external"}
-            };
-        }
 
         
         static readonly TimeZoneInfo _CST = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
@@ -101,6 +93,7 @@ namespace ROWM.Reports
                 case "internal": return DoInternal();
                 case "external": return DoExternal();
                 case "status": return DoStatusDetails(d.ReportUrl);
+                case "snapshot": return DoStatus();
                 default:
                     throw new KeyNotFoundException($"report not implemented");
             }
@@ -291,6 +284,43 @@ namespace ROWM.Reports
             return payload;
         }
 
+        public async Task<ReportPayload> DoStatus()
+        {
+            var parcels = await _context.Parcel.AsNoTracking()
+                .Where(px => px.IsActive && !px.IsDeleted)
+                .Select(px => new { px.Tracking_Number, px.Assessor_Parcel_Number, px.Parcel_Status.Description })
+                .ToArrayAsync();
+
+            var lines = new List<string>
+            {
+                $"Parcel Status Summary Report",
+                $"Date Printed,{DateTime.Now}",
+                $"Tracking Number,APN,Acquisition Status"
+            };
+
+            lines.AddRange(
+                parcels.OrderBy(px => px.Tracking_Number, new TrackingComparer())
+                .Select(px => $"{px.Tracking_Number},{px.Assessor_Parcel_Number},{px.Description}")
+            );
+
+            using (var mem = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(mem))
+                {
+                    foreach (string l in lines)
+                        writer.WriteLine(l);
+
+                    writer.Close();
+
+                    return new ReportPayload
+                    {
+                        Filename = $"Parcel Status - {DateTime.Now}.csv",
+                        Mime = "text/csv",
+                        Content = mem.GetBuffer()
+                    };
+                }
+            }
+        }
         public async Task<ReportPayload> DoStatusDetails(string milestoneCode)
         {
             var milestone = await _context.Parcel_Status.SingleOrDefaultAsync(sx => sx.Code == milestoneCode) ?? throw new ArgumentOutOfRangeException($"bad milestone requested {milestoneCode}");
@@ -314,7 +344,7 @@ namespace ROWM.Reports
                 $"Tracking Number,APN,{string.Join(",", details.Select(sx => sx.Description))}"
             };
 
-            foreach (var parcel in parcels)
+            foreach (var parcel in parcels.OrderBy(px => px.Tracking_Number, new TrackingComparer()))
             {
                 Trace.WriteLine($"{parcel.Tracking_Number}  {parcel.Assessor_Parcel_Number}");
 
@@ -367,5 +397,51 @@ namespace ROWM.Reports
             internal string StatusCode { get; set; }
         }
         #endregion
+    }
+
+    internal class TrackingComparer : IComparer<string>
+    {
+        Regex Tracking = new Regex("(\\d*)(\\.*)", RegexOptions.Singleline | RegexOptions.Compiled);
+
+        public int Compare(string x, string y)
+        {
+            var xm = Tracking.Match(x);
+            var ym = Tracking.Match(y);
+
+            if (xm.Success && ym.Success)
+            {
+                var xn = MyValue(xm.Groups[0].Value);
+                var yn = MyValue(ym.Groups[0].Value);
+
+                var diff = xn - yn;
+                if (diff == 0)
+                {
+                    var xa = xm.Groups[1].Value;
+                    var ya = ym.Groups[1].Value;
+
+                    return string.Compare(xa, ya);
+                }
+                else
+                {
+                    return diff;
+                }
+            } 
+            else
+            {
+                if (xm.Success) return 1;
+                if (ym.Success) return -1;
+                return 0;
+            }
+        }
+
+        static int MyValue(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+                return 0;
+
+            if (int.TryParse(s, out var n))
+                return n;
+            return 0;
+        }
     }
 }
