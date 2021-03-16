@@ -30,14 +30,17 @@ namespace SharePointInterface.Test
         [TestMethod, TestCategory("SharePointCRUD")]
         public void TestConnection_ATC()
         {
-            var msi = new AzureServiceTokenProvider();
-            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
-            var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
-            var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
+            //var msi = new AzureServiceTokenProvider();
+            //var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
+            //var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
+            //var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
             //services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
-            //   d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/test862"));
+            //   d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/chc"));
+            var appid = "77429b44-e9ab-403c-acfa-e90648aa4452";
+            var apps = "ljVTIGAd0siTJ79FmQPPs/yU0QtoEEb1J1y05SsxG+A=";
 
-            ISharePointCRUD sp = new SharePointCRUD(__appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/test862");
+
+            ISharePointCRUD sp = new SharePointCRUD(__appId: appid, __appSecret: apps, _url: "https://atcpmp.sharepoint.com/atcrow/chc");
             var t = sp.GetSiteTitle();
             Assert.AreNotEqual("NA", t);
             Trace.WriteLine(t);

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,9 +12,9 @@ using SharePointInterface;
 
 namespace ROWM
 {
-    public class StartupAlly
+    public class StartupAllyRelease1
     {
-        public StartupAlly(IConfiguration configuration)
+        public StartupAllyRelease1(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -48,15 +50,19 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<DeleteHelper>();
-            services.AddScoped<ROWM.Dal.DocTypes>(); //  fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
+            services.AddScoped<ROWM.Dal.DocTypes>();
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
-                new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/Alliant_CHC_Parcel_FS/FeatureServer"));
+                new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/Wisconsin/Alliant_CHC_Parcel_FS/FeatureServer"));
 
-            var sec = AtcSharePointConfig.SharePointAppSecret();
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac =>
-                new SharePointCRUD(sec.AppId, sec.AppSec, "https://atcpmp.sharepoint.com/atcrow/testchc",
-                d: fac.GetRequiredService<DocTypes>()));
+            //
+            var msi = new AzureServiceTokenProvider();
+            var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
+
+            var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
+            var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
+            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
+               d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/alliant_chc"));
 
             services.AddSingleton<SiteDecoration, Ally>();
 

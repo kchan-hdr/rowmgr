@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="**/appsettings*.json" CopyToPublishFolder="Never" />
+    <None Include="**/appsettings.*.json" CopyToPublishFolder="Never" />
   </ItemGroup>
   
   <ItemGroup>
@@ -77,7 +77,7 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="appsettings.Ally.json">
+    <Content Update="appsettings.AllyRelease1.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
     <Content Update="appsettings.Atc862.json">
