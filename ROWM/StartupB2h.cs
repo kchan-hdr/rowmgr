@@ -13,6 +13,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
+using MaximeRouiller.Azure.AppService.EasyAuth;
 
 namespace ROWM
 {
@@ -43,6 +44,15 @@ namespace ROWM
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("edit", policy => policy.RequireClaim("full-agent", "limited-edit"));
+                opt.AddPolicy("financials", policy => policy.RequireClaim("full-agent"));
+                opt.AddPolicy("contactlog", policy => policy.RequireClaim("full-agent", "limited-edit", "log"));               
+            });
+
+            services.AddAuthentication().AddEasyAuthAuthentication(opt => { });
+
             services.AddCors();
 
             // Add framework services.
@@ -58,7 +68,6 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
-            var joke = Configuration["joke"];
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {

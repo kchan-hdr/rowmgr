@@ -41,5 +41,9 @@ namespace ROWM.Dal
         public virtual DbSet<Repesentation_Type> Repesentation_Type { get; set; }
         public virtual DbSet<Roe_Status> Roe_Status { get; set; }
         public virtual DbSet<Landowner_Score> Landowner_Score { get; set; }
+        public virtual DbSet<Map> Map { get; set; }
+        public virtual DbSet<RoeConditions> RoeConditions { get; set; }
+        public virtual DbSet<Status_Activity> Status_Activity { get; set; }
+        public virtual DbSet<Status_Category> Status_Category { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,8 +26,10 @@ namespace ROWM.Controllers
         }
 
         public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
+        {            
+            var p = ClaimsPrincipal.Current;
+            var m = string.Join(",", p.Claims.Select(cx => $"{cx.Type}:{cx.Value}"));
+            ViewData["Message"] = m;
 
             return View();
         }

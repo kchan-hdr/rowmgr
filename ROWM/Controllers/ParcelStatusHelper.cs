@@ -29,7 +29,7 @@ namespace ROWM.Controllers
         public int GetDomainValue(string status)
         {
             var s = _Status.Single(sx => sx.Code.Equals(status));
-            return s.DomainValue;
+            return s.DomainValue ?? 0;
         }
 
         public int GetRoeDomainValue(string status)

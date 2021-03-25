@@ -20,6 +20,8 @@ namespace ROWM.Dal
             this.Ownership = new HashSet<Ownership>();
             this.ContactLog = new HashSet<ContactLog>();
             this.Document = new HashSet<Document>();
+            this.RoeConditions = new HashSet<RoeConditions>();
+            this.Status_Activity = new HashSet<Status_Activity>();
         }
     
         public System.Guid ParcelId { get; set; }
@@ -62,5 +64,9 @@ namespace ROWM.Dal
         public virtual ICollection<ContactLog> ContactLog { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Document> Document { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RoeConditions> RoeConditions { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Status_Activity> Status_Activity { get; set; }
     }
 }

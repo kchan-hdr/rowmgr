@@ -5,6 +5,17 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="ROWM.Dal.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Map">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Caption" Type="nvarchar(max)" />
+          <Property Name="LayerType" Type="int" Nullable="false" />
+          <Property Name="AgsUrl" Type="nvarchar" MaxLength="2048" />
+          <Property Name="LayerId" Type="nvarchar" MaxLength="10" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Agent">
           <Key>
             <PropertyRef Name="AgentId" />
@@ -233,11 +244,18 @@
           <Key>
             <PropertyRef Name="Code" />
           </Key>
-          <Property Name="Code" Type="nvarchar" MaxLength="40" Nullable="false" />
-          <Property Name="DomainValue" Type="int" Nullable="false" />
-          <Property Name="Description" Type="nvarchar" MaxLength="200" />
-          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="Code" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Category" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DomainValue" Type="int" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="DisplayOrder" Type="int" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="ParentStatusCode" Type="varchar" MaxLength="50" />
+          <Property Name="IsComplete" Type="bit" />
+          <Property Name="IsAbort" Type="bit" />
+          <Property Name="IsRequired" Type="bit" />
+          <Property Name="IsComputed" Type="bit" />
+          <Property Name="ShowInPie" Type="bit" />
         </EntityType>
         <EntityType Name="ParcelContactLogs">
           <Key>
@@ -274,6 +292,54 @@
           <Property Name="DisplayOrder" Type="int" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="RoeConditions">
+          <Key>
+            <PropertyRef Name="ConditionId" />
+          </Key>
+          <Property Name="ConditionId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Condition" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="EffectiveStartDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="EffectiveEndDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="Parcel_ParcelId" Type="uniqueidentifier" />
+          <Property Name="Contact" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="Status_Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ActivityDate" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ParentParcelId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="AgentId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="StatusCode" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="OriginalStatusCode" Type="varchar" MaxLength="50" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Status_Category">
+          <Key>
+            <PropertyRef Name="CategoryCode" />
+          </Key>
+          <Property Name="CategoryCode" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="DisplayOrder" Type="int" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_CONDITIONS_CONTACTINFO">
+          <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="0..1" />
+          <End Role="RoeConditions" Type="Self.RoeConditions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContactInfo">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="RoeConditions">
+              <PropertyRef Name="Contact" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_dbo_ContactInfoContactLogs_ROWM_ContactInfo_ContactInfo_ContactId">
           <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -414,6 +480,54 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="0..1" />
+          <End Role="RoeConditions" Type="Self.RoeConditions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="RoeConditions">
+              <PropertyRef Name="Parcel_ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel_Status_Activity">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="1" />
+          <End Role="Status_Activity" Type="Self.Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="ParentParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel_Status_Category">
+          <End Role="Status_Category" Type="Self.Status_Category" Multiplicity="1" />
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status_Category">
+              <PropertyRef Name="CategoryCode" />
+            </Principal>
+            <Dependent Role="Parcel_Status">
+              <PropertyRef Name="Category" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel_Status_Milestone">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="1" />
+          <End Role="Parcel_Status1" Type="Self.Parcel_Status" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel_Status1">
+              <PropertyRef Name="Code" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
           <End Role="Owner" Type="Self.Owner" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -532,18 +646,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
-          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="0..1" />
-          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Parcel_Status">
-              <PropertyRef Name="Code" />
-            </Principal>
-            <Dependent Role="Parcel">
-              <PropertyRef Name="ParcelStatusCode" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
           <End Role="Roe_Status" Type="Self.Roe_Status" Multiplicity="0..1" />
           <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
@@ -556,7 +658,44 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Status_Activity_Agent">
+          <End Role="Agent" Type="Self.Agent" Multiplicity="1" />
+          <End Role="Status_Activity" Type="Self.Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="AgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Status_Activity_Original_Status">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="0..1" />
+          <End Role="Status_Activity" Type="Self.Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="OriginalStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Status_Activity_Status">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="1" />
+          <End Role="Status_Activity" Type="Self.Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="StatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="ROWMDalStoreContainer">
+          <EntitySet Name="Map" EntityType="Self.Map" Schema="App" store:Type="Tables" />
           <EntitySet Name="Agent" EntityType="Self.Agent" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Contact_Channel" EntityType="Self.Contact_Channel" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Contact_Purpose" EntityType="Self.Contact_Purpose" Schema="ROWM" store:Type="Tables" />
@@ -578,6 +717,13 @@
           <EntitySet Name="ParcelDocuments" EntityType="Self.ParcelDocuments" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Repesentation_Type" EntityType="Self.Repesentation_Type" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Roe_Status" EntityType="Self.Roe_Status" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="RoeConditions" EntityType="Self.RoeConditions" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Status_Activity" EntityType="Self.Status_Activity" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Status_Category" EntityType="Self.Status_Category" Schema="ROWM" store:Type="Tables" />
+          <AssociationSet Name="FK_CONDITIONS_CONTACTINFO" Association="Self.FK_CONDITIONS_CONTACTINFO">
+            <End Role="ContactInfo" EntitySet="ContactInfo" />
+            <End Role="RoeConditions" EntitySet="RoeConditions" />
+          </AssociationSet>
           <AssociationSet Name="FK_dbo_ContactInfoContactLogs_ROWM_ContactInfo_ContactInfo_ContactId" Association="Self.FK_dbo_ContactInfoContactLogs_ROWM_ContactInfo_ContactInfo_ContactId">
             <End Role="ContactInfo" EntitySet="ContactInfo" />
             <End Role="ContactInfoContactLogs" EntitySet="ContactInfoContactLogs" />
@@ -618,6 +764,22 @@
             <End Role="Parcel" EntitySet="Parcel" />
             <End Role="ParcelDocuments" EntitySet="ParcelDocuments" />
           </AssociationSet>
+          <AssociationSet Name="FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId" Association="Self.FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="RoeConditions" EntitySet="RoeConditions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel_Status_Activity" Association="Self.FK_Parcel_Status_Activity">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel_Status_Category" Association="Self.FK_Parcel_Status_Category">
+            <End Role="Status_Category" EntitySet="Status_Category" />
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel_Status_Milestone" Association="Self.FK_Parcel_Status_Milestone">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Parcel_Status1" EntitySet="Parcel_Status" />
+          </AssociationSet>
           <AssociationSet Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" Association="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
             <End Role="Owner" EntitySet="Owner" />
             <End Role="ContactInfo" EntitySet="ContactInfo" />
@@ -654,13 +816,21 @@
             <End Role="Parcel" EntitySet="Parcel" />
             <End Role="Ownership" EntitySet="Ownership" />
           </AssociationSet>
-          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
-            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
-            <End Role="Parcel" EntitySet="Parcel" />
-          </AssociationSet>
           <AssociationSet Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
             <End Role="Roe_Status" EntitySet="Roe_Status" />
             <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Status_Activity_Agent" Association="Self.FK_Status_Activity_Agent">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Status_Activity_Original_Status" Association="Self.FK_Status_Activity_Original_Status">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Status_Activity_Status" Association="Self.FK_Status_Activity_Status">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -680,6 +850,7 @@
           <NavigationProperty Name="ContactLog" Relationship="Self.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" FromRole="Agent" ToRole="ContactLog" />
           <NavigationProperty Name="DocumentActivity" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" FromRole="Agent" ToRole="DocumentActivity" />
           <NavigationProperty Name="Document" Relationship="Self.DocumentAgents" FromRole="Agent" ToRole="Document" />
+          <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Status_Activity_Agent" FromRole="Agent" ToRole="Status_Activity" />
         </EntityType>
         <EntityType Name="Contact_Channel">
           <Key>
@@ -722,6 +893,7 @@
           <Property Name="Representation" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="Owner" Relationship="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" FromRole="ContactInfo" ToRole="Owner" />
           <NavigationProperty Name="ContactLog" Relationship="Self.ContactInfoContactLogs" FromRole="ContactInfo" ToRole="ContactLog" />
+          <NavigationProperty Name="RoeConditions" Relationship="ROWM.Dal.FK_CONDITIONS_CONTACTINFO" FromRole="ContactInfo" ToRole="RoeConditions" />
         </EntityType>
         <EntityType Name="ContactLog">
           <Key>
@@ -886,17 +1058,31 @@
           <Property Name="County_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="Assessor_Parcel_Number" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
           <Property Name="Landowner_Score" Type="Int32" />
+          <NavigationProperty Name="RoeConditions" Relationship="ROWM.Dal.FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId" FromRole="Parcel" ToRole="RoeConditions" />
+          <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Parcel_Status_Activity" FromRole="Parcel" ToRole="Status_Activity" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
             <PropertyRef Name="Code" />
           </Key>
-          <Property Name="Code" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="DomainValue" Type="Int32" Nullable="false" />
-          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
-          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="Code" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="DomainValue" Type="Int32" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Parcel" Relationship="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" FromRole="Parcel_Status" ToRole="Parcel" />
+          <Property Name="Category" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ParentStatusCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsComplete" Type="Boolean" />
+          <Property Name="IsAbort" Type="Boolean" />
+          <Property Name="IsRequired" Type="Boolean" />
+          <Property Name="IsComputed" Type="Boolean" />
+          <Property Name="ShowInPie" Type="Boolean" />
+          <NavigationProperty Name="Status_Category" Relationship="ROWM.Dal.FK_Parcel_Status_Category" FromRole="Parcel_Status" ToRole="Status_Category" />
+          <NavigationProperty Name="Parcel_Status1" Relationship="ROWM.Dal.FK_Parcel_Status_Milestone" FromRole="Parcel_Status" ToRole="Parcel_Status1" />
+          <NavigationProperty Name="Parcel_Status2" Relationship="ROWM.Dal.FK_Parcel_Status_Milestone" FromRole="Parcel_Status1" ToRole="Parcel_Status" />
+          <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Status_Activity_Original_Status" FromRole="Parcel_Status" ToRole="Status_Activity" />
+          <NavigationProperty Name="Status_Activity1" Relationship="ROWM.Dal.FK_Status_Activity_Status" FromRole="Parcel_Status" ToRole="Status_Activity" />
         </EntityType>
         <EntityType Name="Repesentation_Type">
           <Key>
@@ -1161,6 +1347,42 @@
             <End Role="Parcel" EntitySet="Parcel" />
           </AssociationSet>
           <EntitySet Name="Landowner_Score" EntityType="ROWM.Dal.Landowner_Score" />
+          <EntitySet Name="Map" EntityType="ROWM.Dal.Map" />
+          <EntitySet Name="RoeConditions" EntityType="ROWM.Dal.RoeConditions" />
+          <EntitySet Name="Status_Activity" EntityType="ROWM.Dal.Status_Activity" />
+          <EntitySet Name="Status_Category" EntityType="ROWM.Dal.Status_Category" />
+          <AssociationSet Name="FK_Status_Activity_Agent" Association="ROWM.Dal.FK_Status_Activity_Agent">
+            <End Role="Agent" EntitySet="Agent" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CONDITIONS_CONTACTINFO" Association="ROWM.Dal.FK_CONDITIONS_CONTACTINFO">
+            <End Role="ContactInfo" EntitySet="ContactInfo" />
+            <End Role="RoeConditions" EntitySet="RoeConditions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId" Association="ROWM.Dal.FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="RoeConditions" EntitySet="RoeConditions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel_Status_Activity" Association="ROWM.Dal.FK_Parcel_Status_Activity">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel_Status_Category" Association="ROWM.Dal.FK_Parcel_Status_Category">
+            <End Role="Status_Category" EntitySet="Status_Category" />
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel_Status_Milestone" Association="ROWM.Dal.FK_Parcel_Status_Milestone">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Parcel_Status1" EntitySet="Parcel_Status" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Status_Activity_Original_Status" Association="ROWM.Dal.FK_Status_Activity_Original_Status">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Status_Activity_Status" Association="ROWM.Dal.FK_Status_Activity_Status">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Landowner_Score">
           <Key>
@@ -1172,6 +1394,156 @@
           <Property Name="DisplayOrder" Type="Int32" />
           <Property Name="IsActive" Type="Boolean" />
         </EntityType>
+        <EntityType Name="Map">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Guid" Nullable="false" />
+          <Property Name="Caption" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="LayerType" Type="Int32" Nullable="false" />
+          <Property Name="AgsUrl" Type="String" MaxLength="2048" FixedLength="false" Unicode="true" />
+          <Property Name="LayerId" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RoeConditions">
+          <Key>
+            <PropertyRef Name="ConditionId" />
+          </Key>
+          <Property Name="ConditionId" Type="Guid" Nullable="false" />
+          <Property Name="Condition" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="EffectiveStartDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="EffectiveEndDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Parcel_ParcelId" Type="Guid" />
+          <Property Name="Contact" Type="Guid" />
+          <NavigationProperty Name="ContactInfo" Relationship="ROWM.Dal.FK_CONDITIONS_CONTACTINFO" FromRole="RoeConditions" ToRole="ContactInfo" />
+          <NavigationProperty Name="Parcel" Relationship="ROWM.Dal.FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId" FromRole="RoeConditions" ToRole="Parcel" />
+        </EntityType>
+        <EntityType Name="Status_Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="Guid" Nullable="false" />
+          <Property Name="ActivityDate" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ParentParcelId" Type="Guid" Nullable="false" />
+          <Property Name="AgentId" Type="Guid" Nullable="false" />
+          <Property Name="StatusCode" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="OriginalStatusCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Agent" Relationship="ROWM.Dal.FK_Status_Activity_Agent" FromRole="Status_Activity" ToRole="Agent" />
+          <NavigationProperty Name="Parcel" Relationship="ROWM.Dal.FK_Parcel_Status_Activity" FromRole="Status_Activity" ToRole="Parcel" />
+          <NavigationProperty Name="Parcel_Status" Relationship="ROWM.Dal.FK_Status_Activity_Original_Status" FromRole="Status_Activity" ToRole="Parcel_Status" />
+          <NavigationProperty Name="Parcel_Status1" Relationship="ROWM.Dal.FK_Status_Activity_Status" FromRole="Status_Activity" ToRole="Parcel_Status" />
+        </EntityType>
+        <EntityType Name="Status_Category">
+          <Key>
+            <PropertyRef Name="CategoryCode" />
+          </Key>
+          <Property Name="CategoryCode" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Parcel_Status" Relationship="ROWM.Dal.FK_Parcel_Status_Category" FromRole="Status_Category" ToRole="Parcel_Status" />
+        </EntityType>
+        <Association Name="FK_Status_Activity_Agent">
+          <End Type="ROWM.Dal.Agent" Role="Agent" Multiplicity="1" />
+          <End Type="ROWM.Dal.Status_Activity" Role="Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Agent">
+              <PropertyRef Name="AgentId" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="AgentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CONDITIONS_CONTACTINFO">
+          <End Type="ROWM.Dal.ContactInfo" Role="ContactInfo" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.RoeConditions" Role="RoeConditions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContactInfo">
+              <PropertyRef Name="ContactId" />
+            </Principal>
+            <Dependent Role="RoeConditions">
+              <PropertyRef Name="Contact" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId">
+          <End Type="ROWM.Dal.Parcel" Role="Parcel" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.RoeConditions" Role="RoeConditions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="RoeConditions">
+              <PropertyRef Name="Parcel_ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel_Status_Activity">
+          <End Type="ROWM.Dal.Parcel" Role="Parcel" Multiplicity="1" />
+          <End Type="ROWM.Dal.Status_Activity" Role="Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="ParentParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel_Status_Category">
+          <End Type="ROWM.Dal.Status_Category" Role="Status_Category" Multiplicity="1" />
+          <End Type="ROWM.Dal.Parcel_Status" Role="Parcel_Status" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status_Category">
+              <PropertyRef Name="CategoryCode" />
+            </Principal>
+            <Dependent Role="Parcel_Status">
+              <PropertyRef Name="Category" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel_Status_Milestone">
+          <End Type="ROWM.Dal.Parcel_Status" Role="Parcel_Status" Multiplicity="1" />
+          <End Type="ROWM.Dal.Parcel_Status" Role="Parcel_Status1" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel_Status1">
+              <PropertyRef Name="Code" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Status_Activity_Original_Status">
+          <End Type="ROWM.Dal.Parcel_Status" Role="Parcel_Status" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.Status_Activity" Role="Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="OriginalStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Status_Activity_Status">
+          <End Type="ROWM.Dal.Parcel_Status" Role="Parcel_Status" Multiplicity="1" />
+          <End Type="ROWM.Dal.Status_Activity" Role="Status_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Status_Activity">
+              <PropertyRef Name="StatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1383,6 +1755,13 @@
           <EntitySetMapping Name="Parcel_Status">
             <EntityTypeMapping TypeName="ROWM.Dal.Parcel_Status">
               <MappingFragment StoreEntitySet="Parcel_Status">
+                <ScalarProperty Name="ShowInPie" ColumnName="ShowInPie" />
+                <ScalarProperty Name="IsComputed" ColumnName="IsComputed" />
+                <ScalarProperty Name="IsRequired" ColumnName="IsRequired" />
+                <ScalarProperty Name="IsAbort" ColumnName="IsAbort" />
+                <ScalarProperty Name="IsComplete" ColumnName="IsComplete" />
+                <ScalarProperty Name="ParentStatusCode" ColumnName="ParentStatusCode" />
+                <ScalarProperty Name="Category" ColumnName="Category" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
                 <ScalarProperty Name="DomainValue" ColumnName="DomainValue" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
@@ -1460,6 +1839,57 @@
                 <ScalarProperty Name="Caption" ColumnName="Caption" />
                 <ScalarProperty Name="DomainValue" ColumnName="DomainValue" />
                 <ScalarProperty Name="Score" ColumnName="Score" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Map">
+            <EntityTypeMapping TypeName="ROWM.Dal.Map">
+              <MappingFragment StoreEntitySet="Map">
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="LayerId" ColumnName="LayerId" />
+                <ScalarProperty Name="AgsUrl" ColumnName="AgsUrl" />
+                <ScalarProperty Name="LayerType" ColumnName="LayerType" />
+                <ScalarProperty Name="Caption" ColumnName="Caption" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RoeConditions">
+            <EntityTypeMapping TypeName="ROWM.Dal.RoeConditions">
+              <MappingFragment StoreEntitySet="RoeConditions">
+                <ScalarProperty Name="Contact" ColumnName="Contact" />
+                <ScalarProperty Name="Parcel_ParcelId" ColumnName="Parcel_ParcelId" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="EffectiveEndDate" ColumnName="EffectiveEndDate" />
+                <ScalarProperty Name="EffectiveStartDate" ColumnName="EffectiveStartDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Condition" ColumnName="Condition" />
+                <ScalarProperty Name="ConditionId" ColumnName="ConditionId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Status_Activity">
+            <EntityTypeMapping TypeName="ROWM.Dal.Status_Activity">
+              <MappingFragment StoreEntitySet="Status_Activity">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="OriginalStatusCode" ColumnName="OriginalStatusCode" />
+                <ScalarProperty Name="StatusCode" ColumnName="StatusCode" />
+                <ScalarProperty Name="AgentId" ColumnName="AgentId" />
+                <ScalarProperty Name="ParentParcelId" ColumnName="ParentParcelId" />
+                <ScalarProperty Name="ActivityDate" ColumnName="ActivityDate" />
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Status_Category">
+            <EntityTypeMapping TypeName="ROWM.Dal.Status_Category">
+              <MappingFragment StoreEntitySet="Status_Category">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="CategoryCode" ColumnName="CategoryCode" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

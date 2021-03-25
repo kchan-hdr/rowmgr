@@ -18,6 +18,7 @@ namespace ROWM.Dal
         public ContactInfo()
         {
             this.ContactLog = new HashSet<ContactLog>();
+            this.RoeConditions = new HashSet<RoeConditions>();
         }
     
         public System.Guid ContactId { get; set; }
@@ -41,5 +42,7 @@ namespace ROWM.Dal
         public virtual Owner Owner { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContactLog> ContactLog { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<RoeConditions> RoeConditions { get; set; }
     }
 }

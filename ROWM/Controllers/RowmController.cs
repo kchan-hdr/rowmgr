@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.IO;
 using geographia.ags;
 using SharePointInterface;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ROWM.Controllers
 {
@@ -209,6 +211,7 @@ namespace ROWM.Controllers
         #endregion
         #region parcel status
         [HttpPut("parcels/{pid}/status/{statusCode}")]
+        [Authorize( policy:"edit", AuthenticationSchemes ="EasyAuth")]
         public async Task<ParcelGraph> UpdateStatus(string pid, string statusCode)
         {
             var p = await _repo.GetParcel(pid);
@@ -294,6 +297,7 @@ namespace ROWM.Controllers
         #endregion
         #region score
         [Route("parcels/{pid}/rating/{score}"), HttpPut]
+        [Authorize( Roles = "full-agent,limited-edit", AuthenticationSchemes = "EasyAuth")]
         public async Task<ActionResult<ParcelGraph>> UpdateParcelScore(string pid, int score)
         {
             await UpdateLandownerScore(score, DateTimeOffset.Now, new[] { pid });
@@ -465,6 +469,7 @@ namespace ROWM.Controllers
                 NumberOfParcels = s.nParcels,
                 ParcelStatus = await _statistics.SnapshotParcelStatus(),
                 RoeStatus = await _statistics.SnapshotRoeStatus(),
+                ClearStatus = await _statistics.SnapshotClearanceStatus(),
                 Access = await _statistics.SnapshotAccessLikelihood()
             };
         }
@@ -529,6 +534,7 @@ namespace ROWM.Controllers
 
         public IEnumerable<StatisticsRepository.SubTotal> ParcelStatus { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> RoeStatus { get; set; }
+        public IEnumerable<StatisticsRepository.SubTotal> ClearStatus { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> Access { get; set; }
         public IEnumerable<StatisticsRepository.SubTotal> Compensations { get; set; }
     }

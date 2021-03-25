@@ -20,6 +20,7 @@ namespace ROWM.Dal
             this.ContactLog = new HashSet<ContactLog>();
             this.DocumentActivity = new HashSet<DocumentActivity>();
             this.Document = new HashSet<Document>();
+            this.Status_Activity = new HashSet<Status_Activity>();
         }
     
         public System.Guid AgentId { get; set; }
@@ -35,5 +36,7 @@ namespace ROWM.Dal
         public virtual ICollection<DocumentActivity> DocumentActivity { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Document> Document { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Status_Activity> Status_Activity { get; set; }
     }
 }

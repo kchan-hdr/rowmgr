@@ -121,6 +121,9 @@
     <Compile Include="Landowner_Score.cs">
       <DependentUpon>Model.tt</DependentUpon>
     </Compile>
+    <Compile Include="Map.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
     <Compile Include="Model.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -156,10 +159,19 @@
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
+    <Compile Include="RoeConditions.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
     <Compile Include="Roe_Status.cs">
       <DependentUpon>Model.tt</DependentUpon>
     </Compile>
     <Compile Include="ROWM_Context.cs" />
+    <Compile Include="Status_Activity.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Status_Category.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.Config">
