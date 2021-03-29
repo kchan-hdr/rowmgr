@@ -55,6 +55,7 @@ namespace ROWM.Dal
         public string County_Name { get; set; }
         public string Assessor_Parcel_Number { get; set; }
         public Nullable<int> Landowner_Score { get; set; }
+        public string ClearanceCode { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ownership> Ownership { get; set; }

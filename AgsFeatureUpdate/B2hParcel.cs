@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace geographia.ags
 {
-    public class B2hParcel : FeatureService_Base, IFeatureUpdate
+    public class B2hParcel : FeatureService_Base, IFeatureUpdate, IRenderer
     {
+        readonly AgsSchema _layers;
+
         public B2hParcel(string url = "")
         {
             // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer
@@ -21,6 +24,8 @@ namespace geographia.ags
             _LAYERID = 0;
             
             SetSecured();
+
+            _layers = new AgsSchema(this);
         }
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
@@ -133,6 +138,24 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
+
+        public async Task<bool> UpdateFeatureClearance(string parcelId, int status)
+        {
+            if (string.IsNullOrWhiteSpace(parcelId))
+                throw new ArgumentNullException(nameof(parcelId));
+
+            var oid = await Find(0, $"PARCEL_ID='{parcelId}'");
+            var u = oid.Select(i => new UpdateFeature
+            {
+                attributes = new Status_Req
+                {
+                    OBJECTID = i,
+                    Clearance_Status = status
+                }
+            });
+            return await this.Update(u);
+        }
+
         async Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
@@ -151,6 +174,23 @@ namespace geographia.ags
         }
 
         Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => Task.FromResult(false);     // no op
+
+        public async Task<IEnumerable<DomainValue>> GetDomainValues(int layerId)
+        {
+            var desc = await Describe(layerId);
+            var map = JObject.Parse(desc);
+            var m = map.ToObject<MapD>();
+
+            return m.DrawingInfo.Renderer.UniqueValueInfos.Select(v => new DomainValue
+            {
+                Value = v.value,
+                Label = v.label,
+                Red = v.symbol.color[0],
+                Green = v.symbol.color[1],
+                Blue = v.symbol.color[2],
+                Alpha = v.symbol.color[3]
+            });
+        }
         #region request
         public class UpdateRequest
         {
@@ -171,6 +211,8 @@ namespace geographia.ags
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ROE_Status { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public int? Clearance_Status { get; set; }
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? LandOwnerScore { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Documents { get; set; }
@@ -186,6 +228,46 @@ namespace geographia.ags
             public string RoeStatus { get; set; }
             public string Landowner_Score { get; set; }
             public string Documents { get; set; }
+        }
+        #endregion
+        #region symbol
+        public class MapD
+        {
+            public DrawingInfo DrawingInfo { get; set; }
+        }
+
+        public class DrawingInfo
+        {
+            public Renderer Renderer { get; set; }
+        }
+
+        public class Renderer
+        {
+            public IEnumerable<UniqueValue> UniqueValueInfos { get; set; }
+        }
+
+        public class UniqueValue
+        {
+            public Symbol symbol { get; set; }
+            public string value { get; set; }
+            public string label { get; set; }
+            public string description { get; set; }
+        }
+
+        public class Symbol
+        {
+            public string type { get; set; }
+            public string style { get; set; }
+            public int[] color { get; set; }
+            public Outline outline { get; set; }
+        }
+
+        public class Outline
+        {
+            public string type { get; set; }
+            public string style { get; set; }
+            public int[] color { get; set; }
+            public float width { get; set; }
         }
         #endregion
     }

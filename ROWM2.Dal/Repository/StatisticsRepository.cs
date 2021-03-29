@@ -51,7 +51,7 @@ namespace ROWM.Dal
             return from b in _baseParcels.Value
                       join psg in q on b.Title equals psg.Title into matq
                       from sub in matq.DefaultIfEmpty()
-                      select new SubTotal{ Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
+                      select new SubTotal{ Title = b.Title, Caption = b.Caption, DomainValue= b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
         public async Task<IEnumerable<SubTotal>> SnapshotRoeStatus()
@@ -63,19 +63,19 @@ namespace ROWM.Dal
             return from b in _baseRoes.Value
                    join psg in q on b.Title equals psg.Title into matg
                    from sub in matg.DefaultIfEmpty()
-                   select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
+                   select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
         public async Task<IEnumerable<SubTotal>> SnapshotClearanceStatus()
         {
             var q = await (from p in ActiveParcels()
-                           group p by p.RoeStatusCode into psg
+                           group p by p.ClearanceCode into psg
                            select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
             return from b in _baseClearances.Value
                    join psg in q on b.Title equals psg.Title into matg
                    from sub in matg.DefaultIfEmpty()
-                   select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
+                   select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
         public async Task<IEnumerable<SubTotal>> SnapshotAccessLikelihood()
@@ -90,15 +90,16 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
         }
         #region helper
-        private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "acquisition").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, Count = 0 }).ToArray();
-        private IEnumerable<SubTotal> MakeBaseRoes() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "roe").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, Count = 0 }).ToArray();
-        private IEnumerable<SubTotal> MakeBaseClearances() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "clearance").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "acquisition").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseRoes() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "roe").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseClearances() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "clearance").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
         #endregion
         #region dto
         public class SubTotal
         {
             public string Title { get; set; }
             public string Caption { get; set; }
+            public string DomainValue { get; set; }
             public int Count { get; set; }
         }
         #endregion

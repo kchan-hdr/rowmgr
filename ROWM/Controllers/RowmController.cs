@@ -11,6 +11,8 @@ using geographia.ags;
 using SharePointInterface;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.SqlServer.Server;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor;
 
 namespace ROWM.Controllers
 {
@@ -26,14 +28,16 @@ namespace ROWM.Controllers
         readonly ParcelStatusHelper _statusHelper;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
+        readonly B2hParcelHelper _helper;
 
-        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s)
+        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
         {
             _repo = r;
             _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
             _spDocument = s;
+            _helper = h2;
         }
         #endregion
         #region owner
@@ -210,7 +214,7 @@ namespace ROWM.Controllers
         }
         #endregion
         #region parcel status
-        [HttpPut("parcels/{pid}/status/{statusCode}")]
+        [HttpPut("/v0/parcels/{pid}/status/{statusCode}")]
         [Authorize( policy:"edit", AuthenticationSchemes ="EasyAuth")]
         public async Task<ParcelGraph> UpdateStatus(string pid, string statusCode)
         {
@@ -238,6 +242,67 @@ namespace ROWM.Controllers
             await Task.WhenAll(tks);
 
             return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
+        [HttpPatch("v2/parcels/{pid}/status")]
+        public async Task<IActionResult> NewUpdateStatus(string pid, [FromBody] UpdateStatusRequest req)
+        {
+            bool touched = false;
+            var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return NotFound();
+
+            List<Task> tks = new List<Task>();
+
+            // acquisition
+            if (!string.IsNullOrWhiteSpace(req.ParcelStatus))
+            {
+                var (upd, dv) = await _helper.UpdateAcquisition(p, req.ParcelStatus, req.EffectiveDate);
+
+                if (upd)
+                {
+                    tks.Add(_featureUpdate.UpdateFeature(pid, dv));
+                    touched = true;
+                }
+            }
+
+            // roe
+            if (!string.IsNullOrWhiteSpace(req.RoeStatus))
+            {
+                var (upd, dv) = await _helper.UpdateEntry(p, req.RoeStatus, req.EffectiveDate);
+
+                if (upd)
+                {
+                    tks.Add(_featureUpdate.UpdateFeatureRoe(pid, dv));
+                    touched = true;
+                }
+            }
+
+            // clearance
+            if (!string.IsNullOrWhiteSpace(req.Clearance))
+            {
+                var (upd, dv) = await _helper.UpdateClearance(p, req.Clearance, req.EffectiveDate);
+
+                if (upd)
+                {
+                    var hh = _featureUpdate as B2hParcel;
+                    if ( hh != null)
+                        tks.Add(hh.UpdateFeatureClearance(pid, dv));
+
+                    touched = true;
+                }
+            }
+
+            if (touched)
+            {
+                p.LastModified = DateTimeOffset.Now;
+                p.ModifiedBy = _APP_NAME;
+
+                p = await _repo.UpdateParcel(p);
+            }
+
+            await Task.WhenAll(tks);
+
+            return Ok(new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
         }
         #endregion
         #region roe status
@@ -459,7 +524,7 @@ namespace ROWM.Controllers
         }
         #endregion
         #region statistics
-        [HttpGet("statistics")]
+        [HttpGet("statistics_no_color")]
         public async Task<StatisticsDto> GetStatistics()
         {
             var s = await _statistics.Snapshot();
@@ -509,6 +574,16 @@ namespace ROWM.Controllers
 
         public bool IsPrimaryContact { get; set; } = false;
         public string Relations { get; set; } = "";
+    }
+
+    public class UpdateStatusRequest
+    {
+        public DateTimeOffset EffectiveDate { get; set; }
+        public string ParcelStatus { get; set; }
+        public string RoeStatus { get; set; }
+        public string RoeCondition { get; set; }
+        public string Clearance { get; set; }
+        public Guid? AgentId { get; set; }
     }
 
     public class RoeRequest
@@ -689,6 +764,7 @@ namespace ROWM.Controllers
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
         public string RoeCondition { get; set; }
+        public string ClearanceCode { get; set; }
         public int? LandownerScore { get; set; }
         public string SitusAddress { get; set; }
         public double Acreage { get; set; }
@@ -710,6 +786,7 @@ namespace ROWM.Controllers
             ParcelId = p.Assessor_Parcel_Number;
             TractNo = p.Assessor_Parcel_Number;
             ParcelStatusCode = p.ParcelStatusCode;
+            ClearanceCode = p.ClearanceCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;
             RoeCondition = "";

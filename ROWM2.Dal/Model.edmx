@@ -239,6 +239,7 @@
           <Property Name="RoeStatusCode" Type="nvarchar" MaxLength="40" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
           <Property Name="Landowner_Score" Type="int" />
+          <Property Name="ClearanceCode" Type="nvarchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -311,7 +312,7 @@
           <Key>
             <PropertyRef Name="ActivityId" />
           </Key>
-          <Property Name="ActivityId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ActivityId" Type="uniqueidentifier" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="ActivityDate" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="ParentParcelId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="AgentId" Type="uniqueidentifier" Nullable="false" />
@@ -1060,6 +1061,7 @@
           <Property Name="Landowner_Score" Type="Int32" />
           <NavigationProperty Name="RoeConditions" Relationship="ROWM.Dal.FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId" FromRole="Parcel" ToRole="RoeConditions" />
           <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Parcel_Status_Activity" FromRole="Parcel" ToRole="Status_Activity" />
+          <Property Name="ClearanceCode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -1426,7 +1428,7 @@
           <Key>
             <PropertyRef Name="ActivityId" />
           </Key>
-          <Property Name="ActivityId" Type="Guid" Nullable="false" />
+          <Property Name="ActivityId" Type="Guid" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="ActivityDate" Type="DateTimeOffset" Nullable="false" Precision="7" />
           <Property Name="ParentParcelId" Type="Guid" Nullable="false" />
           <Property Name="AgentId" Type="Guid" Nullable="false" />
@@ -1718,6 +1720,7 @@
           <EntitySetMapping Name="Parcel">
             <EntityTypeMapping TypeName="ROWM.Dal.Parcel">
               <MappingFragment StoreEntitySet="Parcel">
+                <ScalarProperty Name="ClearanceCode" ColumnName="ClearanceCode" />
                 <ScalarProperty Name="Landowner_Score" ColumnName="Landowner_Score" />
                 <ScalarProperty Name="Assessor_Parcel_Number" ColumnName="Assessor_Parcel_Number" />
                 <ScalarProperty Name="County_Name" ColumnName="County_Name" />

@@ -54,7 +54,7 @@
         <AssociationConnector Association="ROWM.Dal.ParcelContactLogs" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.ParcelDocuments" ManuallyRouted="false" />
         <EntityTypeShape EntityType="ROWM.Dal.Landowner_Score" Width="1.5" PointX="0.75" PointY="3.75" />
-        <EntityTypeShape EntityType="ROWM.Dal.Map" Width="1.5" PointX="0.75" PointY="6.75" />
+        <EntityTypeShape EntityType="ROWM.Dal.Map" Width="1.5" PointX="0.75" PointY="6.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.RoeConditions" Width="1.5" PointX="22" PointY="8.25" />
         <EntityTypeShape EntityType="ROWM.Dal.Status_Activity" Width="1.5" PointX="13.875" PointY="5.875" />
         <EntityTypeShape EntityType="ROWM.Dal.Status_Category" Width="1.5" PointX="7.125" PointY="4.125" />

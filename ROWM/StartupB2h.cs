@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
 using MaximeRouiller.Azure.AppService.EasyAuth;
+using ROWM.Controllers;
 
 namespace ROWM
 {
@@ -79,7 +80,13 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, B2hParcel>(fac => new B2hParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer"));
+            services.AddScoped<B2hParcelHelper>();
+
+            var feat = new B2hParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer");
+            services.AddSingleton<IFeatureUpdate>(feat);
+            services.AddSingleton<IRenderer>(new B2hParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_MapService/MapServer"));
+            services.AddSingleton<B2hSymbology>();
+
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSingleton<SiteDecoration, B2H>();
