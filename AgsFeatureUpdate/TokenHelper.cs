@@ -76,7 +76,7 @@ namespace geographia.ags
                 return false;
 
             Trace.WriteLine($"{_token}, {_expd} time is {DateTimeOffset.Now}");
-            return DateTimeOffset.Now > _expd;
+            return DateTimeOffset.Now.AddMinutes(1) < _expd;
         }
         #region private
         JObject Parse(string response)

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.218
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ROWM", "ROWM\ROWM.csproj", "{31360B6A-20FE-4159-A5F6-081E6126D04A}"
 EndProject
@@ -43,6 +43,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharePointHelper", "SharePointHelper\SharePointHelper.csproj", "{F895F201-0A4F-4D9F-B41E-18A226FAAF22}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackHillsDocumentToSharePoint", "BlackHillsDocumentToSharePoint\BlackHillsDocumentToSharePoint.csproj", "{F828AD5F-B737-4FBC-82AA-78A384E01D31}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DailyActivitySummary", "DailyActivitySummary\DailyActivitySummary.csproj", "{D566FDE1-ED49-4B83-B085-0336019AC999}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DailyActivitySummary.Dal", "DailyActivitySummary.Dal\DailyActivitySummary.Dal.csproj", "{A2FD6E7F-FC15-4430-B2DE-E930035816DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -204,6 +208,22 @@ Global
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|x64.ActiveCfg = Release|x64
 		{F828AD5F-B737-4FBC-82AA-78A384E01D31}.Release|x64.Build.0 = Release|x64
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Debug|x64.Build.0 = Debug|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Release|x64.ActiveCfg = Release|Any CPU
+		{D566FDE1-ED49-4B83-B085-0336019AC999}.Release|x64.Build.0 = Release|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Debug|x64.Build.0 = Debug|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Release|x64.ActiveCfg = Release|Any CPU
+		{A2FD6E7F-FC15-4430-B2DE-E930035816DE}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

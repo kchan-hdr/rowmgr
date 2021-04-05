@@ -16,6 +16,11 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <Content Include="**\appsetting.*.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  
   <ItemGroup>
     <None Remove="Properties\PublishProfiles\ROWM - FTP.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
