@@ -13,6 +13,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http.Features;
 using geographia.ags;
 using SharePointInterface;
+using MaximeRouiller.Azure.AppService.EasyAuth;
 
 namespace ROWM
 {
@@ -30,6 +31,15 @@ namespace ROWM
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("edit", policy => policy.RequireClaim("full-agent", "limited-edit"));
+                opt.AddPolicy("financials", policy => policy.RequireClaim("full-agent"));
+                opt.AddPolicy("contactlog", policy => policy.RequireClaim("full-agent", "limited-edit", "log"));
+            });
+
+            services.AddAuthentication().AddEasyAuthAuthentication(opt => { });
+
             services.AddCors();
 
             // Add framework services.
@@ -57,9 +67,13 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://maps.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer")
-            );
+
+
+            var feat = new B2hParcel("https://maps.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer");
+            services.AddSingleton<IFeatureUpdate>(feat);
+            services.AddSingleton<IRenderer>(new B2hParcel("https://maps.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_MapService/MapServer"));
+            services.AddSingleton<B2hSymbology>();
+
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSingleton<SiteDecoration, B2H>();
