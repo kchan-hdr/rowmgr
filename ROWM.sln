@@ -46,7 +46,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlackHillsDocumentToSharePo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DailyActivitySummary", "DailyActivitySummary\DailyActivitySummary.csproj", "{D566FDE1-ED49-4B83-B085-0336019AC999}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DailyActivitySummary.Dal", "DailyActivitySummary.Dal\DailyActivitySummary.Dal.csproj", "{A2FD6E7F-FC15-4430-B2DE-E930035816DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DailyActivitySummary.Dal", "DailyActivitySummary.Dal\DailyActivitySummary.Dal.csproj", "{A2FD6E7F-FC15-4430-B2DE-E930035816DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

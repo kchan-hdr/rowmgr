@@ -1,0 +1,87 @@
+﻿{
+   "CodeGenerationMode": 1,
+   "ContextClassName": "B2h_Prod_V2Context",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": null,
+   "ProjectRootNamespace": "DailyActivitySummary.Dal",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 0,
+   "Tables": [
+      {
+         "Name": "[ROWM].[Agent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ContactInfo]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ContactInfoContactLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ContactLog]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Document]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[DocumentActivity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Owner]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Ownership]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Parcel]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Parcel_Status]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ParcelContactLogs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[ParcelDocuments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Status_Activity]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[ROWM].[Status_Category]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "b2h.b2h_prod_v2",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": true,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseNoConstructor": true,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSpatial": false
+}
