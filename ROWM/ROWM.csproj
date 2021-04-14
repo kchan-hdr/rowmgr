@@ -73,6 +73,9 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.AtcChcRelease1.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
     <Content Update="appsettings.AtcChc.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>

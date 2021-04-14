@@ -61,10 +61,11 @@ namespace ROWM
             var msi = new AzureServiceTokenProvider();
             var vaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(msi.KeyVaultTokenCallback));
 
-            var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
-            var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
-            services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
-               d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/ATCROW/CHC"));
+            //var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
+            //var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
+            //services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
+            //   d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/ATCROW/CHC"));
+            services.AddScoped<ISharePointCRUD, DenverNoOp>();
 
             services.AddSingleton<SiteDecoration, AtcChc>();
 
