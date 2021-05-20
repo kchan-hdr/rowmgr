@@ -106,6 +106,7 @@ namespace DailyActivitySummary
             message.AddTo("jstippel@idahopower.com");
             message.AddTo("jmaffuccio@idahopower.com");
             message.AddTo("kfunke@idahopower.com");
+            message.AddTo("Brandon.Jones@hdrinc.com");
             message.AddCc("James.Buker@hdrinc.com");
             message.AddCc("yuying.li@hdrinc.com");
 
