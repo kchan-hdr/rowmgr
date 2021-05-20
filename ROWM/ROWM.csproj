@@ -73,14 +73,17 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="appsettings.AtcChcRelease1.json">
+    <Content Update="appsettings.*.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
-    <Content Update="appsettings.AtcChc.json">
+    <Content Update="appsettings.OppdPwp.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
     <Content Update="wwwroot\css\index.css">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

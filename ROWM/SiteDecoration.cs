@@ -24,4 +24,9 @@
     {
         public string SiteTitle() => "ATC Cardinal-Hickory Creek";
     }
+
+    public class OppdPwp: SiteDecoration
+    {
+        public string SiteTitle() => "OPPD PWP";
+    }
 }
