@@ -320,7 +320,7 @@ namespace SharePointInterface
                         // Content = docBytes,
                         ContentStream = ms,
                         Overwrite = false,
-                        Url = String.Format("{0}/{1}", folder.ServerRelativeUrl, docName),
+                        Url = String.Format("{0}/{1}", folder.ServerRelativeUrl, docName.Trim()),
                     };
 
                     File file = folder.Files.Add(info);

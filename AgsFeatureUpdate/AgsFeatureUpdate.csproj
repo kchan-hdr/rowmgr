@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgsSchema.cs" />
+    <Compile Include="OppdParcel.cs" />
     <Compile Include="AtcParcel.cs" />
     <Compile Include="BhNBParcel.cs" />
     <Compile Include="BlackhillParcel.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="FeatureService.cs" />
     <Compile Include="IFeatureUpdate.cs" />
     <Compile Include="InternalConfig.cs" />
+    <Compile Include="IRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReservoirParcel.cs" />
     <Compile Include="SunflowerParcel.cs" />
