@@ -390,7 +390,26 @@ namespace ROWM.Controllers
         public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus(string pid, string statusCode) => await UpdateRoeStatusImpl(pid, Guid.Empty, statusCode, null);
 
         [HttpPut("parcels/{pid}/roe")]
-        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r) => await UpdateRoeStatusImpl(pid, r.AgentId, r.StatusCode, r.Condition);
+        public async Task<ActionResult<ParcelGraph>> UpdateRoeStatus2(string pid, [FromBody] RoeRequest r)
+        {
+            var p = await _repo.GetParcel(pid);
+            if (p == null)
+                return BadRequest();
+
+            var a = await _repo.GetAgent(r.AgentId);
+
+            var up = new UpdateParcelStatus(new Parcel[] { p }, a, context: _ctx, _repo, _featureUpdate, _statusHelper)
+            {
+                RoeCondition = r.Condition,
+                EffectiveStartDate = r.EffectiveStartDate,
+                EffectiveEndDate = r.EffectiveEndDate,
+                RoeStatus = r.StatusCode,
+                StatusChangeDate = r.ChangeDate,
+                ModifiedBy = User?.Identity?.Name ?? _APP_NAME
+            };
+            await up.Apply();
+            return new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid));
+        }
 
         private async Task<ActionResult<ParcelGraph>> UpdateRoeStatusImpl(string pid, Guid agentId, string statusCode, string condition)
         {
@@ -743,6 +762,8 @@ namespace ROWM.Controllers
         public string StatusCode { get; set; }
         public DateTimeOffset ChangeDate { get; set; }
         public string Condition { get; set; }
+        public DateTimeOffset? EffectiveStartDate { get; set; }
+        public DateTimeOffset? EffectiveEndDate { get; set; }
     }
     #endregion
     #region offer dto

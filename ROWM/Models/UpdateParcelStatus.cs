@@ -25,6 +25,8 @@ namespace ROWM.Dal
         public string AcquisitionStatus { get; set; }
         public string RoeStatus { get; set; }
         public string RoeCondition { get; set; }
+        public DateTimeOffset? EffectiveStartDate { get; set; }
+        public DateTimeOffset? EffectiveEndDate { get; set; }
         public string Notes { get; set; }
 
         public string ModifiedBy { get; set; } = "UP";
@@ -80,7 +82,13 @@ namespace ROWM.Dal
 
                     if (!string.IsNullOrWhiteSpace(RoeCondition))
                     {
-                        p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
+                        p.Conditions.Add(new Dal.RoeCondition 
+                        { 
+                            Condition = RoeCondition, 
+                            EffectiveStartDate = EffectiveStartDate,
+                            EffectiveEndDate = EffectiveEndDate,
+                            Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy 
+                        });
                     }
 
                     var roeDV = _statusHelper.GetRoeDomainValue(RoeStatus);
