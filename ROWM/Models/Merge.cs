@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ROWM.Models
 {
@@ -126,7 +127,7 @@ namespace ROWM.Models
             var table = tab.First();
 
             var rows = table.Descendants<TableRow>();
-            var rt = rows.Skip(9).First();
+            var rt = rows.Skip(7).First();
             var cells = rt.Descendants<TableCell>();
             var dateProperties = cells.First().TableCellProperties;
             var logProperties = cells.Last().TableCellProperties;
@@ -146,6 +147,9 @@ namespace ROWM.Models
                 var nr = new Run();
                 if (!string.IsNullOrWhiteSpace(log.Title))
                     nr.Append(new Text($"Title: {log.Title}"), new Break());
+
+                if (!string.IsNullOrWhiteSpace(log.Agent?.AgentName ?? ""))
+                    nr.Append(new Text($"Agent: {log.Agent?.AgentName}"), new Break());
 
                 if (!string.IsNullOrWhiteSpace(log.ContactChannel))
                     nr.Append(new Text($"Contact Method: {log.ContactChannel}"), new Break());
