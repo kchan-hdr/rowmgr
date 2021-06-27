@@ -54,8 +54,11 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
             services.AddScoped<Controllers.ParcelStatusHelper>();
+
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"));
+            services.AddScoped<IRenderer, AtcParcel>(fac => new AtcParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_ROW_Mapservice/MapServer"));
+            services.AddScoped<IMapSymbology, AtcSymbology>();
 
             //
             var msi = new AzureServiceTokenProvider();

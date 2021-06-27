@@ -114,6 +114,7 @@
     <Compile Include="FeatureService.cs" />
     <Compile Include="IFeatureUpdate.cs" />
     <Compile Include="InternalConfig.cs" />
+    <Compile Include="IRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReservoirParcel.cs" />
     <Compile Include="SunflowerParcel.cs" />

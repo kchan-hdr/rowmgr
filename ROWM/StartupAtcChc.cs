@@ -48,10 +48,13 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<DeleteHelper>();
-            services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new DocTypes(fac.GetRequiredService<ROWM_Context>()));            
             services.AddScoped<Controllers.ParcelStatusHelper>();
+
             services.AddScoped<IFeatureUpdate, AtcParcel>(fac =>
                 new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"));
+            services.AddSingleton<IRenderer>(new AtcParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_ROW_Mapservice/MapServer"));
+            services.AddSingleton<IMapSymbology, AtcSymbology>();
 
             var sec = AtcSharePointConfig.SharePointAppSecret();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac =>

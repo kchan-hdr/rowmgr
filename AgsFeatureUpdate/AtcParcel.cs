@@ -7,10 +7,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Polly;
+using Newtonsoft.Json.Linq;
 
 namespace geographia.ags
 {
-    public class AtcParcel : FeatureService_Base, IFeatureUpdate
+    public class AtcParcel : FeatureService_Base, IFeatureUpdate, IRenderer
     {
         static readonly string _PARCEL_KEY = "Tracking_Number";
 
@@ -348,6 +349,69 @@ namespace geographia.ags
             reqContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
             return await base.Edit(lay, reqContent);
         }
+
+        #region irenderer
+        public async Task<IEnumerable<DomainValue>> GetDomainValues(int layerId)
+        {
+            var desc = await Describe(layerId);
+            var map = JObject.Parse(desc);
+            var m = map.ToObject<MapD>();
+
+            return m.DrawingInfo.Renderer.UniqueValueInfos.Select(v => new DomainValue
+            {
+                Value = v.value,
+                Label = v.label,
+                Red = v.symbol.color[0],
+                Green = v.symbol.color[1],
+                Blue = v.symbol.color[2],
+                Alpha = v.symbol.color[3]
+            });
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<DomainValue>> GetDomainValues(string layerName) => await GetDomainValues(await _layers.GetId(layerName));
+        #region symbol
+
+        public class MapD
+        {
+            public DrawingInfo DrawingInfo { get; set; }
+        }
+
+        public class DrawingInfo
+        {
+            public Renderer Renderer { get; set; }
+        }
+
+        public class Renderer
+        {
+            public IEnumerable<UniqueValue> UniqueValueInfos { get; set; }
+        }
+
+        public class UniqueValue
+        {
+            public Symbol symbol { get; set; }
+            public string value { get; set; }
+            public string label { get; set; }
+            public string description { get; set; }
+        }
+
+        public class Symbol
+        {
+            public string type { get; set; }
+            public string style { get; set; }
+            public int[] color { get; set; }
+            public Outline outline { get; set; }
+        }
+
+        public class Outline
+        {
+            public string type { get; set; }
+            public string style { get; set; }
+            public int[] color { get; set; }
+            public float width { get; set; }
+        }
+        #endregion
+        #endregion
 
         public class Edits<T>
         {

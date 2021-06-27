@@ -671,7 +671,7 @@ namespace ROWM.Controllers
         }
         #endregion
         #region statistics
-        [HttpGet("statistics")]
+        [HttpGet("statistics_no_color")]
         public async Task<StatisticsDto> GetStatistics()
         {
             var s = await _statistics.Snapshot();
