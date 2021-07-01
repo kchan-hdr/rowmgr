@@ -43,4 +43,9 @@
         public string SiteTitle() => "City of Wharton";
         public string SiteTitle() => "OPPD PWP";
     }
+
+    public class B2H: SiteDecoration
+    {
+        public string SiteTitle() => "B2H";
+    }
 }

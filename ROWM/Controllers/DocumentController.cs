@@ -1,4 +1,4 @@
-﻿using geographia.ags;
+using geographia.ags;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -236,7 +236,7 @@ namespace ROWM.Controllers
 
             sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
             Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == OwnershipType.Primary);
-            string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
+            string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
             try
             {
 
@@ -402,7 +402,7 @@ namespace ROWM.Controllers
 
                 sourceFilename = HeaderUtilities.RemoveQuotes(sourceFilename).Value;
                 Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary()); // o.Ownership_t == Ownership.OwnershipType.Primary);
-                string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
+                string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
                 try
                 {
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);

@@ -82,6 +82,8 @@ namespace ROWM.Dal.Test
                 Assert.IsNotNull(parcel);
                 Assert.AreEqual(p, parcel.Assessor_Parcel_Number);
                 Assert.IsNotNull(parcel.Ownership);
+                Assert.AreEqual(p, parcel.ParcelId);
+                //Assert.IsNotNull(parcel.Owners);
             }
 
             watch.Stop();

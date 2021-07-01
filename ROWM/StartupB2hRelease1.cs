@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -49,7 +47,7 @@ namespace ROWM
             //services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new Dal.ROWM_Context(cs);
+                return new Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -58,7 +56,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer")
+                new B2hParcel("https://maps.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer")
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
@@ -76,7 +74,7 @@ namespace ROWM
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseExceptionHandler("/Home/Error");
- 
+
             app.UseStaticFiles();
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());

@@ -61,7 +61,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, BlackhillParcel>();
+            services.AddScoped<IFeatureUpdate, B2hParcel>();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
             services.AddSwaggerDocument();

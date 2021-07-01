@@ -104,6 +104,8 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
         #endregion
 
         public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid) => await GetStatusForParcel(pid, false);
+        public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
+        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).AsNoTracking();
 
         public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid, bool all = false)
         {
@@ -136,8 +138,6 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
                 _ctx.Entry<Parcel>(p).State = EntityState.Modified;
 
             await WriteDb();
-            //if (await WriteDb() <= 0)
-            //    throw new ApplicationException("update parcel failed");
 
             return p;
         }

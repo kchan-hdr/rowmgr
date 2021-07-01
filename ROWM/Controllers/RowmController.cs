@@ -107,18 +107,18 @@ namespace ROWM.Controllers
             var o = await _repo.GetOwner(id);
             var newc = new ContactInfo
             {
-                FirstName = info.OwnerFirstName,
-                LastName = info.OwnerLastName,
+                OwnerFirstName = info.OwnerFirstName,
+                OwnerLastName = info.OwnerLastName,
 
-                StreetAddress = info.OwnerStreetAddress,
-                City = info.OwnerCity,
-                State = info.OwnerState,
-                ZIP = info.OwnerZIP,
+                OwnerStreetAddress = info.OwnerStreetAddress,
+                OwnerCity = info.OwnerCity,
+                OwnerState = info.OwnerState,
+                OwnerZIP = info.OwnerZIP,
 
-                Email = info.OwnerEmail,
-                CellPhone = info.OwnerCellPhone,
-                WorkPhone = info.OwnerWorkPhone,
-                HomePhone = info.OwnerHomePhone,
+                OwnerEmail = info.OwnerEmail,
+                OwnerCellPhone = info.OwnerCellPhone,
+                OwnerWorkPhone = info.OwnerWorkPhone,
+                OwnerHomePhone = info.OwnerHomePhone,
 
                 IsPrimaryContact = info.IsPrimaryContact,
                 Representation = info.Relations,
@@ -156,18 +156,18 @@ namespace ROWM.Controllers
             var o = await _repo.GetOwner(id);
             var c = o.ContactInfo.Single(cx => cx.ContactId == cinfo);
 
-            c.FirstName = info.OwnerFirstName;
-            c.LastName = info.OwnerLastName;
+            c.OwnerFirstName = info.OwnerFirstName;
+            c.OwnerLastName = info.OwnerLastName;
 
-            c.StreetAddress = info.OwnerStreetAddress;
-            c.City = info.OwnerCity;
-            c.State = info.OwnerState;
-            c.ZIP = info.OwnerZIP;
+            c.OwnerStreetAddress = info.OwnerStreetAddress;
+            c.OwnerCity = info.OwnerCity;
+            c.OwnerState = info.OwnerState;
+            c.OwnerZIP = info.OwnerZIP;
 
-            c.Email = info.OwnerEmail;
-            c.CellPhone = info.OwnerCellPhone;
-            c.WorkPhone = info.OwnerWorkPhone;
-            c.HomePhone = info.OwnerHomePhone;
+            c.OwnerEmail = info.OwnerEmail;
+            c.OwnerCellPhone = info.OwnerCellPhone;
+            c.OwnerWorkPhone = info.OwnerWorkPhone;
+            c.OwnerHomePhone = info.OwnerHomePhone;
 
             c.IsPrimaryContact = info.IsPrimaryContact;
             c.Representation = info.Relations;
@@ -534,24 +534,26 @@ namespace ROWM.Controllers
             //    return BadRequest();
             //}
 
-            //p.RoeStatusCode = statusCode;
-            //if (!string.IsNullOrWhiteSpace(condition))
-            //{
-            //    if ( null == p.Conditions)
-            //        p.Conditions = new List<RoeCondition>();
+            p.RoeStatusCode = statusCode;
+            if (!string.IsNullOrWhiteSpace(condition))
+            {
+                // db doesn't have condition
+                //if ( null == p.Conditions)
+                //    p.Conditions = new List<RoeCondition>();
 
-            //    p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
-            //}
-            //p.LastModified = DateTimeOffset.Now;
-            //p.ModifiedBy = _APP_NAME;
+                //p.Conditions.Add(new RoeCondition() { Condition = condition, IsActive = true, EffectiveStartDate = DateTimeOffset.Now, EffectiveEndDate = DateTimeOffset.MaxValue });
+            }
+            p.LastModified = DateTimeOffset.Now;
+            p.ModifiedBy = _APP_NAME;
 
-            //// propagate to parcel 
-            //// TODO: clean up
-            //switch( statusCode )
-            //{
-            //    case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
-            //    case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
-            //}
+            // propagate to parcel 
+            // TODO: clean up
+            switch( statusCode )
+            {
+                case "ROE_Obtained": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+                case "ROE_with_Conditions": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+                case "Access_Granted": p.ParcelStatusCode = "ROE_Obtained"; tks.Add(_featureUpdate.UpdateFeature(pid, 2)); break;
+            }
 
             //tks.Add( _repo.UpdateParcel(p));
 
@@ -745,7 +747,7 @@ namespace ROWM.Controllers
         async Task<int> UpdateLandownerScore(int score, DateTimeOffset ts, IEnumerable<string> parcelIds)
         {
             var touched = 0;
-            if (score >= 0 && score <= 2)
+            if (score >= 0 && score <= 3)
             {
                 var tasks = new List<Task>();
 
@@ -990,6 +992,7 @@ namespace ROWM.Controllers
         {
             ContactId = c.ContactId;
             ContactName = $"{c.FirstName ?? ""} {c.LastName ?? ""}".Trim();
+            ContactName = $"{c.OwnerFirstName ?? ""} {c.OwnerLastName ?? ""}";
             IsPrimary = c.IsPrimaryContact;
             Relations = c.Representation;
 
@@ -1006,6 +1009,16 @@ namespace ROWM.Controllers
 
             if (c.Affiliation != null)
                 BusinessName = c.Affiliation.Name;
+            OwnerFirstName = c.OwnerFirstName;
+            OwnerLastName = c.OwnerLastName;
+            OwnerStreetAddress = c.OwnerStreetAddress;
+            OwnerCity = c.OwnerCity;
+            OwnerState = c.OwnerState;
+            OwnerZIP = c.OwnerZIP;
+            OwnerEmail = c.OwnerEmail;
+            OwnerCellPhone = c.OwnerCellPhone;
+            OwnerWorkPhone = c.OwnerWorkPhone;
+            OwnerHomePhone = c.OwnerHomePhone;
         }
     }
 
@@ -1121,11 +1134,11 @@ namespace ROWM.Controllers
         internal ParcelGraph(Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
-            TractNo = p.Tracking_Number;
+            TractNo = p.Assessor_Parcel_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;
-            RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
+            RoeCondition = "";
             SitusAddress = p.SitusAddress;
 
             LandownerScore = p.Landowner_Score;

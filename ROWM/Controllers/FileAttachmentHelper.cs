@@ -53,7 +53,7 @@ namespace ROWM.Controllers
 
                 fileName = HeaderUtilities.RemoveQuotes(fileName).Value;
                 Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary());
-                string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
+                string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
                 try
                 {
                     _sharePointCRUD.UploadParcelDoc(parcelName, "Other", fileName, bb, null);
