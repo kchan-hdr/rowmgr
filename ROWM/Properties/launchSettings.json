@@ -26,6 +26,16 @@
         "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONVAULT": "https://atc-rowm-key.vault.azure.net"
       },
       "applicationUrl": "http://localhost:54062"
+    },
+    "ROWM-DEN": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Dw1",
+        "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONENABLED": "true",
+        "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONVAULT": "https://blackhill-dev-keys.vault.azure.net"
+      },
+      "applicationUrl": "http://localhost:54062"
     }
   }
 }

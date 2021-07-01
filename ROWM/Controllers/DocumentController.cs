@@ -100,8 +100,32 @@ namespace ROWM.Controllers
 
             d.LastModified = DateTimeOffset.Now;
 
+            if (touched)
+                await _updater.DoUpdate(d.Parcel);
+
             return CreatedAtRoute("UpdateDocuMeta", new DocumentInfo(await _repo.UpdateDocument(d)));
         }
+
+        #region DocumentInfo helper (automapper-ish)
+        static Document DocumentInfoCopy(Document origin, DocumentInfo param)
+        {
+            var propsd = origin.GetType().GetProperties().ToDictionary(p => p.Name);
+            var props = param.GetType().GetProperties();
+
+            foreach( var prop in props.Where(px => px.Name != "DocumentId"))
+            {
+                var v = prop.GetValue(param);
+                if (v != null)
+                {
+                    if (propsd.TryGetValue(prop.Name, out var tp))
+                    {
+                        tp.SetValue(origin, v);
+                    }
+                }
+            }
+            return origin;
+        }
+        #endregion
 
         [HttpGet("api/documents/{docId:Guid}")]
         public IActionResult GetFile(Guid docId)

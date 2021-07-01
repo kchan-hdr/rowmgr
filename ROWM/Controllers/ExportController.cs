@@ -114,30 +114,11 @@ namespace ROWM.Controllers
             if (d.Count() <= 0)
                 return NoContent();
 
-            // to do. inject export engine
-            try
-            {
-                var data = d.OrderBy(dh => dh.Parcel_ParcelId).Select(dh => new ExcelExport.DocListExport.DocumentList
-                {
-                    parcelid = dh.Parcel_ParcelId,
-                    title=dh.Title,
-                    contenttype =dh.ContentType,
-                    sentdate=dh.SentDate,
-                    delivereddate=dh.DeliveredDate,
-                    clienttrackingnumber=dh.ClientTrackingNumber,
-                    signeddate = dh.SignedDate,
-                    checkno=dh.CheckNo,
-                    receiveddate=dh.ReceivedDate 
-                });
+            var ps = this._repo.GetParcels2();
 
-                var e = new ExcelExport.DocListExport(data, LogoPath);
-                var bytes = e.Export();
-                return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "documents.xlsx");
-            }
-            catch (Exception)
-            {
-                var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
-                    .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
+            var dd = from parcel in this._repo.GetParcels2()
+                     join doc in d on parcel.Assessor_Parcel_Number equals doc.Parcel_ParcelId into dh  // bad alias
+                     select new { parcel.Tracking_Number, dh };
 
             using (var s = new MemoryStream())
             {
@@ -147,6 +128,15 @@ namespace ROWM.Controllers
 
                         foreach (var l in lines)
                             writer.WriteLine(l);
+                    foreach( var ddx in dd.OrderBy(dx => dx.Tracking_Number))
+                    {
+                        writer.WriteLine($"{ddx.Tracking_Number}");
+
+                        foreach ( var dh in ddx.dh)
+                        {
+                            writer.WriteLine($"{ddx.Tracking_Number},\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
+                        }
+                    }
 
                         writer.Close();
                     }
@@ -171,28 +161,56 @@ namespace ROWM.Controllers
             {
                 using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
                 {
-                    writer.WriteLine("Parcel ID,Owner,ROE Status,Conditions,Date");
+                    writer.WriteLine("NSR Number,Parcel ID,Owner,ROE Status,Conditions,Date");
 
-                    foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
+                    foreach (var p in parcels.OrderBy(px => px.Tracking_Number))
                     {
                         var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                         var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
                         var conditions = p.Conditions?.FirstOrDefault()?.Condition ?? "";
-                        var row = $"{p.Assessor_Parcel_Number},\"{oname}\",{p.Roe_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
+                        var row = $"{p.Tracking_Number},\"{p.Assessor_Parcel_Number}\",\"{oname}\",{p.Roe_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
                         writer.WriteLine(row);
                     }
 
                         writer.Close();
                     }
 
-                    return File(s.GetBuffer(), "text/csv", "roe.csv");
-                }
+                return File(s.GetBuffer(), "text/csv", "roe.csv");
             }
         }
 
-        //        return File(s.GetBuffer(), "text/csv", "acq.csv");
-        //    }
-        //}
+        [HttpGet("export/acq")]
+        public IActionResult ExportAcq(string f)
+        {
+            if ("excel" != f)
+                return BadRequest($"not supported export '{f}'");
+
+            var parcels = this._repo.GetParcels2();
+
+            if (parcels.Count() <= 0)
+                return NoContent();
+
+            using (var s = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(s, System.Text.Encoding.UTF8))
+                {
+                    writer.WriteLine("NSR Number,Parcel ID,Owner,Parcel Status,Conditions,Date");
+
+                    foreach (var p in parcels.OrderBy(px => px.Tracking_Number))
+                    {
+                        var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
+                        var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
+                        var conditions = p.Conditions?.FirstOrDefault()?.Condition ?? "";
+                        var row = $"{p.Tracking_Number},\"{p.Assessor_Parcel_Number}\",\"{oname}\",{p.Parcel_Status.Description},{conditions},{p.LastModified.Date.ToShortDateString()}";
+                        writer.WriteLine(row);
+                    }
+
+                    writer.Close();
+                }
+
+                return File(s.GetBuffer(), "text/csv", "acq.csv");
+            }
+        }
         /// <summary>
         /// support excel only
         /// </summary>
@@ -318,11 +336,12 @@ namespace ROWM.Controllers
             public static string Header() =>
                 "Parcel ID,RGI,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
                 "Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
+                "NSR Number,Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
 
             public override string ToString()
             {
                 var n = Notes.Replace('"', '\'');
-                return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
+                return $"{Tracking},\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
             }
         }
 

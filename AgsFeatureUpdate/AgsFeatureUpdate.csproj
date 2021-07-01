@@ -127,6 +127,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DenverParcel.cs" />
     <Compile Include="AgsSchema.cs" />
     <Compile Include="OppdParcel.cs" />
     <Compile Include="AtcParcel.cs" />
