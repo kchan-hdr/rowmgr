@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ROWM.Dal;
 using SharePointInterface;
+using ROWM.Dal;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.Azure.KeyVault;
 
 namespace ROWM
 {
@@ -42,7 +45,7 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-                return new ROWM.Dal.ROWM_Context(cs);
+               return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -62,7 +65,7 @@ namespace ROWM
             var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
             var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
-               d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line6943"));
+                d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line6943"));
 
             services.AddSingleton<SiteDecoration, Atc6943>();
 
@@ -72,7 +75,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-                o.OperationFilter<FileOperation>();
+               o.OperationFilter<FileOperation>();
             });
         }
 
@@ -81,7 +84,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

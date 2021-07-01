@@ -1,0 +1,17 @@
+{
+  "name": "Right-of-Way Manager",
+  "short_name": "ROWM",
+  "icons": [
+    {
+      "src": "/images/kai.jpg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/images/kai.jpg",
+      "sizes":  "512x512"
+    }
+  ],
+  "description": "Right-of-Way module of the PM Dashboard",
+  "display": "standalone",
+  "start_url":  "/"
+}

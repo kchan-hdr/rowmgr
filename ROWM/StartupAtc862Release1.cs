@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ROWM.Dal;
 using SharePointInterface;
+using WebEssentials.AspNetCore.Pwa;
 
 namespace ROWM
 {
@@ -79,7 +80,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-                o.OperationFilter<FileOperation>();
+               o.OperationFilter<FileOperation>();
             });
         }
 
@@ -88,7 +89,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

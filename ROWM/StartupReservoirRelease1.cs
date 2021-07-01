@@ -61,8 +61,8 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac =>
-                new ReservoirParcel("https://maps-stg.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_FS/FeatureServer")
+            services.AddScoped<IFeatureUpdate, ReservoirParcel>(fac=> 
+                new ReservoirParcel("https://maps.hdrgateway.com/arcgis/rest/services/California/Sites_Parcel_Mobil/FeatureServer")
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 

@@ -181,6 +181,7 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
 
             return c;
         }
+        public async Task<ContactInfo> GetContact(Guid c) => await _ctx.ContactInfo.FindAsync(c);
 
         public IEnumerable<Ownership> GetContacts() => _ctx.Parcel.Where(p => p.IsActive).SelectMany(p => p.Ownership);
 

@@ -55,7 +55,7 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-                return new ROWM.Dal.ROWM_Context(cs);
+               return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -80,7 +80,7 @@ namespace ROWM
             });
             services.ConfigureSwaggerGen(o =>
             {
-                o.OperationFilter<FileOperation>();
+               o.OperationFilter<FileOperation>();
             });
         }
 
@@ -89,7 +89,7 @@ namespace ROWM
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

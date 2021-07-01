@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ROWM.Dal;
 using SharePointInterface;
+using ROWM.Dal;
 
 namespace ROWM
 {

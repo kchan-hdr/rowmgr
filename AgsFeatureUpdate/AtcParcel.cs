@@ -52,23 +52,23 @@ namespace geographia.ags
                 {
                    return
                    GetAll<Status_dto>(req, (arr) =>
-                   {
-                       var list = new List<Status_dto>();
+            {
+                var list = new List<Status_dto>();
 
-                       foreach (var f in arr)
-                       {
-                           var s = new Status_dto();
-                           s.OBJECTID = f["attributes"].Value<int>("OBJECTID");
-                           s.ParcelId = f["attributes"].Value<string>(_PARCEL_KEY);
-                           s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
-                           s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
-                           s.Documents = f["attributes"].Value<string>("Documents");
-                           s.Landowner_Score = f["attributes"].Value<int>("Likelihood");
-                           list.Add(s);
-                       }
+                foreach (var f in arr)
+                {
+                    var s = new Status_dto();
+                    s.OBJECTID = f["attributes"].Value<int>("OBJECTID");
+                    s.ParcelId = f["attributes"].Value<string>(_PARCEL_KEY);
+                    s.ParcelStatus = f["attributes"].Value<string>("ParcelStatus");
+                    s.RoeStatus = f["attributes"].Value<string>("ROE_Status");
+                    s.Documents = f["attributes"].Value<string>("Documents");
+                    s.Landowner_Score = f["attributes"].Value<int>("Likelihood");
+                    list.Add(s);
+                }
 
-                       return list;
-                   });
+                return list;
+            });
 
                 });
 

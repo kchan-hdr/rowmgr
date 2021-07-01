@@ -12,7 +12,10 @@ namespace SharePointInterface.Test
         [TestMethod, TestCategory("SharePointCRUD")]
         public void TestConnection()
         {
-            ISharePointCRUD sp = new SharePointCRUD();
+            ISharePointCRUD sp = new SharePointCRUD(
+                __appId: "77429b44-e9ab-403c-acfa-e90648aa4452", 
+                __appSecret: "",
+                _url: "https://atcpmp.sharepoint.com/atcrow/chc");
             var t = sp.GetSiteTitle();
             Assert.AreNotEqual("NA", t);
             Trace.WriteLine(t);
