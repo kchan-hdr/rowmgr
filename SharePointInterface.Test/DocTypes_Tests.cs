@@ -64,13 +64,13 @@ namespace SharePointInterface.Test
         [TestCategory("Doc Types")]
         public void Find()
         {
-            var t = com.hdr.Rowm.Sunflower.DocType.Find("Acquistion Offer Package Original");
+            var t = com.hdr.Rowm.Sunflower.DocType.Find("Acquisition Offer Package Original");
             Assert.IsNotNull(t);
-            Assert.AreEqual("Acquistion Offer Package Original", t.DocTypeName);
+            Assert.AreEqual("Acquisition Offer Package Original", t.DocTypeName);
             Assert.AreEqual("4.3.3 Easement/3 Easement Final Sent to LO", t.FolderPath);
             Assert.AreEqual(true, t.IsDisplayed);
 
-            Assert.IsNotNull( com.hdr.Rowm.Sunflower.DocType.Find("  Acquistion Offer Package Original"));
+            Assert.IsNotNull( com.hdr.Rowm.Sunflower.DocType.Find("  Acquisition Offer Package Original"));
 
             Assert.IsNull(com.hdr.Rowm.Sunflower.DocType.Find("doesn't exist"));
             Assert.IsNull(com.hdr.Rowm.Sunflower.DocType.Find(""));
@@ -100,13 +100,13 @@ namespace SharePointInterface.Test
         {
             var t = com.hdr.Rowm.Sunflower.DocType.Types;
 
-            Assert.IsTrue(0 < t.Count(dt => dt.DocTypeName.StartsWith("Acquistion")));
+            Assert.IsTrue(0 < t.Count(dt => dt.DocTypeName.StartsWith("Acquisition")));
             Assert.AreEqual(0, t.Count(dt => dt.DocTypeName.StartsWith("option", StringComparison.CurrentCultureIgnoreCase)));
 
             foreach (var dt in t)
                 Trace.WriteLine(dt);
         }
-
+   
         [TestMethod, TestCategory("Doc Types")]
         public void Confirm_Title_Report_In_Options()
         {

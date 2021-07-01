@@ -17,18 +17,26 @@ namespace ROWM.Dal.Test
         [TestInitialize]
         public void Init()
         {
-            myCtx = new ROWM_Context(DbConnection.GetConnectionString());
+            myCtx = new ROWM_Context(); // DbConnection.GetConnectionString());
         }
 
         [TestMethod, TestCategory("DAL")]
         public async Task Simple_Owner_Add()
         {
             var repo = new OwnerRepository(myCtx);
-            var o1 = await repo.AddOwner("dev_user");
+            var _NAME1 = "dev_user";
+            var o1 = await repo.AddOwner(_NAME1);
             Assert.IsNotNull(o1);
-            Assert.AreEqual("dev_user", o1.PartyName);
-            Assert.IsNotNull(o1.ContactInfo); //.Contacts);
-            Assert.AreNotEqual(0, o1.ContactInfo.Count());
+            Assert.AreEqual(_NAME1, o1.PartyName);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(o1.OwnerAddress));
+            // Assert.IsNotNull(o1.ContactInfo); //.Contacts);
+            // Assert.AreNotEqual(0, o1.ContactInfo.Count());
+
+            var o2 = await repo.AddOwner("dev_user2", address: "nowhere");
+            Assert.IsNotNull(o2);
+            Assert.AreEqual("dev_user2", o2.PartyName);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(o2.OwnerAddress));
+            Assert.AreEqual("nowhere", o2.OwnerAddress);
         }
 
         [TestMethod, TestCategory("DAL")]
@@ -61,7 +69,6 @@ namespace ROWM.Dal.Test
         public async Task Simple_Parcel_Speed()
         {
             var repo = new OwnerRepository(myCtx);
-            var repo2 = new ParcelRepository(myCtx);
             var ps = repo.GetParcels();
             Assert.IsNotNull(ps);
             Assert.AreNotEqual(0, ps.Count());
@@ -71,10 +78,10 @@ namespace ROWM.Dal.Test
 
             foreach( var p in ps)
             {
-                var parcel = repo2.GetParcel(p);
+                var parcel = await repo.GetParcel(p);
                 Assert.IsNotNull(parcel);
-                Assert.AreEqual(p, parcel.ParcelId);
-                Assert.IsNotNull(parcel.Owners);
+                Assert.AreEqual(p, parcel.Assessor_Parcel_Number);
+                Assert.IsNotNull(parcel.Ownership);
             }
 
             watch.Stop();
@@ -85,7 +92,7 @@ namespace ROWM.Dal.Test
             {
                 var parcel = await repo.GetParcel(p);
                 Assert.IsNotNull(parcel);
-                Assert.AreEqual(p, parcel.ParcelId);
+                Assert.AreEqual(p, parcel.Assessor_Parcel_Number);
                 Assert.IsNotNull(parcel.Ownership);
             }
 

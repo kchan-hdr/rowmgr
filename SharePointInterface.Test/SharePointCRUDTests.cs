@@ -24,6 +24,22 @@ namespace SharePointInterface.Test
         }
 
         [TestMethod, TestCategory("SharePointCRUD")]
+        public void SimpleConnectionATC()
+        {
+            SharePointCRUD spCRUD = new SharePointCRUD("e8d38b84-11bb-43df-b07d-a549b05eab19", "/kzpHsp4A8NXWYyhGOGI8LmA8jdBwZCtKjqLrfN3W3A=", "https://atcpmp.sharepoint.com/line6943");
+            string title = spCRUD.GetSiteTitle();
+            Assert.IsNotNull(title);
+        }
+
+        [TestMethod, TestCategory("SharePointCRUD")]
+        public void SimpleConnectionATC2()
+        {
+            SharePointCRUD spCRUD = new SharePointCRUD("14e5814e-95f9-4aee-9890-e82fa00b323f", "Mc2nMSCT0Rq2AcR5vrzDAH38dqdUh6R/wHPS/EmjTgc=", "https://atcpmp.sharepoint.com/line6943");
+            string title = spCRUD.GetSiteTitle();
+            Assert.IsNotNull(title);
+        }
+
+        [TestMethod, TestCategory("SharePointCRUD")]
         public void GetLists()
         {
             SharePointCRUD spCRUD = new SharePointCRUD(); //  _appId, _appSecret);

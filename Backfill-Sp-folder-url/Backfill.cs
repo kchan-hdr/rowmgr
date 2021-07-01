@@ -19,19 +19,19 @@ namespace Backfill_Sp_folder_url
 
             var same = new SameParcel();
 
-            using (var ctx = new ROWM_Context(DbConnection.GetConnectionString()))
+            using (var ctx = new ROWM_Context()) // DbConnection.GetConnectionString()))
             {
                 var parcels = await ctx.Document.SelectMany(dx => dx.Parcel).ToArrayAsync();
                 var tasks = new List<Task>();
 
-                foreach( var p in parcels.Distinct(same))
+                foreach (var p in parcels.Distinct(same))
                 {
                     var parcelName = $"{p.Assessor_Parcel_Number} {p.Ownership.First(o => o.IsPrimary()).Owner.PartyName}";
                     var name = sp.GetParcelFolderName(parcelName);
                     var url = sp.GetParcelFolderURL(name);
                     Console.WriteLine($"{p.Assessor_Parcel_Number} --> {url}");
-                    
-                    if ( !string.IsNullOrWhiteSpace(url))
+
+                    if (!string.IsNullOrWhiteSpace(url))
                         tasks.Add(f.UpdateFeatureDocuments(p.Assessor_Parcel_Number, url));
                 }
 

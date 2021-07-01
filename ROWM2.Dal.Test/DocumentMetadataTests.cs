@@ -18,7 +18,7 @@ namespace ROWM2.Dal.Test
         [TestInitialize]
         public void Init()
         {
-            _ctx = new ROWM_Context(DbConnection.GetConnectionString());
+            _ctx = new ROWM_Context();
             _repo = new OwnerRepository(_ctx);
             var agent = _repo.GetDefaultAgent().GetAwaiter().GetResult();
 

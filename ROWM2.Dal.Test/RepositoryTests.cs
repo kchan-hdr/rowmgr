@@ -9,13 +9,12 @@ namespace ROWM2.Dal.Test
     [TestClass]
     public class RepositoryTests
     {
-        OwnerRepository _repo;
+        StatisticsRepository _repo;
 
         [TestInitialize]
         public void Init()
         {
-            _repo = new OwnerRepository(
-                new ROWM_Context(DbConnection.GetConnectionString()));
+            _repo = new StatisticsRepository(new ROWM_Context());
         }
 
         [TestMethod, TestCategory("DAL Repo")]

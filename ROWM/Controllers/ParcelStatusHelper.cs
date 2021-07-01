@@ -1,9 +1,6 @@
 ﻿using ROWM.Dal;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using System.Threading.Tasks;
 
 namespace ROWM.Controllers
 {
@@ -11,13 +8,13 @@ namespace ROWM.Controllers
     {
         readonly List<Parcel_Status> _Status;
         readonly List<Roe_Status> _roeStatus;
-        readonly Dictionary<int,Landowner_Score> _Scores;
+        readonly Dictionary<int, Landowner_Score> _Scores;
 
         public ParcelStatusHelper(ROWM_Context c)
         {
             _Status = c.Parcel_Status.AsNoTracking().ToList();
             _roeStatus = c.Roe_Status.AsNoTracking().ToList();
-            _Scores = c.Landowner_Score.AsNoTracking().ToDictionary<Landowner_Score,int>(lls=>lls.Score);
+            _Scores = c.Landowner_Score.AsNoTracking().ToDictionary<Landowner_Score, int>(lls => lls.Score);
         }
 
         public string ParseDomainValue(int d)
@@ -43,7 +40,7 @@ namespace ROWM.Controllers
         #region landowner score 
         internal string ParseScore(int? score)
         {
-            if (!score.HasValue || score == 0 ) { return ""; }
+            if (!score.HasValue || score == 0) { return ""; }
             var val = score.Value;
             return _Scores.ContainsKey(val) ? _Scores[val].Caption : "";
         }

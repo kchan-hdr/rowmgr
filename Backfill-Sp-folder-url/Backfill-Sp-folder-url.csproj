@@ -8,9 +8,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Backfill_Sp_folder_url</RootNamespace>
     <AssemblyName>Backfill-Sp-folder-url</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,13 +63,17 @@
       <Project>{9eba766e-dda1-49bd-845e-ada468fbc00b}</Project>
       <Name>AgsFeatureUpdate</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
-      <Project>{23d465b8-d88e-4979-ad4e-891b744d6d1e}</Project>
-      <Name>ROWM2.Dal</Name>
+    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj">
+      <Project>{D9838F13-BB90-4B23-9192-95FEDBA58696}</Project>
+      <Name>ROWM3.Dal</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">
       <Project>{1f998edb-3a5d-4f61-a1e8-62b6afbea99b}</Project>
       <Name>SharePointInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj">
+      <Project>{20759891-df1a-4e84-8762-d8a61bf9ec54}</Project>
+      <Name>SharePointUtil_Sunflower</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -12,7 +12,7 @@ namespace ROWM2.Dal.Test
         [TestMethod, TestCategory("DAL")]
         public void Simple_Connection_Test()
         {
-            var c = new ROWM_Context(DbConnection.GetConnectionString());
+            var c = new ROWM_Context();
             var n = c.Owner.Count();
             Assert.IsTrue(n >= 0);
 
@@ -22,7 +22,7 @@ namespace ROWM2.Dal.Test
         [TestMethod, TestCategory("DAL")]
         public void Simple_Database_First_Insert()
         {
-            var c = new ROWM_Context(DbConnection.GetConnectionString());
+            var c = new ROWM_Context();
 
             var l = c.ContactLog.Create();
             l.Agent = c.Agent.First();

@@ -18,6 +18,8 @@ namespace geographia.ags
                 : url;
 
             _LAYERID = 0;
+
+            SetSecured();
         }
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
@@ -99,10 +101,9 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
-        async Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating)
-        {
-            throw new NotImplementedException();
-        }
+        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating) => Task.FromResult(false); // no op
+
+        Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => Task.FromResult(false); // no op
         #region request
         public class UpdateRequest
         {

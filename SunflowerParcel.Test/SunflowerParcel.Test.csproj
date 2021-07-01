@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SunflowerParcel.Test</RootNamespace>
     <AssemblyName>SunflowerParcel.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
@@ -19,6 +19,7 @@
     <TestProjectType>UnitTest</TestProjectType>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -413,9 +414,9 @@
       <Project>{9eba766e-dda1-49bd-845e-ada468fbc00b}</Project>
       <Name>AgsFeatureUpdate</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj">
-      <Project>{23D465B8-D88E-4979-AD4E-891B744D6D1E}</Project>
-      <Name>ROWM2.Dal</Name>
+    <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj">
+      <Project>{D9838F13-BB90-4B23-9192-95FEDBA58696}</Project>
+      <Name>ROWM3.Dal</Name>
     </ProjectReference>
     <ProjectReference Include="..\ROWM\ROWM.csproj">
       <Project>{31360b6a-20fe-4159-a5f6-081e6126d04a}</Project>
@@ -424,6 +425,10 @@
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">
       <Project>{1F998EDB-3A5D-4F61-A1E8-62B6AFBEA99B}</Project>
       <Name>SharePointInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj">
+      <Project>{20759891-df1a-4e84-8762-d8a61bf9ec54}</Project>
+      <Name>SharePointUtil_Sunflower</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

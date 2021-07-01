@@ -1,0 +1,3 @@
+[submodule "blackhill-row-manager"]
+	path = blackhill-row-manager
+	url = https://kc16200@bitbucket.org/hdrgis/blackhill-row-manager.git

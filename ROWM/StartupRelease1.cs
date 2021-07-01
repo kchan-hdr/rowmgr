@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Microsoft.AspNetCore.Http.Features;
-using geographia.ags;
 using SharePointInterface;
 
 namespace ROWM
@@ -48,21 +41,20 @@ namespace ROWM
                 o.MultipartBodyLengthLimit = int.MaxValue;
             });
 
-            var cs = Configuration.GetConnectionString("rowm");
+            var cs = Configuration.GetConnectionString("ROWM_Context");
             //services.AddScoped<ROWM.Dal.ROWM_Context>();
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new Dal.ROWM_Context(cs);
-            });
-            services.AddScoped<com.hdr.Rowm.Export.RowmEntities>(fac =>
-            {
-                return new com.hdr.Rowm.Export.RowmEntities(cs);
+                return new Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
-            services.AddSingleton<Controllers.ParcelStatusHelper>();
-            services.AddScoped<IFeatureUpdate, B2hParcel>( fac => 
-                new B2hParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer") 
+            services.AddScoped<ROWM.Dal.StatisticsRepository>();
+            services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
+            services.AddScoped<Controllers.ParcelStatusHelper>();
+            services.AddScoped<IFeatureUpdate, BlackhillParcel>(fac =>
+               new BlackhillParcel("https://gis05.hdrgateway.com/arcgis/rest/services/California/Blackhills_Parcel_FS/FeatureServer")
             );
             services.AddScoped<ISharePointCRUD, SharePointCRUD>();
 
@@ -83,7 +75,7 @@ namespace ROWM
             loggerFactory.AddDebug();
 
             app.UseExceptionHandler("/Home/Error");
- 
+
             app.UseStaticFiles();
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());

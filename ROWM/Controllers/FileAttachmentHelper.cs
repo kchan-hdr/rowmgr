@@ -37,6 +37,11 @@ namespace ROWM.Controllers
             var d = await _repo.Store(title, "Other", contentType, fileName, log.ContactAgentId, bb);
             d.Agent.Add(log.Agent); // this relationship is not used anymore
 
+            // add document to log
+            if (log.Attachments == null || !log.Attachments.Any())
+                log.Attachments = new List<Document>();
+            log.Attachments.Add(d);
+
             // Add document to parcels
             var myParcels = parcels.Distinct();
 
@@ -48,7 +53,7 @@ namespace ROWM.Controllers
 
                 fileName = HeaderUtilities.RemoveQuotes(fileName).Value;
                 Ownership primaryOwner = myParcel.Ownership.First<Ownership>(o => o.IsPrimary());
-                string parcelName = String.Format("{0} {1}", pid, primaryOwner.Owner.PartyName);
+                string parcelName = String.Format("{0} {1}", myParcel.Tracking_Number, primaryOwner.Owner.PartyName);
                 try
                 {
                     _sharePointCRUD.UploadParcelDoc(parcelName, "Other", fileName, bb, null);

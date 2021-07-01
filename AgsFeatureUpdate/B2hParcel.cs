@@ -147,6 +147,8 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
+
+        Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => Task.FromResult(false);     // no op
         #region request
         public class UpdateRequest
         {

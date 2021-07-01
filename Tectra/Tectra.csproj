@@ -8,9 +8,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Tectra</RootNamespace>
     <AssemblyName>Tectra</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -80,6 +81,10 @@
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">
       <Project>{1f998edb-3a5d-4f61-a1e8-62b6afbea99b}</Project>
       <Name>SharePointInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharePointUtil_Sunflower\SharePointUtil_Sunflower.csproj">
+      <Project>{20759891-df1a-4e84-8762-d8a61bf9ec54}</Project>
+      <Name>SharePointUtil_Sunflower</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

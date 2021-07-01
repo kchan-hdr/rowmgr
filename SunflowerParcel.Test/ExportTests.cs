@@ -10,10 +10,10 @@ namespace SunflowerParcel.Test
         [TestMethod]
         public void Test_Export_Contacts()
         {
-            var rep = new ROWM.Dal.OwnerRepository();
+            var rep = new ROWM.Dal.OwnerRepository(new ROWM.Dal.ROWM_Context());
             var ctrl = new ExportController(rep);
 
-            dynamic file = ctrl.ExportContact("excel");
+            dynamic file = ctrl.ExportContract("excel");
             Assert.IsNotNull(file);
 
             System.IO.File.WriteAllBytes(@"D:/junk/contacts.csv", file.FileContents);

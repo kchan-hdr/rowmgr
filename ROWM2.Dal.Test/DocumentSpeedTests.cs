@@ -21,7 +21,7 @@ namespace ROWM2.Dal.Test
             var watch = new Stopwatch();
 
             Trace.WriteLine($"Repo {DateTime.Now}");
-            using (var ctx = new ROWM_Context(DbConnection.GetConnectionString()))
+            using (var ctx = new ROWM_Context())
             {
                 ctx.Database.Log = m => Trace.WriteLine(m);
 
@@ -33,7 +33,7 @@ namespace ROWM2.Dal.Test
             }
 
             Trace.WriteLine($"EF {DateTime.Now}");
-            using (var ctx = new ROWM_Context(DbConnection.GetConnectionString()))
+            using (var ctx = new ROWM_Context())
             {
                 ctx.Database.Log = m => Trace.WriteLine(m);
 
@@ -56,7 +56,7 @@ namespace ROWM2.Dal.Test
             var watch = new Stopwatch();
 
             Trace.WriteLine($"Repo {DateTime.Now}");
-            using (var ctx = new ROWM_Context(DbConnection.GetConnectionString()))
+            using (var ctx = new ROWM_Context())
             {
                 ctx.Database.Log = m => Trace.WriteLine(m);
 
@@ -68,7 +68,7 @@ namespace ROWM2.Dal.Test
             }
 
             Trace.WriteLine($"EF {DateTime.Now}");
-            using (var ctx = new ROWM_Context(DbConnection.GetConnectionString()))
+            using (var ctx = new ROWM_Context())
             {
                 ctx.Database.Log = m => Trace.WriteLine(m);
 
