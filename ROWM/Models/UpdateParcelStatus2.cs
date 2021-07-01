@@ -46,7 +46,7 @@ namespace ROWM.Models
             if (_PURPOSE == null)
                 _PURPOSE = await _repo.GetPurpose();
 
-            var myphases = parcel.ContactLog.Select(l => l.ProjectPhase).Distinct();
+            var myphases = parcel.ContactLog.Select(l => l.ProjectPhase).Where(ph=> !ph.Equals("na")).Distinct();
             if (myphases.Any())
             {
                 var rr = myphases.Select(mp => _PURPOSE.SingleOrDefault(p => p.PurposeCode == mp).Milestone);

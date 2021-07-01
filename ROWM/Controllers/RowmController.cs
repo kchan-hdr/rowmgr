@@ -697,6 +697,21 @@ namespace ROWM.Controllers
             return touched;
         }
 
+        [HttpDelete("parcels/{pid}/logs/{lid}")]
+        public async Task<IActionResult> DeleteContactLog(string pid, Guid lid)
+        {
+            var p = await _repo.GetParcel(pid);
+            var l = p.ContactLog.Single(cx => cx.ContactLogId == lid);
+
+            l.IsDeleted = true;
+
+            var myParcels = new List<string> { pid };
+            var myContacts = p.ParcelContacts.Select(cx => cx.ContactId);
+            await _repo.UpdateContactLog(myParcels, myContacts, l);
+
+            return Ok();
+        }
+
         static ReservoirParcel.ContactLog_dto Convert(ContactLog log)
         {
             return new ReservoirParcel.ContactLog_dto

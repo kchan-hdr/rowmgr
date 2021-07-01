@@ -53,4 +53,9 @@
     {
         public string SiteTitle() => "Yoakum SH-72";
     }
+
+    public class Uinta : SiteDecoration
+    {
+        public string SiteTitle() => "Uinta Basin Railway (2020.7.1)";
+    }
 }

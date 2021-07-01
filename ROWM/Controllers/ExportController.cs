@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace ROWM.Controllers
 {
-    [Produces("application/json")]
-    public class ExportController : Controller
+    [ApiController]
+    public class ExportController : ControllerBase
     {
         OwnerRepository _repo;
         IFileProvider _file;
