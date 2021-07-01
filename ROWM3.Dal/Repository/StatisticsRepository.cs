@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,7 @@ namespace ROWM.Dal
 
         Lazy<IEnumerable<SubTotal>> _baseParcels;
         Lazy<IEnumerable<SubTotal>> _baseRoes;
+
         IEnumerable<SubTotal> _baseAccess = new SubTotal[]{
             new SubTotal { Title = "0", Caption = "Unknown", Count = 0 },
             new SubTotal { Title = "2", Caption = "Unlikely", Count = 0 },
@@ -47,8 +49,8 @@ namespace ROWM.Dal
                            select new SubTotal { Title = psg.Key, Count = psg.Count() }).ToArrayAsync();
 
             return from b in _baseParcels.Value
-                   join psg in q on b.Title equals psg.Title into matq
-                   from sub in matq.DefaultIfEmpty()
+                      join psg in q on b.Title equals psg.Title into matq
+                      from sub in matq.DefaultIfEmpty()
                    select new SubTotal { Title = b.Title, Caption = b.Caption, DomainValue = b.DomainValue, Count = sub?.Count ?? 0 };
         }
 
@@ -75,6 +77,21 @@ namespace ROWM.Dal
                    from sub in matg.DefaultIfEmpty()
                    select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
         }
+
+        public async Task<Financials> GetFinancials()
+        {
+            var p = await ActiveParcels().ToArrayAsync();
+
+            return new Financials
+            {
+                Appraisal = p.Sum(px => px.InitialROEOffer_OfferAmount) ?? 0,
+                Settlement = p.Sum(px => px.FinalROEOffer_OfferAmount) ?? 0,
+                ApprovedOffer = p.Sum(px => px.InitialOptionOffer_OfferAmount) ?? 0,
+                Sales = p.Sum(px => px.FinalOptionOffer_OfferAmount) ?? 0,
+                Closing = p.Sum(px => px.InitialEasementOffer_OfferAmount) ?? 0
+            };
+        }
+
         #region helper
         private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
         private IEnumerable<SubTotal> MakeBaseRoes() => _context.Roe_Status.Where(px => px.IsActive).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
@@ -86,6 +103,24 @@ namespace ROWM.Dal
             public string Caption { get; set; }
             public string DomainValue { get; set; }
             public int Count { get; set; }
+        }
+
+        public class Financials
+        {
+            [DisplayName("Appraisal Value")]
+            public double Appraisal { get; set; }    // Initial ROE Offer
+
+            [DisplayName("Admin Settlement")]
+            public double Settlement { get; set; }   // Final ROE Offer
+
+            [DisplayName("Approved Offer")]
+            public double ApprovedOffer { get; set; }    // Initial Option Offer
+
+            [DisplayName("Contract Sales Price")]
+            public double Sales { get; set; }    // Final Option Offer
+
+            [DisplayName("Closing Cost")]
+            public double Closing { get; set; } // Initial Easement
         }
         #endregion
     }

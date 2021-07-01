@@ -7,19 +7,34 @@ using System.Threading.Tasks;
 
 namespace ROWM.Dal
 {
+    public interface IUpdateParcelStatus
+    {
+        Agent myAgent { get; set; }
+        IEnumerable<Parcel> myParcels { get; set; }
+
+        DateTimeOffset StatusChangeDate { get; set; }
+        string AcquisitionStatus { get; set; }
+        string RoeStatus { get; set; }
+        string RoeCondition { get; set; }
+        string Notes { get; set; }
+        string ModifiedBy { get; set; }
+
+        Task<int> Apply();
+    }
+
     /// <summary>
     /// Implements parcel status update
     /// </summary>
-    public class UpdateParcelStatus
+    public class UpdateParcelStatus : IUpdateParcelStatus
     {
         readonly OwnerRepository repo;
         readonly IFeatureUpdate _featureUpdate;
-        readonly Controllers.ParcelStatusHelper _statusHelper;
+        readonly ParcelStatusHelper _statusHelper;
         readonly ROWM_Context _context;
 
 
-        Agent myAgent;
-        IEnumerable<Parcel> myParcels;
+        public Agent myAgent { get; set; }
+        public IEnumerable<Parcel> myParcels { get; set; }
 
         public DateTimeOffset StatusChangeDate { get; set; } = DateTimeOffset.Now;
         public string AcquisitionStatus { get; set; }
@@ -59,6 +74,7 @@ namespace ROWM.Dal
                 var history = new StatusActivity();
 
                 var pid = p.Assessor_Parcel_Number;
+                var track = p.Tracking_Number;
 
                 if (this.AcquisitionStatus != null && p.ParcelStatusCode != this.AcquisitionStatus)
                 {
@@ -69,7 +85,7 @@ namespace ROWM.Dal
                     dirty = true;
 
                     var dv = _statusHelper.GetDomainValue(AcquisitionStatus);
-                    tks.Add(this._featureUpdate.UpdateFeature(pid, dv));
+                    tks.Add(this._featureUpdate.UpdateFeature(pid, track, dv));
                 }
 
                 if (this.RoeStatus != null && p.RoeStatusCode != this.RoeStatus)
@@ -82,18 +98,12 @@ namespace ROWM.Dal
 
                     if (!string.IsNullOrWhiteSpace(RoeCondition))
                     {
-                        p.Conditions.Add(new Dal.RoeCondition 
-                        { 
-                            Condition = RoeCondition, 
-                            EffectiveStartDate = EffectiveStartDate,
-                            EffectiveEndDate = EffectiveEndDate,
-                            Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy 
-                        });
+                        p.Conditions.Add(new Dal.RoeCondition { Condition = RoeCondition, Created = dt, LastModified = dt, ModifiedBy = this.ModifiedBy });
                     }
 
                     var roeDV = _statusHelper.GetRoeDomainValue(RoeStatus);
                     tks.Add(string.IsNullOrWhiteSpace(RoeCondition) ?
-                        _featureUpdate.UpdateFeatureRoe(pid, roeDV) : _featureUpdate.UpdateFeatureRoe_Ex(pid, roeDV, RoeCondition));
+                        _featureUpdate.UpdateFeatureRoe(pid, track, roeDV) : _featureUpdate.UpdateFeatureRoe_Ex(pid, track, roeDV, RoeCondition));
                 }
 
                 if (dirty)
@@ -111,9 +121,18 @@ namespace ROWM.Dal
                 }
             }
 
-            tks.Add(this._context.SaveChangesAsync());
+            // tks.Add(this._context.SaveChangesAsync());
 
             await Task.WhenAll(tks);
+
+            try
+            {
+                this._context.SaveChanges();
+            }
+            catch( Exception e)
+            {
+                throw;
+            }
 
             return 0;
         }

@@ -17,6 +17,19 @@ namespace Ags.Test
         {
             var server = "http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer";
             var h = new TokenHelper(server);
+
+            // var good = await h.Validate();
+            // Assert.IsTrue(good);
+
+            var token = await h.GetToken();
+            Assert.IsFalse(string.IsNullOrWhiteSpace(token));
+        }
+
+        [TestMethod, TestCategory("AGS")]
+        public async Task Normal_Prod_Token_Gen()
+        {
+            var server = "http://gis05.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer";
+            var h = new TokenHelper(server);
             var token = await h.GetToken();
             Assert.IsFalse(string.IsNullOrWhiteSpace(token));
         }

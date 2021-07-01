@@ -26,7 +26,7 @@ namespace ROWM.Dal
         [StringLength(20)]
         public string ContactChannel { get; set; }
 
-        [StringLength(20)]
+        [StringLength(50)]
         public string ProjectPhase { get; set; }
 
         [StringLength(200)]

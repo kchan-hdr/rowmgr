@@ -51,6 +51,7 @@ namespace ROWM.Dal
             var p = await ActiveParcels()
                 .Include(px => px.Ownership.Select( o=>o.Owner.ContactLog))
                 .Include(px => px.ContactLog)
+                .FirstOrDefaultAsync(px => px.Tracking_Number == pid);
                 .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
 
             return p;
@@ -71,19 +72,23 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
             var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
+            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Tracking_Number.Equals(pid));
             if ( p == null)
             {
                 throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
             }
 
-            //var query = p.Document.Select(dx => new { dx.DocumentId, dx.DocumentType, dx.Title });
+            var query = p.Document.Select(dx => new Document
+            {
+                DocumentId = dx.DocumentId,
+                DocumentType = dx.DocumentType,
+                Title = dx.Title,
+                DateRecorded = dx.DateRecorded,
+                Created = dx.Created,
+                LastModified = dx.LastModified
+            });
 
-            //return query.Select(dx => new Document
-            //{
-            //    DocumentId = dx.DocumentId,
-            //    Title = dx.Title,
-            //    DocumentType = dx.DocumentType
-            //}).ToList();
+            return query.ToList();
 
             var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid and d.IsDeleted = 0", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
             var ds = await q.ToListAsync();
@@ -98,6 +103,30 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
         }
         #endregion
 
+        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid) => await GetStatusForParcel(pid, false);
+
+        public async Task<IEnumerable<StatusActivity>> GetStatusForParcel(string pid, bool all = false)
+        {
+            var p = await ActiveParcels().AsNoTracking()
+                .Include(px => px.Activities)
+                .FirstOrDefaultAsync(px => px.Tracking_Number.Equals(pid));
+
+            if ( p==null)
+                throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");
+
+            if (all)
+            {
+                return p.Activities.ToArray();
+            } 
+            else           
+            {
+                var q = from a in p.Activities
+                        group a by a.ParcelStatusCode into ag
+                        select ag.OrderByDescending(ax => ax.ActivityDate).Take(1);
+
+                return q.SelectMany(qx => qx);
+            }
+        }
         public IEnumerable<string> GetParcels() => ActiveParcels().AsNoTracking().Select(px => px.Assessor_Parcel_Number);
         public IEnumerable<Parcel> GetParcels2() => ActiveParcels().Include(px => px.Ownership.Select( o => o.Owner )).Include(px => px.Conditions).AsNoTracking();
 
@@ -258,6 +287,7 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
             }
 
             var existingPids = log.Parcel.Select(p => p.Tracking_Number).ToList();
+            var existingPids = log.Parcel.Select(p => p.Assessor_Parcel_Number).ToList();
             var existingCids = log.ContactInfo.Select(c => c.ContactId).ToList();
 
             // Find Deleted & added parcels & contacts
@@ -272,6 +302,7 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
                 foreach (var pid in deletedPids)
                 {
                     var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Tracking_Number.Equals(pid));
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
                     if (px == null)
                     {
                         Trace.TraceWarning($"invalid parcel {pid}");
@@ -303,6 +334,7 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
                 foreach (var pid in newPids)
                 {
                     var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.Tracking_Number.Equals(pid));
+                    var px = await _ctx.Parcel.SingleOrDefaultAsync(pxid => pxid.ParcelId.Equals(pid));
                     if (px == null)
                     {
                         Trace.TraceWarning($"invalid parcel {pid}");
@@ -376,6 +408,12 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
 
             return o;
         }
+
+        #region statics lookup
+        public async Task<IEnumerable<Parcel_Status>> GetParcelStatus() => await _ctx.Parcel_Status.Where(s => s.IsActive).AsNoTracking().ToListAsync();
+        public async Task<IEnumerable<Contact_Purpose>> GetPurpose() => await _ctx.Contact_Purpose.Include(p => p.Milestone).Where(p => p.IsActive).AsNoTracking().ToListAsync();
+        #endregion
+
         #region documents
         public Document GetDocument(Guid id) => _ctx.Document.Find(id);
 

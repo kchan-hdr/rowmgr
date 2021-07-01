@@ -63,9 +63,11 @@ namespace geographia.ags.Test
                     new OwnerRepository(ctx),
                     new ContactInfoRepository (ctx),
                     new StatisticsRepository(ctx),
+                    new DeleteHelper(ctx),
+                    new ROWM.Models.UpdateParcelStatus2(null,null),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
-                    new SharePointCRUD());
+                    default);
                 var good = await c.UpdateStatus(_test, _test_status);
                 Assert.AreEqual(_test, good.Value.ParcelId);
                 Assert.AreEqual(_test_status, good.Value.ParcelStatusCode);
@@ -96,9 +98,11 @@ namespace geographia.ags.Test
                     new OwnerRepository(ctx),
                     new ContactInfoRepository(ctx),
                     new StatisticsRepository(ctx),
+                    new DeleteHelper(ctx),
+                    new ROWM.Models.UpdateParcelStatus2(null,null),
                     new ParcelStatusHelper(ctx),
                     new SunflowerParcel(),
-                    new SharePointCRUD());
+                    default);
                 var good = await c.UpdateStatus(_test, _test_status);
             }
         }

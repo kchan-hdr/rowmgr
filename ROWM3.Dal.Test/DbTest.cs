@@ -11,7 +11,7 @@ namespace ROWM3.Dal.Test
     [TestClass]
     public class DbTest
     {
-        [TestMethod, TestCategory("DAL3Sde")]
+        [TestMethod, Ignore(), TestCategory("DAL3Sde")]
         public void Simple_Sde_Connection_Test()
         {
             var c = new ROWM_SdeContext();
@@ -21,7 +21,7 @@ namespace ROWM3.Dal.Test
             Trace.WriteLine(n);
         }
 
-        [TestMethod, TestCategory("DAL3Sde")]
+        [TestMethod, Ignore(), TestCategory("DAL3Sde")]
         public async Task Simple_All_Parcel_IDs_SDE()
         {
             var repo = new OwnerRepository(new ROWM_SdeContext());

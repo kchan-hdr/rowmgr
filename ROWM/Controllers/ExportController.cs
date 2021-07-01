@@ -12,11 +12,58 @@ namespace ROWM.Controllers
     public class ExportController : Controller
     {
         OwnerRepository _repo;
+        IFileProvider _file;
+        IRowmReports _reports;
+        Lazy<string> LogoPath;
 
-        public ExportController(OwnerRepository repo)
+        readonly LinkGenerator _links;
+
+        public ExportController(OwnerRepository repo, LinkGenerator g, IFileProvider fileProvider = null, IRowmReports reports = null)
         {
             _repo = repo;
+            _file = fileProvider;
+            _reports = reports;
+            _links = g;
+
+            LogoPath = new Lazy<string>( () => GetLogo());
         }
+
+        #region new reporting engine
+        [HttpGet("api/export2")]
+        public IEnumerable<ReportDef> GetReportsList()
+        {
+            var myList = _reports.GetReports();
+            return myList.Select( rx => { rx.ReportUrl = $"//{HttpContext.Request.Host.Value}/export2/{rx.ReportCode}"; return rx; });
+        }
+
+        [HttpGet("export2/{reportCode}")]
+        public async Task<ActionResult> GetReport(string reportCode)
+        {
+            var m = _reports.GetReports();
+            var r = m.FirstOrDefault(x => x.ReportCode == reportCode);
+            if (r == null)
+                return BadRequest();
+
+            var payload = await _reports.GenerateReport(r);
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
+
+        [HttpGet("export/acq")]
+        public async Task<IActionResult> DummyReport()
+        {
+            var m = _reports.GetReports();
+            var r = m.FirstOrDefault(x => x.ReportCode == "internal" );
+            var payload = await _reports.GenerateReport(r);
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
+
+        [HttpGet("export/status/{milestone}")]
+        public async Task<IActionResult> StatusDetails(string milestone)
+        {
+            var payload = await _reports.GenerateReport(new ReportDef { ReportCode = "status", ReportUrl = milestone });
+            return File(payload.Content, payload.Mime, payload.Filename);
+        }
+        #endregion
 
         /// <summary>
         /// support excel only
@@ -39,7 +86,7 @@ namespace ROWM.Controllers
                 {
                     writer.WriteLine(LogExport.Header());
 
-                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)))
+                    foreach (var l in logs.SelectMany(l => LogExport.Export(l)).OrderBy(l => l.Tracking))
                         writer.WriteLine(l);
 
                     writer.Close();
@@ -57,7 +104,7 @@ namespace ROWM.Controllers
         [HttpGet("export/documents")]
         public async Task<IActionResult> ExportDocumentg(string f)
         {
-            const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
+            const string DOCUMENT_HEADER = "NSR Number,Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -118,13 +165,16 @@ namespace ROWM.Controllers
             }
         }
 
+        //        return File(s.GetBuffer(), "text/csv", "acq.csv");
+        //    }
+        //}
         /// <summary>
         /// support excel only
         /// </summary>
         /// <param name="f"></param>
         /// <returns></returns>
         [HttpGet("export/contacts")]
-        public IActionResult ExportContract(string f)
+        public IActionResult ExportContact(string f)
         {
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
@@ -146,16 +196,17 @@ namespace ROWM.Controllers
                 {
                     writer.WriteLine(ContactExport2.Header());
 
-                    foreach (var l in cc.OrderBy(cx => cx.PartyName)
-                                        .ThenByDescending(cx => cx.IsPrimary)
-                                        .ThenBy(cx => cx.LastName)
-                                        .Select(ccx => ccx.ToString()))
-                        writer.WriteLine(l);
+                        foreach (var l in cc.OrderBy(cx => cx.PartyName)
+                                            .ThenByDescending(cx => cx.IsPrimary)
+                                            .ThenBy(cx => cx.LastName)
+                                            .Select(ccx => ccx.ToString()))
+                            writer.WriteLine(l);
 
-                    writer.Close();
+                        writer.Close();
+                    }
+
+                    return File(s.GetBuffer(), "text/csv", "contacts.csv");
                 }
-
-                return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
 
@@ -194,9 +245,20 @@ namespace ROWM.Controllers
                 return File(s.GetBuffer(), "text/csv", "contacts.csv");
             }
         }
+        #region logo image
+        string GetLogo()
+        {
+            if (_file == null)
+                return string.Empty;
+
+            var fileInfo = _file.GetFileInfo("wwwroot/assets/IDP-logo-color.png");
+            return  fileInfo.PhysicalPath;
+        }
+        #endregion
         #region helpers
         public class LogExport
         {
+            public string Tracking { get; set; }
             public string ParcelId { get; set; }
             public string ParcelStatusCode { get; set; }
             public string RoeStatusCode { get; set; }
@@ -214,6 +276,7 @@ namespace ROWM.Controllers
             {
                 return log.Parcel.Where(p => p.IsActive).Select(p => new LogExport
                 {
+                    Tracking = p.Tracking_Number,
                     ParcelId = p.Assessor_Parcel_Number,
                     ParcelStatusCode = p.ParcelStatusCode,
                     RoeStatusCode = log.Landowner_Score?.ToString() ?? "", // p.RoeStatusCode,
@@ -228,12 +291,12 @@ namespace ROWM.Controllers
             }
 
             public static string Header() =>
-                "Parcel ID,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
+                "Parcel ID,Parcel Status,Landowner Score,Contact Name,Date,Channel,Type,Title,Notes,Agent Name";
 
             public override string ToString()
             {
                 var n = Notes.Replace('"', '\'');
-                return $"=\"{ParcelId}\",{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
+                return $"=\"{ParcelId}\",{ParcelStatusCode},{RoeStatusCode},\"{ContactName}\",{DateAdded.Date.ToShortDateString()},{ContactChannel},{ProjectPhase},\"{Title}\",\"{n}\",\"{AgentName}\"";
             }
         }
 
@@ -257,7 +320,7 @@ namespace ROWM.Controllers
 
             public static IEnumerable<ContactExport2> Export(IGrouping<Guid, Ownership> og)
             {
-                var relatedParcels = og.Select(p => p.Parcel.Assessor_Parcel_Number).OrderBy(p => p).ToArray<string>();
+                var relatedParcels = og.Select(p => $"{p.Parcel.Tracking_Number} ({p.Parcel.Assessor_Parcel_Number})").OrderBy(p => p).ToArray<string>();
 
                 var ox = og.First();
                 return ox.Owner.ContactInfo.Select(cx => new ContactExport2

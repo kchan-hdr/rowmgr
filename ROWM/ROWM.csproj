@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="FileOperation.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Properties\PublishProfiles\ROWM - FTP.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM - Web Deploy.pubxml" />
     <None Remove="Properties\PublishProfiles\ROWM-mezzy - Web Deploy.pubxml" />
@@ -55,7 +59,7 @@
     <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Swashbuckle" Version="5.6.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="WebEssentials.AspNetCore.PWA" Version="1.0.59" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />

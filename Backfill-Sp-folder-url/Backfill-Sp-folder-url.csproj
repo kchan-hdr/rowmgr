@@ -12,6 +12,11 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
+<<<<<<< HEAD
+=======
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+>>>>>>> origin/wharton-dev
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -127,10 +132,14 @@
     </ProjectReference>
     <ProjectReference Include="..\ROWM3.Dal\ROWM3.Dal.csproj">
 <<<<<<< HEAD
+<<<<<<< HEAD
       <Project>{D9838F13-BB90-4B23-9192-95FEDBA58696}</Project>
 =======
       <Project>{d9838f13-bb90-4b23-9192-95fedba58696}</Project>
 >>>>>>> origin/blackhill-dev
+=======
+      <Project>{d9838f13-bb90-4b23-9192-95fedba58696}</Project>
+>>>>>>> origin/wharton-dev
       <Name>ROWM3.Dal</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">

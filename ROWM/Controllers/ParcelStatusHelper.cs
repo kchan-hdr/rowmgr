@@ -1,6 +1,7 @@
 ﻿using ROWM.Dal;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 
 namespace ROWM.Controllers
 {
@@ -28,6 +29,8 @@ namespace ROWM.Controllers
             var s = _Status.Single(sx => sx.Code.Equals(status));
             return s.DomainValue;
         }
+
+        public int GetRank(string status) => _Status.SingleOrDefault(sx => sx.Code.Equals(status))?.DisplayOrder ?? 0;
 
         public int GetRoeDomainValue(string status)
         {

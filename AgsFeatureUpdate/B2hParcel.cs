@@ -15,10 +15,12 @@ namespace geographia.ags
             // Staging: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer
             // Production: http://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer
             _URL = string.IsNullOrWhiteSpace(url) ?
-                "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS_stg/FeatureServer"
+                "https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer"
                 : url;
 
             _LAYERID = 0;
+            
+            SetSecured();
         }
 
         public async Task<IEnumerable<Status_dto>> GetAllParcels()
@@ -81,7 +83,7 @@ namespace geographia.ags
             return await base.Update(_LAYERID, reqContent);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentURL)
+        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string track, string documentURL)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -98,7 +100,7 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status)
+        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, string track, int status)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -114,7 +116,7 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status)
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, string track, int status)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -131,7 +133,7 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating)
+        async Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -142,13 +144,13 @@ namespace geographia.ags
                 attributes = new Status_Req
                 {
                     OBJECTID = i,
-                    Landowner_Score = rating
+                    LandOwnerScore = rating
                 }
             });
             return await this.Update(u);
         }
 
-        Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => Task.FromResult(false);     // no op
+        Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, string track, int status, string condition) => Task.FromResult(false);     // no op
         #region request
         public class UpdateRequest
         {
@@ -169,7 +171,7 @@ namespace geographia.ags
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? ROE_Status { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-            public int? Landowner_Score { get; set; }
+            public int? LandOwnerScore { get; set; }
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public string Documents { get; set; }
         }

@@ -112,6 +112,7 @@
     <Compile Include="BhNBParcel.cs" />
     <Compile Include="BlackhillParcel.cs" />
     <Compile Include="B2hParcel.cs" />
+    <Compile Include="DenverParcel.cs" />
     <Compile Include="FeatureService.cs" />
     <Compile Include="IFeatureUpdate.cs" />
     <Compile Include="InternalConfig.cs" />
@@ -126,6 +127,12 @@
     <None Include="app.config" />
     <None Include="json1.json" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\SonarAnalyzer.CSharp.8.12.0.21095\analyzers\Google.Protobuf.dll" />
+    <Analyzer Include="..\packages\SonarAnalyzer.CSharp.8.12.0.21095\analyzers\SonarAnalyzer.CFG.dll" />
+    <Analyzer Include="..\packages\SonarAnalyzer.CSharp.8.12.0.21095\analyzers\SonarAnalyzer.CSharp.dll" />
+    <Analyzer Include="..\packages\SonarAnalyzer.CSharp.8.12.0.21095\analyzers\SonarAnalyzer.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

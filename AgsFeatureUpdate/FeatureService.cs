@@ -1,9 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -91,61 +89,6 @@ namespace geographia.ags
             return default;
             //throw new KeyNotFoundException(query);
         }
-
-        /// <summary>
-        /// gis05s seems broken
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="query"></param>
-        /// <param name="parser"></param>
-        /// <returns></returns>
-        public virtual async Task<IEnumerable<T>> _GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
-        {
-            if (parser == null)
-                throw new ArgumentNullException(nameof(parser));
-
-            if (string.IsNullOrWhiteSpace(query))
-                throw new ArgumentNullException(nameof(query));
-
-            var results = new List<T>();
-            var hasMore = true;
-            var offset = 0;
-            var step = 100;
-
-            while (hasMore)
-            {
-                var myQuery = $"{query}&supportsPagination=true&resultOffset={offset}&resultRecordCount={step}";
-                var response = await _Client.GetAsync(query);
-                response.EnsureSuccessStatusCode();
-
-                var responseText = await response.Content.ReadAsStringAsync();
-                var obj = JObject.Parse(responseText);
-
-                var ff = obj["features"];
-                if ( ff.Type == JTokenType.Array)
-                {
-                    results.AddRange(parser((JArray)ff));
-                }
-
-                hasMore = HasMore(obj);
-                if (hasMore)
-                    offset += step;
-            }
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// ArcGIS REST Query response
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        private static bool HasMore(JObject obj)
-        {
-            var good = obj["exceededTransferLimit"]?.Value<bool>() ?? false;
-            return good;
-        }
-
 
         public virtual async Task<IEnumerable<T>> GetAll<T>(string query, Func<JArray, IEnumerable<T>> parser)
         {

@@ -1,0 +1,57 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- azure-pipelines
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: 'ROWM.sln'
+  myProject: 'ROWM/ROWM.csproj'
+  buildPlatform: 'AnyCPU'
+  buildConfiguration: 'Release'
+
+resources:
+  pipelines:
+    - pipeline: hdrgis.row-services-base
+      source: hdrgis.wharton-row-manager
+      trigger:
+        branches: 
+        - master
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: DownloadPipelineArtifact@2
+  inputs:
+    buildType: 'specific'
+    project: 'b9d4f0fe-bd74-4898-b154-6ffd9c99939e'
+    definition: '2'
+    buildVersionToDownload: 'latest'
+    targetPath: '$(Build.SourcesDirectory)\ROWM\wwwroot\js'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(myProject)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    clean: true
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Pipeline.Workspace)'
+    publishLocation: 'pipeline'

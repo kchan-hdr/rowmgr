@@ -71,5 +71,14 @@ namespace ROWM.Dal
         public Guid? OrganizationId { get; set; }
         [ForeignKey("OrganizationId")]
         public virtual Organization Affiliation { get; set; }
+
+
+        // db upgrading...
+        public bool DoNotEmail { get; set; } = false;
+        public bool DoNotLetter { get; set; } = false;
+        public bool DoNotCallHomePhone { get; set; } = false;
+        public bool DoNotCallWorkPhone { get; set; } = false;
+        public bool DoNotCallCellPhone { get; set; } = false;
+        public string PreferredContactMode { get; set; }
     }
 }

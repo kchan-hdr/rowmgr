@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace ExcelExport
 {
-    public class ContactListExport : Exporter
+    public class ContactListExport : Exporter<ContactListExport.ContactList>
     {
+        public ContactListExport(IEnumerable<ContactListExport.ContactList> d, string l) : base(d, l) { }
+
         public override byte[] Export()
         {
             reportname = "Contacts List";
@@ -25,53 +27,65 @@ namespace ExcelExport
 
             uint row = 1;
 
-            // column heading
-            var hr = InsertRow(row++, d);
-            WriteText(hr, "A", "Parcel ID");
-            WriteText(hr, "B", "Owner");
-            WriteText(hr, "C", "Primary Contact");
-            WriteText(hr, "D", "Contact Firstname");
-            WriteText(hr, "E", "Contact Lastname");
-            WriteText(hr, "F", "Contact EMail");
-            WriteText(hr, "G", "Contact Cell Phone");
-            WriteText(hr, "H", "Contact Home Phone");
-            WriteText(hr, "I", "Contact Street Address");
-            WriteText(hr, "J", "Contact City");
-            WriteText(hr, "K", "Contact State");
-            WriteText(hr, "L", "Contact ZIP");
-            WriteText(hr, "M", "Representation");
+            row = WriteLogo(row, p, d, reportname);
 
-            foreach (var c in Load())
+            // column heading --Owner,Is Primary Contact,First Name,Last Name,Email,Cell Phone,Phone,Street Address,City,State,ZIP,Representation
+            var hr = InsertRow(row++, d);
+            var c = 0;
+            WriteText(hr, GetColumnCode(c++), "Owner", 1);
+            WriteText(hr, GetColumnCode(c++), "Primary Contact", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact Firstname", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact Lastname", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact EMail", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact Cell Phone", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact Home Phone", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact Street Address", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact City", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact State", 1);
+            WriteText(hr, GetColumnCode(c++), "Contact ZIP", 1);
+            WriteText(hr, GetColumnCode(c++), "Representation", 1);
+            WriteText(hr, GetColumnCode(c++), "Related Parcels", 1);
+
+            foreach (var cx in items)
             {
                 var r = InsertRow(row++, d);
-                WriteText(r, "A", c.parcelid);
-                WriteText(r, "B", c.partyname);
-                WriteText(r, "C", c.isprimarycontact ? "YES" : "NO");
-                WriteText(r, "D", c.ownerfirstname);
-                WriteText(r, "E", c.ownerlastname);
-                WriteText(r, "F", c.owneremail);
-                WriteText(r, "G", c.ownercellphone);
-                WriteText(r, "H", c.ownerhomephone);
-                WriteText(r, "I", c.ownerstreetaddress);
-                WriteText(r, "J", c.ownercity);
-                WriteText(r, "K", c.ownerstate);
-                WriteText(r, "L", c.ownerzip);
-                WriteText(r, "M", c.representation);
+                c = 0;
+                WriteText(r, GetColumnCode(c++), cx.partyname);
+                WriteText(r, GetColumnCode(c++), cx.isprimarycontact ? "YES" : "NO");
+                WriteText(r, GetColumnCode(c++), cx.ownerfirstname);
+                WriteText(r, GetColumnCode(c++), cx.ownerlastname);
+                WriteText(r, GetColumnCode(c++), cx.owneremail);
+                WriteText(r, GetColumnCode(c++), cx.ownercellphone);
+                WriteText(r, GetColumnCode(c++), cx.ownerhomephone);
+                WriteText(r, GetColumnCode(c++), cx.ownerstreetaddress);
+                WriteText(r, GetColumnCode(c++), cx.ownercity);
+                WriteText(r, GetColumnCode(c++), cx.ownerstate);
+                WriteText(r, GetColumnCode(c++), cx.ownerzip);
+                WriteText(r, GetColumnCode(c++), cx.representation);
+                WriteText(r, GetColumnCode(c++), cx.parcelid);
             }
 
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = pageId, Name = "Contacts" });
             bookPart.Workbook.Save();
         }
-
-        List<ContactList> Load()
+        #region export dto
+        public partial class ContactList
         {
-            using (var ctx = new RowmEntities())
-            {
-                var q = ctx.ContactList.AsNoTracking()
-                            .OrderBy(ax => ax.parcelid).ThenByDescending(ax => ax.isprimarycontact).ThenBy(ax=>ax.ownerlastname);
-
-                return q.ToList();
-            }
+            public string parcelid { get; set; }
+            public string partyname { get; set; }
+            public int ownership_t { get; set; }
+            public bool isprimarycontact { get; set; }
+            public string ownerfirstname { get; set; }
+            public string ownerlastname { get; set; }
+            public string owneremail { get; set; }
+            public string ownercellphone { get; set; }
+            public string ownerhomephone { get; set; }
+            public string ownerstreetaddress { get; set; }
+            public string ownercity { get; set; }
+            public string ownerstate { get; set; }
+            public string ownerzip { get; set; }
+            public string representation { get; set; }
         }
+        #endregion
     }
 }

@@ -19,12 +19,12 @@ namespace Tectra
 
         internal DocuController()
         {
-            var c = new ROWM_Context(DbConnection.GetConnectionString());
+            var c = new ROWM_Context(); // DbConnection.GetConnectionString());
             c.Database.CommandTimeout = 1000;
             _repo = new OwnerRepository(c);
             _featureUpdate = new B2hParcel("https://gis05s.hdrgateway.com/arcgis/rest/services/California/B2H_ROW_Parcels_FS/FeatureServer");
 
-            _sharePointCRUD = new SharePointCRUD();
+            //_sharePointCRUD = new SharePointCRUD();
         }
 
         internal async Task DoWrite()

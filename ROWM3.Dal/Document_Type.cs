@@ -21,5 +21,10 @@ namespace ROWM.Dal
         public int DisplayOrder { get; set; }
 
         public bool IsActive { get; set; }
+
+
+        [ForeignKey("Milestone")]
+        public string MilestoneCode { get; set; }
+        public virtual Parcel_Status Milestone { get; set; }
     }
 }

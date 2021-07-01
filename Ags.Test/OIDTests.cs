@@ -29,7 +29,7 @@ namespace Ags.Test
             "https://maps.hdrgateway.com/arcgis/rest/services/California/ATC_CHC_Parcel_FS/FeatureServer"
         };
 
-        public static IEnumerable<object[]> GetProviders ()
+        public static IEnumerable<object[]> GetProviders()
         {
             foreach (var p in parcels)
                 yield return new object[] { p };

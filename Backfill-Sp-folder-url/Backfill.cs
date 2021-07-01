@@ -31,23 +31,6 @@ namespace Backfill_Sp_folder_url
 
             var same = new SameParcel();
 
-<<<<<<< HEAD
-            using (var ctx = new ROWM_Context()) // DbConnection.GetConnectionString()))
-            {
-                var parcels = await ctx.Document.SelectMany(dx => dx.Parcel).ToArrayAsync();
-                var tasks = new List<Task>();
-
-                foreach (var p in parcels.Distinct(same))
-                {
-                    var parcelName = $"{p.Assessor_Parcel_Number} {p.Ownership.First(o => o.IsPrimary()).Owner.PartyName}";
-                    var name = sp.GetParcelFolderName(parcelName);
-                    var url = sp.GetParcelFolderURL(name);
-                    Console.WriteLine($"{p.Assessor_Parcel_Number} --> {url}");
-
-                    if (!string.IsNullOrWhiteSpace(url))
-                        tasks.Add(f.UpdateFeatureDocuments(p.Assessor_Parcel_Number, url));
-                }
-=======
 
             var strategy = new SqlAzureExecutionStrategy();
             var cs = "data source=tcp:atc-rowm.database.windows.net;initial catalog=rowm_6943;persist security info=True;user id=rowm_app;password=;MultipleActiveResultSets=True;App=EntityFramework"; // Configuration.GetConnectionString("ROWM_Context");
@@ -62,7 +45,6 @@ namespace Backfill_Sp_folder_url
                         {
                             var sp = new SharePointCRUD(
                                d: new DocTypes(ctx), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line6943");
->>>>>>> origin/blackhill-dev
 
                             // var mxParcel = ctx.Parcel.Include(px => px.Ownership).FirstOrDefault(px => px.ParcelId == myParcel.ParcelId);
 

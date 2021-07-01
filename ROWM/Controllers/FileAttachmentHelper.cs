@@ -1,4 +1,4 @@
-﻿using Microsoft.Net.Http.Headers;
+using Microsoft.Net.Http.Headers;
 using ROWM.Dal;
 using SharePointInterface;
 using System;

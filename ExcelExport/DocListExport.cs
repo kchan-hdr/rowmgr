@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace ExcelExport
 {
-    public class DocListExport : Exporter
+    public class DocListExport : Exporter<DocListExport.DocumentList>
     {
+        public DocListExport(IEnumerable<DocumentList> d, string l) : base(d, l) { }
+
         public override byte[] Export()
         {
             reportname = "Documents List";
@@ -25,47 +27,56 @@ namespace ExcelExport
 
             uint row = 1;
 
-            // column heading
-            var hr = InsertRow(row++, d);
-            WriteText(hr, "A", "Parcel ID");
-            WriteText(hr, "B", "Title");
-            WriteText(hr, "C", "Document Type");
-            WriteText(hr, "D", "Date Sent");
-            WriteText(hr, "E", "Date Delivered");
-            WriteText(hr, "F", "Client Tracking Number");
-            WriteText(hr, "G", "Date Received");
-            WriteText(hr, "H", "Date Signed");
-            WriteText(hr, "I", "Check No");
-            WriteText(hr, "J", "Date Recorded");
+            row = WriteLogo(row, p, d, reportname);
 
-            foreach (var doc in Load())
+            // column heading --             const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
+            var hr = InsertRow(row++, d);
+            var c = 0;
+            WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
+            WriteText(hr, GetColumnCode(c++), "Title");
+            WriteText(hr, GetColumnCode(c++), "Document Type", 1);
+            WriteText(hr, GetColumnCode(c++), "Date Sent", 1);
+            WriteText(hr, GetColumnCode(c++), "Date Delivered", 1);
+            WriteText(hr, GetColumnCode(c++), "Client Tracking Number", 1);
+            WriteText(hr, GetColumnCode(c++), "Date Received", 1);
+            WriteText(hr, GetColumnCode(c++), "Date Signed", 1);
+            WriteText(hr, GetColumnCode(c++), "Check No", 1);
+            WriteText(hr, GetColumnCode(c++), "Date Recorded", 1);
+
+            foreach (var doc in items)
             {
                 var r = InsertRow(row++, d);
-                WriteText(r, "A", doc.parcelid);
-                WriteText(r, "B", doc.title);
-                WriteText(r, "C", doc.contenttype);
-                WriteText(r, "D", doc.sentdate.HasValue ? doc.sentdate.Value.Date.ToShortDateString() : "");
-                WriteText(r, "E", doc.delivereddate.HasValue ? doc.delivereddate.Value.Date.ToShortDateString() : "");
-                WriteText(r, "F", doc.clienttrackingnumber);
-                WriteText(r, "G", doc.receiveddate.HasValue ? doc.receiveddate.Value.Date.ToShortDateString() : "");
-                WriteText(r, "H", doc.signeddate.HasValue ? doc.signeddate.Value.Date.ToShortDateString() : "");
-                WriteText(r, "I", doc.checkno);
-                WriteText(r, "J", doc.daterecorded.HasValue ? doc.daterecorded.Value.Date.ToShortDateString() : "");
+                c = 0;
+                WriteText(r, GetColumnCode(c++), doc.parcelid);
+                WriteText(r, GetColumnCode(c++), doc.title);
+                WriteText(r, GetColumnCode(c++), doc.contenttype);
+                WriteText(r, GetColumnCode(c++), doc.sentdate.HasValue ? doc.sentdate.Value.Date.ToShortDateString() : "");
+                WriteText(r, GetColumnCode(c++), doc.delivereddate.HasValue ? doc.delivereddate.Value.Date.ToShortDateString() : "");
+                WriteText(r, GetColumnCode(c++), doc.clienttrackingnumber);
+                WriteText(r, GetColumnCode(c++), doc.receiveddate.HasValue ? doc.receiveddate.Value.Date.ToShortDateString() : "");
+                WriteText(r, GetColumnCode(c++), doc.signeddate.HasValue ? doc.signeddate.Value.Date.ToShortDateString() : "");
+                WriteText(r, GetColumnCode(c++), doc.checkno);
+                WriteText(r, GetColumnCode(c++), doc.daterecorded.HasValue ? doc.daterecorded.Value.Date.ToShortDateString() : "");
             }
 
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = pageId, Name = "Documents" });
             bookPart.Workbook.Save();
         }
 
-        List<DocumentList> Load()
+        #region export dto
+        public partial class DocumentList
         {
-            using (var ctx = new RowmEntities())
-            {
-                var q = ctx.DocumentList.AsNoTracking()
-                            .OrderBy(ax => ax.parcelid).ThenBy(ax => ax.title);
-
-                return q.ToList();
-            }
+            public string parcelid { get; set; }
+            public string title { get; set; }
+            public string contenttype { get; set; }
+            public Nullable<System.DateTimeOffset> sentdate { get; set; }
+            public Nullable<System.DateTimeOffset> delivereddate { get; set; }
+            public string clienttrackingnumber { get; set; }
+            public Nullable<System.DateTimeOffset> receiveddate { get; set; }
+            public Nullable<System.DateTimeOffset> signeddate { get; set; }
+            public string checkno { get; set; }
+            public Nullable<System.DateTimeOffset> daterecorded { get; set; }
         }
+        #endregion
     }
 }

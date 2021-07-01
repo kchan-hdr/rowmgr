@@ -85,7 +85,7 @@ namespace geographia.ags
             return await base.Update(_LAYERID, reqContent);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentURL)
+        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string track, string documentURL)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -102,7 +102,7 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status)
+        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, string track, int status)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -119,9 +119,9 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status) => await UpdateFeatureRoe_Impl(parcelId, status, "");
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, string track, int status) => await UpdateFeatureRoe_Impl(parcelId, status, "");
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => await UpdateFeatureRoe_Impl(parcelId, status, condition);
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, string track, int status, string condition) => await UpdateFeatureRoe_Impl(parcelId, status, condition);
 
         async Task<bool> UpdateFeatureRoe_Impl(string parcelId, int status, string condition)
         {
@@ -141,7 +141,7 @@ namespace geographia.ags
             return await this.Update(u);
         }
 
-        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating) => Task.FromResult(false); // no op
+        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false); // no op
         #region request
         public class UpdateRequest
         {

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using ROWM.Dal;
+using ROWM.Models;
 using SharePointInterface;
 using System;
 using System.Collections.Generic;
@@ -24,20 +25,24 @@ namespace ROWM.Controllers
     public class DocumentController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
+        #region ctor            
         private readonly ISharePointCRUD _sharePointCRUD;
+        private readonly UpdateParcelStatus2 _updater;
         private readonly ParcelStatusHelper _statusHelper;
         private readonly DocTypes _docTypes;
 
-        #region ctor
+        readonly ROWM_Context _ctx;
         readonly OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
         readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, IFeatureUpdate f, DeleteHelper del, DocTypes d)
+        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, DocTypes d)
         {
+            _ctx = c;
             _repo = r;
             _deleteHelper = del;
             _sharePointCRUD = sp;
+            _updater = u;
             _featureUpdate = f;
             _statusHelper = h;
             _docTypes = d;
@@ -52,7 +57,7 @@ namespace ROWM.Controllers
         {
             if (await _deleteHelper.DeleteDocument(docId, User.Identity.Name))
                 return Ok();
-            else 
+            else
                 return BadRequest();
         }
 
@@ -380,7 +385,18 @@ namespace ROWM.Controllers
             {
                 var myParcel = await _repo.GetParcel(pid);
                 myParcel.Document.Add(d);
-                await _repo.UpdateParcel(myParcel);
+
+                var (t, s) = await _updater.DoUpdate(myParcel);
+                if (t)
+                {
+                    var ud = new UpdateParcelStatus(new Parcel[] { myParcel }, agent, context: _ctx, _repo, _featureUpdate, _statusHelper)
+                    {
+                        AcquisitionStatus = s.Code,
+                        ModifiedBy = User?.Identity?.Name ?? _APP_NAME
+                    };
+
+                    await ud.Apply();
+                }
 
                 header.DocumentId = d.DocumentId;
 
@@ -390,12 +406,12 @@ namespace ROWM.Controllers
                 try
                 {
                     //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
-                    _sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null);
-                    string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
-
-                    // bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
-                    bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
-                    await _repo.UpdateParcel(myParcel);
+                    if (_sharePointCRUD.UploadParcelDoc(parcelName, header.DocumentType, sourceFilename, bb, null))
+                    {
+                        string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
+                        bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
+                        await _repo.UpdateParcel(myParcel);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -406,6 +422,7 @@ namespace ROWM.Controllers
 #endif
                 }
             }
+
 
             return Json(header);
         }
@@ -433,34 +450,21 @@ namespace ROWM.Controllers
             var dt = _docTypes.Find(docType) ?? _docTypes.Default;
 
             var pid = p.Assessor_Parcel_Number;
+            var track = p.Tracking_Number;
 
             var tasks = new List<Task<bool>>();
-            tasks.Add(_featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl));
+            tasks.Add(_featureUpdate.UpdateFeatureDocuments(pid, track, parcelDocUrl));
 
             switch (dt.DocTypeName)
             {
                 case "ROE Package Original":
-                    tasks.Add(_featureUpdate.UpdateFeatureRoe(pid, 1));
+                    tasks.Add(_featureUpdate.UpdateFeatureRoe(pid, track, 1));
                     p.RoeStatusCode = "ROE_In_Progress";
                     break;
                 case "ROE Package Updated":
-                    tasks.Add(_featureUpdate.UpdateFeatureRoe(pid, 1));
+                    tasks.Add(_featureUpdate.UpdateFeatureRoe(pid, track, 1));
                     p.RoeStatusCode = "ROE_In_Progress";
                     break;
-
-                    //case "Acquisition Offer Package Original": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                    //case "Acquisition Offer Package Updated": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                    //case "Acquisition Notice of Intent Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                    //case "Acquisition Offer Package Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 3)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(3);  break;
-                    //case "Acquisition Final Offer Package": tasks.Add(_featureUpdate.UpdateFeature(pid, 8)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(8);  break;
-                    //case "Acquisition Offer Package Signed": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
-                    //case "Acquisition Offer Packet Sent to Client": tasks.Add(_featureUpdate.UpdateFeature(pid, 9)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(9);  break;
-                    //case "Acquisition Compensation Check": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                    //case "Acquisition Documents Recorded": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
-                    //case "Acquisition Compensation Received by Owner": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                    //case "Acquisition Fully Signed Compenation Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 5)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(5);  break;
-                    //case "Acquisition Fully Signed Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 4)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(4);  break;
-                    //case "Acquisition Recorded Easement Agreement": tasks.Add(_featureUpdate.UpdateFeature(pid, 6)); p.ParcelStatusCode = _statusHelper.ParseDomainValue(6);  break;
             }
 
             return (await Task.WhenAll(tasks)).All(rt => rt);

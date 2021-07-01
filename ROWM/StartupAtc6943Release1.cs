@@ -45,7 +45,7 @@ namespace ROWM
             var cs = Configuration.GetConnectionString("ROWM_Context");
             services.AddScoped<ROWM.Dal.ROWM_Context>(fac =>
             {
-               return new ROWM.Dal.ROWM_Context(cs);
+                return new ROWM.Dal.ROWM_Context(cs);
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
@@ -65,18 +65,11 @@ namespace ROWM
             var appid = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-client").GetAwaiter().GetResult();
             var apps = vaultClient.GetSecretAsync("https://atc-rowm-key.vault.azure.net/", "atc-secret").GetAwaiter().GetResult();
             services.AddScoped<ISharePointCRUD, SharePointCRUD>(fac => new SharePointCRUD(
-                d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line6943"));
+               d: fac.GetRequiredService<DocTypes>(), __appId: appid.Value, __appSecret: apps.Value, _url: "https://atcpmp.sharepoint.com/atcrow/line6943"));
 
             services.AddSingleton<SiteDecoration, Atc6943>();
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "ROW Manager", Version = "v1" });
-            });
-            services.ConfigureSwaggerGen(o =>
-            {
-               o.OperationFilter<FileOperation>();
-            });
+            services.AddSwaggerDocument();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -106,11 +99,8 @@ namespace ROWM
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "ROW Manager V1");
-            });
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
         }
     }
 }

@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Security;
 using Microsoft.SharePoint.Client;
 using OfficeDevPnP.Core;
+using System.Text.RegularExpressions;
 using ROWM.Dal;
 using System.Diagnostics;
 
@@ -29,6 +33,10 @@ namespace SharePointInterface
         static readonly string _STAGING_SITE_URL = "https://hdroneview.sharepoint.com/ROW_Dev";
 
         static readonly string _DOCUMENT_LIST_BASE = "Shared Documents";
+
+        static readonly string _DOCUMENT_LIST_BASE = "Shared Documents";
+        private string _parcelsFolderName = "ROW";
+        private string _parcelsFolderTemplate = "ROW/_Track_No_LO Name"; // "Folder_Template";
 
         private ClientContext _ctx;
         private string _parcelsFolderName = "Parcels";
@@ -76,6 +84,18 @@ namespace SharePointInterface
             return _ctx;
         }
 
+        // switch to certificate
+        ClientContext MyContext()
+        {
+            if (_ctx != null)
+                return _ctx;
+
+            var c = new System.Security.Cryptography.X509Certificates.X509Certificate2(Convert.FromBase64String(_appSecret));
+            AuthenticationManager authManager = new AuthenticationManager();
+            _ctx = authManager.GetAzureADAppOnlyAuthenticatedContext(_siteUrl, _appId, "hdroneview.onmicrosoft.com", c);
+            return _ctx;
+        }
+
         public string GetSiteTitle()
         {
             var ctx = MyContext();
@@ -101,7 +121,10 @@ namespace SharePointInterface
         {
             if (String.IsNullOrWhiteSpace(baseFolderName))
             {
-                baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
+                // this doesn't make sense
+                // baseFolderName = string.IsNullOrWhiteSpace(baseFolderName) ? $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}" : $"{_DOCUMENT_LIST_BASE}/{baseFolderName}";
+
+                baseFolderName = string.IsNullOrWhiteSpace(_parcelsFolderName) ? _DOCUMENT_LIST_BASE : $"{_DOCUMENT_LIST_BASE}/{_parcelsFolderName}";
             }
             if (String.IsNullOrWhiteSpace(folderTemplate))
             {
@@ -120,6 +143,7 @@ namespace SharePointInterface
             ctx.Load(list);
             ctx.Load(baseFolder);
             ctx.ExecuteQuery();
+
 
 
             if (baseFolder.FolderExists(folderName))

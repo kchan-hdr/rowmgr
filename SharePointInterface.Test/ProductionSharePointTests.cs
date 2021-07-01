@@ -75,6 +75,22 @@ namespace SharePointInterface.Test
         }
 
         [TestMethod, TestCategory("SharePointCRUD - Destructive")]
+        public void InsertDoc2()
+        {
+            string fileName = @"testdata\logs.csv";
+
+            SharePointCRUD spCRUD = new SharePointCRUD(); // _appId, _appSecret);
+            Microsoft.SharePoint.Client.Folder folder = spCRUD.GetOrCreateFolder("Test2", "DW_Documents");
+            bool docExists = spCRUD.DocExists(folder, "test2.txt");
+            if (!docExists)
+            {
+                byte[] bytes = System.IO.File.ReadAllBytes(fileName);
+                docExists = spCRUD.InsertDoc(folder, "test2.txt", bytes);
+            }
+            Assert.IsTrue(docExists);
+        }
+
+        [TestMethod, TestCategory("SharePointCRUD - Destructive")]
         public void UploadDoc()
         {
             string fileName = @"testdata\logs.csv";

@@ -41,9 +41,11 @@
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNetCore.Antiforgery, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNetCore.Antiforgery.2.1.1\lib\netstandard2.0\Microsoft.AspNetCore.Antiforgery.dll</HintPath>
@@ -419,7 +421,7 @@
       <Name>ROWM3.Dal</Name>
     </ProjectReference>
     <ProjectReference Include="..\ROWM\ROWM.csproj">
-      <Project>{31360b6a-20fe-4159-a5f6-081e6126d04a}</Project>
+      <Project>{31360B6A-20FE-4159-A5F6-081E6126D04A}</Project>
       <Name>ROWM</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharePointInterface\SharePointInterface.csproj">

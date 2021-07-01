@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ROWM.Dal
 {
@@ -13,6 +16,8 @@ namespace ROWM.Dal
         public string FolderPath { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsDisplayed { get; set; }
+        [JsonIgnore]
+        public Parcel_Status Milestone { get; set; }
 
         public DocType() { }
     }
@@ -36,6 +41,6 @@ namespace ROWM.Dal
             _Master = new Lazy<IEnumerable<DocType>>(DocTypeLoad, System.Threading.LazyThreadSafetyMode.PublicationOnly);
         }
 
-        IEnumerable<DocType> DocTypeLoad() => _ctx.Document_Type.AsNoTracking().Select(dt => new DocType { DocTypeName = dt.DocTypeName, DisplayOrder = dt.DisplayOrder, FolderPath = dt.FolderPath, IsDisplayed = dt.IsActive }).ToArray();
+        IEnumerable<DocType> DocTypeLoad() => _ctx.Document_Type.AsNoTracking().Select(dt => new DocType { DocTypeName = dt.DocTypeName, DisplayOrder = dt.DisplayOrder, FolderPath = dt.FolderPath, IsDisplayed = dt.IsActive, Milestone = dt.Milestone }).ToArray();
     }
 }

@@ -57,7 +57,7 @@ namespace geographia.ags
         }
 
         // IFeatureUpdate implementation
-        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, int status)
+        async Task<bool> IFeatureUpdate.UpdateFeature(string parcelId, string track, int status)
         {
             if (string.IsNullOrWhiteSpace(parcelId))
                 throw new ArgumentNullException(nameof(parcelId));
@@ -75,7 +75,7 @@ namespace geographia.ags
             return await Update(u);
         }
 
-        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, int status)
+        async Task<bool> IFeatureUpdate.UpdateFeatureRoe(string parcelId, string track, int status)
         {
             var oid = await Find(0, $"PID='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
@@ -88,7 +88,7 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
-        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string documentsUrl)
+        async Task<bool> IFeatureUpdate.UpdateFeatureDocuments(string parcelId, string track, string documentsUrl)
         {
             var oid = await Find(0, $"PID='{parcelId}'");
             var u = oid.Select(i => new UpdateFeature
@@ -101,9 +101,9 @@ namespace geographia.ags
             });
             return await this.Update(u);
         }
-        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, int rating) => Task.FromResult(false); // no op
+        Task<bool> IFeatureUpdate.UpdateRating(string parcelId, string track, int rating) => Task.FromResult(false); // no op
 
-        Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => Task.FromResult(false); // no op
+        Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, string track, int status, string condition) => Task.FromResult(false); // no op
         #region request
         public class UpdateRequest
         {

@@ -6,7 +6,7 @@ namespace ROWM.Dal
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    [Table("ROWM.Repesentation_Type")]
+    [Table("ROWM.Representation_Type")]
     public partial class Repesentation_Type
     {
         [Key]
