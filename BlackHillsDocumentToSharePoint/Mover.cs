@@ -46,7 +46,7 @@ namespace BlackHillsDocumentToSharePoint
                         string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
 
 
-                        var task = _featureUpdate.UpdateFeatureDocuments(p.Assessor_Parcel_Number, parcelDocUrl);
+                        var task = _featureUpdate.UpdateFeatureDocuments(p.Assessor_Parcel_Number, string.Empty, parcelDocUrl);
                         task.GetAwaiter().GetResult();
                     }
                     catch (Exception e)

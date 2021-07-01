@@ -125,7 +125,7 @@ namespace Tectra
                 _sharePointCRUD.UploadParcelDoc(parcelName, documentT, sourceFilename, bb, null);
                 string parcelDocUrl = _sharePointCRUD.GetParcelFolderURL(parcelName, null);
 
-                bool success = await _featureUpdate.UpdateFeatureDocuments(pid, parcelDocUrl);
+                bool success = await _featureUpdate.UpdateFeatureDocuments(pid, string.Empty, parcelDocUrl);
                 // bool success = await ParcelStatusEvent(myParcel, parcelDocUrl, header.DocumentType);
                 await _repo.UpdateParcel(myParcel);
             }

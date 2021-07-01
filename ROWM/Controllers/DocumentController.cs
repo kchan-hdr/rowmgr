@@ -18,6 +18,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using sh72 = TxDotNeogitations;
 
 namespace ROWM.Controllers
 {
@@ -34,9 +35,10 @@ namespace ROWM.Controllers
         readonly ROWM_Context _ctx;
         readonly OwnerRepository _repo;
         readonly IFeatureUpdate _featureUpdate;
+        readonly TxDotNeogitations.ITxDotNegotiation _txDotHelper;
         readonly DeleteHelper _deleteHelper;
 
-        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, DocTypes d)
+        public DocumentController(ROWM_Context c, OwnerRepository r, ParcelStatusHelper h, ISharePointCRUD sp, UpdateParcelStatus2 u, IFeatureUpdate f, DeleteHelper del, sh72.ITxDotNegotiation tx, DocTypes d)
         {
             _ctx = c;
             _repo = r;
@@ -46,6 +48,8 @@ namespace ROWM.Controllers
             _featureUpdate = f;
             _statusHelper = h;
             _docTypes = d;
+
+            _txDotHelper = tx;
         }
         #endregion
 
@@ -371,7 +375,6 @@ namespace ROWM.Controllers
                 }
             }
 
-
             var agent = await _repo.GetAgent(header.AgentName) ?? await _repo.GetDefaultAgent();
 
             // Store Document
@@ -385,6 +388,19 @@ namespace ROWM.Controllers
             {
                 var myParcel = await _repo.GetParcel(pid);
                 myParcel.Document.Add(d);
+
+                /// handle negotiation
+                /// 
+                if (_txDotHelper != null)
+                {
+                    var negotiation = Sh72Helper.TryMake(formValueProvider);
+                    negotiation.DocumentId = d.DocumentId;
+
+                    _ = await _txDotHelper.Store(myParcel.ParcelId, d.DocumentId, negotiation.ContactId, negotiation, HttpContext.User.Identity.Name);
+
+                    // temp. as flag
+                    myParcel.InitialEasementOffer_OfferAmount = negotiation.OfferAmount;
+                }
 
                 var (t, s) = await _updater.DoUpdate(myParcel);
                 if (t)

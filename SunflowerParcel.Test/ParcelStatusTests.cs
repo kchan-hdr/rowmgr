@@ -39,7 +39,7 @@ namespace geographia.ags.Test
             var _test = "1941800000002000";
             var _test_status = 7;
 
-            var good = await fs.UpdateFeature(_test, _test_status);
+            var good = await fs.UpdateFeature(_test, string.Empty, _test_status);
 
             Assert.IsTrue(good);
 

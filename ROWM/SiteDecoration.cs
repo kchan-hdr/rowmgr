@@ -48,4 +48,9 @@
     {
         public string SiteTitle() => "B2H";
     }
+
+    public class Sh72: SiteDecoration
+    {
+        public string SiteTitle() => "Yoakum SH-72";
+    }
 }

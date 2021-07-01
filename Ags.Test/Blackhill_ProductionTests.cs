@@ -31,9 +31,9 @@ namespace Ags.Test
             var dead = testParcel.First();
             Assert.IsTrue(int.TryParse(dead.RoeStatus, out var roe));
             var h2 = h as IFeatureUpdate;
-            Assert.IsTrue(await h2.UpdateFeatureRoe(pid, roe));
+            Assert.IsTrue(await h2.UpdateFeatureRoe(pid, string.Empty, roe));
 
-            Assert.IsTrue(await h2.UpdateFeatureRoe_Ex(pid, roe, "."));
+            Assert.IsTrue(await h2.UpdateFeatureRoe_Ex(pid, string.Empty, roe, "."));
         }
     }
 }

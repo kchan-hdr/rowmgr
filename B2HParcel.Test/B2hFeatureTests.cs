@@ -29,7 +29,7 @@ namespace B2HParcel.Test
         public async Task Simple_Document_Update(string pid, string url)
         {
             var h = new B2hParcel();
-            var good = await ((IFeatureUpdate)h).UpdateFeatureDocuments(pid, url);
+            var good = await ((IFeatureUpdate)h).UpdateFeatureDocuments(pid, string.Empty, url);
             Assert.True(good);
 
             var dtos = await h.GetParcels(pid);

@@ -56,7 +56,7 @@ namespace Backfill_Sp_folder_url
                                 //_sharePointCRUD.UploadParcelDoc(parcelName, "Other", sourceFilename, bb, null);
                                 sp.UploadParcelDoc(parcelName, d.DocumentType, d.SourceFilename, d.Content, null);
                                 string parcelDocUrl = sp.GetParcelFolderURL(parcelName, null);
-                                await f.UpdateFeatureDocuments(myParcel.Assessor_Parcel_Number, parcelDocUrl);
+                                await f.UpdateFeatureDocuments(myParcel.Assessor_Parcel_Number, string.Empty, parcelDocUrl);
                             }
                             catch (Exception e)
                             {
