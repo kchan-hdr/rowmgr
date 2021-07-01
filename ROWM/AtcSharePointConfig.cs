@@ -20,10 +20,14 @@ namespace ROWM
 
             var vault = new SecretClient(home, cred);
 
-            var appid = vault.GetSecret("atc-client");
-            var apps = vault.GetSecret("atc-secret");
+            var appid = "77429b44-e9ab-403c-acfa-e90648aa4452";
+            var apps = "ljVTIGAd0siTJ79FmQPPs/yU0QtoEEb1J1y05SsxG+A=";
+            return new AppSecret(appid, apps);
 
-            return new AppSecret(appid.Value.Value, apps.Value.Value);
+            //var appid = vault.GetSecret("atc -client");
+            //var apps = vault.GetSecret("atc -secret");
+
+            //return new AppSecret(appid.Value.Value, apps.Value.Value);
         }
     }
 

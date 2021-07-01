@@ -25,6 +25,11 @@
         public string SiteTitle() => "ATC Cardinal-Hickory Creek";
     }
 
+    public class Ally : SiteDecoration
+    {
+        public string SiteTitle() => "Alliant - CHC Distribution";
+    }
+
     public class OppdPwp: SiteDecoration
     {
         public string SiteTitle() => "OPPD PWP";
