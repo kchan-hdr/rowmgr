@@ -17,14 +17,16 @@ namespace ROWM.Controllers
         private readonly DocTypes _docTypes;
         private readonly ISharePointCRUD _sp;
         private readonly IFeatureUpdate _ags;
+        private readonly IRenderer _renderer;
 
-        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp, IFeatureUpdate ags)
+        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp, IFeatureUpdate ags, IRenderer r)
         {
             _Context = c;
             _repo = a;
             _docTypes = d;
             _sp = sp;
             _ags = ags;
+            _renderer = r;
         }
 
         [HttpGet("api/map")]
@@ -57,6 +59,36 @@ namespace ROWM.Controllers
             return new Vocabulary(agents, channels, purposes, rels, pStatus, rStatus, llScore);
         }
 
+        [HttpGet("api/parcelStatus")]
+        public async Task<IEnumerable<StatusDto>> GetParcelStatus()
+        {
+            var sym = await _renderer.GetDomainValues("tract acquisition status");
+
+            var pStatus = _Context.Parcel_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
+
+            var ss = from p in pStatus
+                     join sy in sym on p.DomainValue equals sy.Code into rr
+                     from rrx in rr.DefaultIfEmpty()
+                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.Code, "acquisition", rrx?.Hex ?? "#ffffff");
+
+            return ss;
+        }
+
+        [HttpGet("api/roeStatus")]
+        public async Task<IEnumerable<StatusDto>> GetRelStatus()
+        {
+            var sym = await _renderer.GetDomainValues("tract roe status");
+
+            var pStatus = _Context.Roe_Status.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.DisplayOrder).ToList();
+
+            var ss = from p in pStatus
+                     join sy in sym on p.DomainValue equals sy.Code into rr
+                     from rrx in rr.DefaultIfEmpty()
+                     select new StatusDto(p.DisplayOrder, p.Code, p.Description, p.Code, "roe", rrx?.Hex ?? "#ffffff");
+
+            return ss;
+        }
+
         [HttpGet("api/DocTypes")]
         public IEnumerable<DocType> GetDocTypes() => _docTypes.Types;
 
@@ -67,6 +99,20 @@ namespace ROWM.Controllers
         /// <returns></returns>
         [HttpGet("SharePoint/{folder}")]
         public string GetSharePoint(string folder) => _sp.GetParcelFolderURL(folder, string.Empty);
+
+
+        public class StatusDto
+        {
+            public int DisplayOrder { get; private set; }
+            public string Code { get; private set; }
+            public string Caption { get; private set; }
+            public string Color { get; private set; }
+
+            public string Category { get; private set; }
+            public string ParentCode { get; private set; }
+
+            internal StatusDto(int i, string value, string label, string parent, string category, string hex) => (DisplayOrder, Code, Caption, ParentCode, Category, Color) = (i, value, label, parent, category, hex);
+        }
 
         #region lookups
         public class Lookup

@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgsSchema.cs" />
+    <Compile Include="OppdParcel.cs" />
     <Compile Include="AtcParcel.cs" />
     <Compile Include="BhNBParcel.cs" />
     <Compile Include="BlackhillParcel.cs" />
