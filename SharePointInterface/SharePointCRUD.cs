@@ -68,7 +68,7 @@ namespace SharePointInterface
             if (_appId == null || _appSecret == null )
             {
                 _appId = "baa9400f-d050-4564-9394-71e71b8feacd";
-                _appSecret = "nA4nAxjYFp7FYEonzSfuSfReiQUERR09qVogkGSmLJo=";
+                _appSecret = "R3BpDBXgpWxiBDnreZJl6dfqsJGr80yoCJDb6uBagiU="; // "nA4nAxjYFp7FYEonzSfuSfReiQUERR09qVogkGSmLJo =";
             }
 
             // Method using Sharepoint Credentials
