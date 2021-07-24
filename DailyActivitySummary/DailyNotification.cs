@@ -103,12 +103,15 @@ namespace DailyActivitySummary
             };
             message.SetFrom(new EmailAddress("NO-REPLY@hdrinc.com", "B2H LCD"));
 
-            message.AddTo("jstippel@idahopower.com");
-            message.AddTo("jmaffuccio@idahopower.com");
-            message.AddTo("kfunke@idahopower.com");
-            message.AddTo("Brandon.Jones@hdrinc.com");
-            message.AddCc("James.Buker@hdrinc.com");
-            message.AddCc("yuying.li@hdrinc.com");
+            var recipients = await _Helper.GetRecipients();
+            message.AddTos(recipients.Where(rx => !rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
+            message.AddCcs(recipients.Where(rx => rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
+            //message.AddTo("jstippel@idahopower.com");
+            //message.AddTo("jmaffuccio@idahopower.com");
+            //message.AddTo("kfunke@idahopower.com");
+            //message.AddTo("Brandon.Jones@hdrinc.com");
+            //message.AddCc("James.Buker@hdrinc.com");
+            //message.AddCc("yuying.li@hdrinc.com");
 
             message.AddBccs(new List<EmailAddress> { new EmailAddress("kelly.chan@hdrinc.com"), new EmailAddress("tui.chan@gmail.com", "b2h") });
             

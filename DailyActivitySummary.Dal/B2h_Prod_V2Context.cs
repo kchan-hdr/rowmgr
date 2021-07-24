@@ -32,6 +32,8 @@ namespace DailyActivitySummary.Dal
         public virtual DbSet<StatusActivity> StatusActivity { get; set; }
         public virtual DbSet<StatusCategory> StatusCategory { get; set; }
 
+        public virtual DbSet<Recipient> Recipients { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AgentConfiguration());

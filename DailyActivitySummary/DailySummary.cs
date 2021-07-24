@@ -16,6 +16,8 @@ namespace DailyActivitySummary
         DateTimeOffset _start;
         DateTimeOffset _end;
 
+        public async Task<IEnumerable<Recipient>> GetRecipients() => await _Context.Recipients.Where(rx => rx.IsActive).ToArrayAsync();
+            
         public async Task<IEnumerable<ParcelSummary>> GetSummary(DateTime? dt)
         {
             _end = dt ?? new DateTimeOffset(DateTime.Now);
@@ -75,7 +77,7 @@ namespace DailyActivitySummary
         {
             var q = from p in _Context.Parcel.AsNoTracking()
                     where p.IsActive
-                    select new OwnerDto { APN = p.AssessorParcelNumber, Namees = p.Ownership.Select(os => os.Owner.PartyName) };
+                    select new OwnerDto { APN = p.AssessorParcelNumber, Namees = p.Ownership.Where(os => os.OwnershipT == 1).Select(os => os.Owner.PartyName) };
 
             return await q.ToArrayAsync();
         }
