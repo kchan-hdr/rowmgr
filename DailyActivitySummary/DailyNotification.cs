@@ -58,7 +58,8 @@ namespace DailyActivitySummary
 
                 if (s.Statuses.Any())
                 {
-                    var statusT = "Status Change".ToQuantity(s.Statuses.Count);
+                    var cnt = s.Statuses.Select(sx => sx.ChangeId).Distinct().Count();
+                    var statusT = "Status Change".ToQuantity(cnt);
                     dot.AppendLine(statusT);
                     summaryText.Add(statusT);
                     
@@ -71,7 +72,8 @@ namespace DailyActivitySummary
 
                 if (s.Logs.Any())
                 {
-                    var logT = "Contact Activity".ToQuantity(s.Logs.Count);
+                    var cnt = s.Logs.Select(lx => lx.LogId).Distinct().Count();
+                    var logT = "Contact Activity".ToQuantity(cnt);
                     dot.AppendLine(logT);
                     summaryText.Add(logT);
                     //dox.Append("<h2>Contact Log</h2>");
@@ -83,7 +85,8 @@ namespace DailyActivitySummary
 
                 if (s.Docs.Any())
                 {
-                    var dotT = "Uploaded Document".ToQuantity(s.Docs.Count);
+                    var cnt = s.Docs.Select(dx => dx.DocId).Distinct().Count();
+                    var dotT = "Uploaded Document".ToQuantity(cnt);
                     dot.AppendLine(dotT);
                     summaryText.Add(dotT);
                     //dox.Append("<h2>Documents</h2>");

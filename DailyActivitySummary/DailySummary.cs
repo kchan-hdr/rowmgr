@@ -90,7 +90,7 @@ namespace DailyActivitySummary
                     join st0 in _Context.ParcelStatus.AsNoTracking() on c.OriginalStatusCode equals st0.Code into st0g
                     from st0c in st0g.DefaultIfEmpty()
                     where c.ActivityDate >= _start && c.ActivityDate < _end
-                    select new StatusChangeDto {  APN = p.AssessorParcelNumber, AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "" };
+                    select new StatusChangeDto {  APN = p.AssessorParcelNumber, AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "", ChangeId = c.ActivityId };
 
             return await q.ToListAsync();
         }
@@ -108,7 +108,7 @@ namespace DailyActivitySummary
                     join st in _Context.ParcelStatus.AsNoTracking() on c.StatusCode equals st.Code
                     join st0 in _Context.ParcelStatus.AsNoTracking() on c.OriginalStatusCode equals st0.Code into st0g
                     from st0c in st0g.DefaultIfEmpty()
-                    select new StatusChangeDto { APN = p.AssessorParcelNumber, AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "" };
+                    select new StatusChangeDto { APN = p.AssessorParcelNumber, AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "", ChangeId = c.ActivityId };
 
             return await q.ToListAsync();
         }
@@ -119,7 +119,7 @@ namespace DailyActivitySummary
                     join pl in _Context.ParcelContactLogs.AsNoTracking() on l.ContactLogId equals pl.ContactLogContactLogId
                     join cl in _Context.ContactInfoContactLogs.AsNoTracking() on l.ContactLogId equals cl.ContactLogContactLogId
                     where l.DateAdded >= _start && l.DateAdded < _end
-                    select new LogDto { Title=  l.Title, APN = pl.ParcelParcel.AssessorParcelNumber, FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName };
+                    select new LogDto { Title=  l.Title, APN = pl.ParcelParcel.AssessorParcelNumber, FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName, LogId = l.ContactLogId };
 
             return await q.ToListAsync();
         }
@@ -131,7 +131,7 @@ namespace DailyActivitySummary
             var q = from l in _Context.ContactLog.FromSqlRaw(Q).Include(cl => cl.ContactInfoContactLogs).AsNoTracking()
                     join pl in _Context.ParcelContactLogs.AsNoTracking() on l.ContactLogId equals pl.ContactLogContactLogId
                     join cl in _Context.ContactInfoContactLogs.AsNoTracking() on l.ContactLogId equals cl.ContactLogContactLogId
-                    select new LogDto { Title = l.Title, APN = pl.ParcelParcel.AssessorParcelNumber, FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName };
+                    select new LogDto { Title = l.Title, APN = pl.ParcelParcel.AssessorParcelNumber, FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName, LogId = l.ContactLogId };
 
             return await q.ToListAsync();
         }
@@ -142,7 +142,7 @@ namespace DailyActivitySummary
                     join pd in _Context.ParcelDocuments.AsNoTracking() on da.ParentDocumentId equals pd.DocumentDocumentId
                     join p in _Context.Parcel.AsNoTracking() on pd.ParcelParcelId equals p.ParcelId
                     where da.ActivityDate >= _start && da.ActivityDate < _end
-                    select new DocumentDto { APN = p.AssessorParcelNumber, Title = da.ParentDocument.Title, Activity = da.Activity };
+                    select new DocumentDto { APN = p.AssessorParcelNumber, Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
 
             return await q.ToListAsync();
         }
@@ -154,7 +154,7 @@ namespace DailyActivitySummary
             var q = from da in _Context.DocumentActivity.FromSqlRaw(Q).AsNoTracking()
                     join pd in _Context.ParcelDocuments.AsNoTracking() on da.ParentDocumentId equals pd.DocumentDocumentId
                     join p in _Context.Parcel.AsNoTracking() on pd.ParcelParcelId equals p.ParcelId
-                    select new DocumentDto { APN = p.AssessorParcelNumber, Title = da.ParentDocument.Title, Activity = da.Activity };
+                    select new DocumentDto { APN = p.AssessorParcelNumber, Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
 
             return await q.ToListAsync();
         }
@@ -182,6 +182,7 @@ namespace DailyActivitySummary
         public string Category { get; set; }
         public string StatusCode { get; set; }
         public string OldStatusCode { get; set; }
+        public Guid ChangeId { get; set; }
 
         public override string ToString()
         {
@@ -196,6 +197,7 @@ namespace DailyActivitySummary
         public string LastName { get; set; }
         public string AgentName { get; set; }
         public string Title { get; set; }
+        public Guid LogId { get; set; }
 
         public override string ToString()
         {
@@ -210,6 +212,7 @@ namespace DailyActivitySummary
         public string APN { get; set; }
         public string Title { get; set; }
         public string Activity { get; set; }
+        public Guid DocId { get; set; }
 
         public override string ToString()
         {
