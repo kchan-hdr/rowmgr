@@ -175,6 +175,9 @@ namespace geographia.ags
 
         Task<bool> IFeatureUpdate.UpdateFeatureRoe_Ex(string parcelId, int status, string condition) => Task.FromResult(false);     // no op
 
+        public async Task<IEnumerable<DomainValue>> GetDomainValues(string layerName) =>
+            await GetDomainValues(await _layers.GetId(layerName));
+
         public async Task<IEnumerable<DomainValue>> GetDomainValues(int layerId)
         {
             var desc = await Describe(layerId);

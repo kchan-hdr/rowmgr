@@ -9,6 +9,7 @@ namespace geographia.ags
     public interface IRenderer
     {
         Task<IEnumerable<DomainValue>> GetDomainValues(int layerId);
+        Task<IEnumerable<DomainValue>> GetDomainValues(string layerName);
     }
 
     #region dto

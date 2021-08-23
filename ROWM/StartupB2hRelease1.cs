@@ -32,6 +32,8 @@ namespace ROWM
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddApplicationInsightsTelemetry();
+
             services.AddAuthorization(opt =>
             {
                 opt.AddPolicy("edit", policy => policy.RequireClaim("full-agent", "limited-edit"));

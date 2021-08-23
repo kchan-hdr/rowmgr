@@ -35,9 +35,13 @@ namespace geographia.ags
             var list = new List<IdInfo>();
             list.AddRange(info.Layers);
             list.AddRange(info.Tables);
-            foreach(var lx in list)
-                _layers.Add(lx.Name.ToLower(), lx.Id);
-            
+            foreach (var lx in list)
+            {
+                var lkey = lx.Name.ToLower();
+                if (!_layers.ContainsKey(lkey))
+                    _layers.Add(lkey, lx.Id);
+            }
+
             return _layers.Count > 0;
         }
 
