@@ -51,9 +51,9 @@ namespace ROWM.Dal
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
             var p = await _ctx.Parcel.FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
-            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
+            var q = _ctx.Database.SqlQuery<DocumentH>("SELECT d.DocumentId, d.DocumentType, d.title, d.isDeleted FROM rowm.ParcelDocuments pd INNER JOIN rowm.Document d on pd.document_documentid = d.documentid WHERE pd.parcel_parcelId = @pid", new System.Data.SqlClient.SqlParameter("@pid", p.ParcelId));
             var ds = await q.ToListAsync();
-            return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType }).ToList();
+            return ds.Select(dx => new Document { Title = dx.Title, DocumentId = dx.DocumentId, DocumentType = dx.DocumentType, IsDeleted = dx.IsDeleted }).ToList();
         }
         #region Db dto
         public class DocumentH
@@ -61,6 +61,7 @@ namespace ROWM.Dal
             public Guid DocumentId { get; set; }
             public string DocumentType { get; set; }
             public string Title { get; set; }
+            public bool IsDeleted { get; set; }
         }
         #endregion
 

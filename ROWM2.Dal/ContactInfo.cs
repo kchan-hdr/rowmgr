@@ -38,6 +38,7 @@ namespace ROWM.Dal
         public Nullable<System.DateTimeOffset> LastModified { get; set; }
         public string ModifiedBy { get; set; }
         public string Representation { get; set; }
+        public bool IsDeleted { get; set; }
     
         public virtual Owner Owner { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

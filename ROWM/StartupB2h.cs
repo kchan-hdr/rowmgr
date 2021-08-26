@@ -80,6 +80,7 @@ namespace ROWM
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<ROWM.Dal.StatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddScoped<Dal.DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<B2hParcelHelper>();

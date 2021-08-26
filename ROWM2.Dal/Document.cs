@@ -50,6 +50,7 @@ namespace ROWM.Dal
         public string SourceFilename { get; set; }
         public Nullable<System.DateTimeOffset> DateRecorded { get; set; }
         public string CheckNo { get; set; }
+        public bool IsDeleted { get; set; }
     
         public virtual DocumentPackage DocumentPackage { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

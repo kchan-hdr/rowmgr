@@ -26,13 +26,15 @@ namespace ROWM.Controllers
         readonly OwnerRepository _repo;
         readonly StatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
+        readonly DeleteHelper _delete;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
         readonly B2hParcelHelper _helper;
 
-        public RowmController(OwnerRepository r, StatisticsRepository sr, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
+        public RowmController(OwnerRepository r, StatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
         {
             _repo = r;
+            _delete = del;
             _statistics = sr;
             _statusHelper = h;
             _featureUpdate = f;
@@ -120,6 +122,14 @@ namespace ROWM.Controllers
             c.ModifiedBy = _APP_NAME;
 
             return Json(new ContactInfoDto(await _repo.UpdateContact(c)));
+        }
+        [HttpDelete("contacts/{cid:Guid}")]
+        public async Task<IActionResult> DeleteContact(Guid cid)
+        {
+            if (await _delete.DeleteContact(cid, User.Identity.Name))
+                return Ok();
+            else
+                return BadRequest();
         }
         #endregion
         #endregion
@@ -450,6 +460,14 @@ namespace ROWM.Controllers
             var log = await _repo.UpdateContactLog(logRequest.ParcelIds, logRequest.ContactIds, l);
             return Json(new ContactLogDto(log));
         }
+        [HttpDelete("contactLogs/{lid:Guid}")]
+        public async Task<IActionResult> DeleteContactLog(Guid lid)
+        {
+            if (await _delete.DeleteContactLog(lid, User.Identity.Name))
+                return Ok();
+            else
+                return BadRequest();
+        }
         #region contact status helper
         /// <summary>
         /// update db and feature to Owner_Contacted, if was No_Activities
@@ -718,11 +736,11 @@ namespace ROWM.Controllers
             OwnerId = o.OwnerId;
             PartyName = o.PartyName;
             OwnedParcel = o.Ownership.Where(ox=>ox.Parcel.IsActive).Select(ox=> new ParcelHeaderDto(ox));
-            Contacts = o.ContactInfo.Select(cx => new ContactInfoDto(cx));
+            Contacts = o.ContactInfo.Where(cx => !cx.IsDeleted).Select(cx => new ContactInfoDto(cx));
             ContactLogs = o.ContactInfo
                 .Where( cx => cx.ContactLog != null )
                 .SelectMany( cx => cx.ContactLog.Select( cxl => new ContactLogDto(cxl ))); //  o.ContactLogs.Select(cx => new ContactLogDto(cx));
-            Documents = o.Document.Select(dx => new DocumentHeader(dx));
+            Documents = o.Document.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
     }
 
@@ -803,8 +821,8 @@ namespace ROWM.Controllers
             FinalROEOffer = OfferHelper.MakeCompensation(p, "FinalROE");
 
             Owners = p.Ownership.Select( ox => new OwnerDto(ox.Owner));
-            ContactsLog =  p.ContactLog.Select( cx => new ContactLogDto(cx));
-            Documents = d.Select(dx => new DocumentHeader(dx));
+            ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
+            Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
         }
     }
     #endregion

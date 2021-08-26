@@ -33,6 +33,7 @@ namespace ROWM.Dal
         public string ModifiedBy { get; set; }
         public Nullable<System.Guid> Owner_OwnerId { get; set; }
         public Nullable<int> Landowner_Score { get; set; }
+        public bool IsDeleted { get; set; }
     
         public virtual Agent Agent { get; set; }
         public virtual Owner Owner { get; set; }

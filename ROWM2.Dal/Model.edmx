@@ -66,6 +66,7 @@
           <Property Name="LastModified" Type="datetimeoffset" Precision="7" />
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
           <Property Name="Representation" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="ContactInfoContactLogs">
           <Key>
@@ -91,6 +92,7 @@
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
           <Property Name="Owner_OwnerId" Type="uniqueidentifier" />
           <Property Name="Landowner_Score" Type="int" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Document">
           <Key>
@@ -122,6 +124,7 @@
           <Property Name="SourceFilename" Type="nvarchar" MaxLength="500" />
           <Property Name="DateRecorded" Type="datetimeoffset" Precision="7" />
           <Property Name="CheckNo" Type="nvarchar(max)" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Document_Type">
           <Key>
@@ -183,6 +186,7 @@
           <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="OwnerDocuments">
           <Key>
@@ -235,11 +239,12 @@
           <Property Name="FinalEasementOffer_OfferDate" Type="datetimeoffset" Precision="7" />
           <Property Name="FinalEasementOffer_OfferAmount" Type="float" />
           <Property Name="FinalEasementOffer_OfferNotes" Type="nvarchar(max)" />
-          <Property Name="ParcelStatusCode" Type="nvarchar" MaxLength="40" />
-          <Property Name="RoeStatusCode" Type="nvarchar" MaxLength="40" />
+          <Property Name="ParcelStatusCode" Type="varchar" MaxLength="50" />
+          <Property Name="RoeStatusCode" Type="varchar" MaxLength="50" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
           <Property Name="Landowner_Score" Type="int" />
-          <Property Name="ClearanceCode" Type="nvarchar" MaxLength="50" />
+          <Property Name="ClearanceCode" Type="varchar" MaxLength="50" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -287,7 +292,7 @@
           <Key>
             <PropertyRef Name="Code" />
           </Key>
-          <Property Name="Code" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="Code" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="DomainValue" Type="int" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="200" />
           <Property Name="DisplayOrder" Type="int" Nullable="false" />
@@ -647,11 +652,23 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
-          <End Role="Roe_Status" Type="Self.Roe_Status" Multiplicity="0..1" />
+        <Association Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="0..1" />
           <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Roe_Status">
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel">
+              <PropertyRef Name="ParcelStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
+          <End Role="Parcel_Status" Type="Self.Parcel_Status" Multiplicity="0..1" />
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
               <PropertyRef Name="Code" />
             </Principal>
             <Dependent Role="Parcel">
@@ -817,8 +834,12 @@
             <End Role="Parcel" EntitySet="Parcel" />
             <End Role="Ownership" EntitySet="Ownership" />
           </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
           <AssociationSet Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode" Association="Self.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode">
-            <End Role="Roe_Status" EntitySet="Roe_Status" />
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
             <End Role="Parcel" EntitySet="Parcel" />
           </AssociationSet>
           <AssociationSet Name="FK_Status_Activity_Agent" Association="Self.FK_Status_Activity_Agent">
@@ -895,6 +916,7 @@
           <NavigationProperty Name="Owner" Relationship="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" FromRole="ContactInfo" ToRole="Owner" />
           <NavigationProperty Name="ContactLog" Relationship="Self.ContactInfoContactLogs" FromRole="ContactInfo" ToRole="ContactLog" />
           <NavigationProperty Name="RoeConditions" Relationship="ROWM.Dal.FK_CONDITIONS_CONTACTINFO" FromRole="ContactInfo" ToRole="RoeConditions" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="ContactLog">
           <Key>
@@ -916,6 +938,7 @@
           <NavigationProperty Name="ContactInfo" Relationship="Self.ContactInfoContactLogs" FromRole="ContactLog" ToRole="ContactInfo" />
           <NavigationProperty Name="Parcel" Relationship="Self.ParcelContactLogs" FromRole="ContactLog" ToRole="Parcel" />
           <Property Name="Landowner_Score" Type="Int32" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="Document">
           <Key>
@@ -953,6 +976,7 @@
           <NavigationProperty Name="Agent" Relationship="Self.DocumentAgents" FromRole="Document" ToRole="Agent" />
           <NavigationProperty Name="Owner" Relationship="Self.OwnerDocuments" FromRole="Document" ToRole="Owner" />
           <NavigationProperty Name="Parcel" Relationship="Self.ParcelDocuments" FromRole="Document" ToRole="Parcel" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="Document_Type">
           <Key>
@@ -1004,6 +1028,7 @@
           <NavigationProperty Name="ContactLog" Relationship="Self.FK_ROWM_ContactLog_ROWM_Owner_Owner_OwnerId" FromRole="Owner" ToRole="ContactLog" />
           <NavigationProperty Name="Ownership" Relationship="Self.FK_ROWM_Ownership_ROWM_Owner_OwnerId" FromRole="Owner" ToRole="Ownership" />
           <NavigationProperty Name="Document" Relationship="Self.OwnerDocuments" FromRole="Owner" ToRole="Document" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="Ownership">
           <Key>
@@ -1048,8 +1073,8 @@
           <Property Name="FinalEasementOffer_OfferDate" Type="DateTimeOffset" Precision="7" />
           <Property Name="FinalEasementOffer_OfferAmount" Type="Double" />
           <Property Name="FinalEasementOffer_OfferNotes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="ParcelStatusCode" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
-          <Property Name="RoeStatusCode" Type="String" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="ParcelStatusCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RoeStatusCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Ownership" Relationship="Self.FK_ROWM_Ownership_ROWM_Parcel_ParcelId" FromRole="Parcel" ToRole="Ownership" />
           <NavigationProperty Name="Parcel_Status" Relationship="Self.FK_ROWM_Parcel_ROWM_Parcel_Status_ParcelStatusCode" FromRole="Parcel" ToRole="Parcel_Status" />
@@ -1061,7 +1086,9 @@
           <Property Name="Landowner_Score" Type="Int32" />
           <NavigationProperty Name="RoeConditions" Relationship="ROWM.Dal.FK_dbo_RoeConditions_ROWM_Parcel_Parcel_ParcelId" FromRole="Parcel" ToRole="RoeConditions" />
           <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Parcel_Status_Activity" FromRole="Parcel" ToRole="Status_Activity" />
-          <Property Name="ClearanceCode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ClearanceCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Parcel_Status1" Relationship="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1" FromRole="Parcel" ToRole="Parcel_Status" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -1085,6 +1112,7 @@
           <NavigationProperty Name="Parcel_Status2" Relationship="ROWM.Dal.FK_Parcel_Status_Milestone" FromRole="Parcel_Status1" ToRole="Parcel_Status" />
           <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Status_Activity_Original_Status" FromRole="Parcel_Status" ToRole="Status_Activity" />
           <NavigationProperty Name="Status_Activity1" Relationship="ROWM.Dal.FK_Status_Activity_Status" FromRole="Parcel_Status" ToRole="Status_Activity" />
+          <NavigationProperty Name="Parcel1" Relationship="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1" FromRole="Parcel_Status" ToRole="Parcel" />
         </EntityType>
         <EntityType Name="Repesentation_Type">
           <Key>
@@ -1099,7 +1127,7 @@
           <Key>
             <PropertyRef Name="Code" />
           </Key>
-          <Property Name="Code" Type="String" MaxLength="40" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Code" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="DomainValue" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
           <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
@@ -1385,6 +1413,10 @@
             <End Role="Parcel_Status" EntitySet="Parcel_Status" />
             <End Role="Status_Activity" EntitySet="Status_Activity" />
           </AssociationSet>
+          <AssociationSet Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1" Association="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1">
+            <End Role="Parcel_Status" EntitySet="Parcel_Status" />
+            <End Role="Parcel" EntitySet="Parcel" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Landowner_Score">
           <Key>
@@ -1546,6 +1578,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1">
+          <End Type="ROWM.Dal.Parcel_Status" Role="Parcel_Status" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.Parcel" Role="Parcel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel_Status">
+              <PropertyRef Name="Code" />
+            </Principal>
+            <Dependent Role="Parcel">
+              <PropertyRef Name="RoeStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1587,6 +1631,7 @@
           <EntitySetMapping Name="ContactInfo">
             <EntityTypeMapping TypeName="ROWM.Dal.ContactInfo">
               <MappingFragment StoreEntitySet="ContactInfo">
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="ContactId" ColumnName="ContactId" />
                 <ScalarProperty Name="IsPrimaryContact" ColumnName="IsPrimaryContact" />
                 <ScalarProperty Name="OwnerFirstName" ColumnName="OwnerFirstName" />
@@ -1610,6 +1655,7 @@
           <EntitySetMapping Name="ContactLog">
             <EntityTypeMapping TypeName="ROWM.Dal.ContactLog">
               <MappingFragment StoreEntitySet="ContactLog">
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="Landowner_Score" ColumnName="Landowner_Score" />
                 <ScalarProperty Name="ContactLogId" ColumnName="ContactLogId" />
                 <ScalarProperty Name="DateAdded" ColumnName="DateAdded" />
@@ -1628,6 +1674,7 @@
           <EntitySetMapping Name="Document">
             <EntityTypeMapping TypeName="ROWM.Dal.Document">
               <MappingFragment StoreEntitySet="Document">
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="DocumentId" ColumnName="DocumentId" />
                 <ScalarProperty Name="DocumentType" ColumnName="DocumentType" />
                 <ScalarProperty Name="Content" ColumnName="Content" />
@@ -1695,6 +1742,7 @@
           <EntitySetMapping Name="Owner">
             <EntityTypeMapping TypeName="ROWM.Dal.Owner">
               <MappingFragment StoreEntitySet="Owner">
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="OwnerId" ColumnName="OwnerId" />
                 <ScalarProperty Name="PartyName" ColumnName="PartyName" />
                 <ScalarProperty Name="OwnerType" ColumnName="OwnerType" />
@@ -1720,6 +1768,7 @@
           <EntitySetMapping Name="Parcel">
             <EntityTypeMapping TypeName="ROWM.Dal.Parcel">
               <MappingFragment StoreEntitySet="Parcel">
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="ClearanceCode" ColumnName="ClearanceCode" />
                 <ScalarProperty Name="Landowner_Score" ColumnName="Landowner_Score" />
                 <ScalarProperty Name="Assessor_Parcel_Number" ColumnName="Assessor_Parcel_Number" />

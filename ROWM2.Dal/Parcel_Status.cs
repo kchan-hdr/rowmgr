@@ -20,6 +20,7 @@ namespace ROWM.Dal
             this.Parcel = new HashSet<Parcel>();
             this.Status_Activity = new HashSet<Status_Activity>();
             this.Status_Activity1 = new HashSet<Status_Activity>();
+            this.Parcel1 = new HashSet<Parcel>();
         }
     
         public string Code { get; set; }
@@ -44,5 +45,7 @@ namespace ROWM.Dal
         public virtual ICollection<Status_Activity> Status_Activity { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Status_Activity> Status_Activity1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Parcel> Parcel1 { get; set; }
     }
 }

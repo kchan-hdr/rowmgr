@@ -56,6 +56,7 @@ namespace ROWM.Dal
         public string Assessor_Parcel_Number { get; set; }
         public Nullable<int> Landowner_Score { get; set; }
         public string ClearanceCode { get; set; }
+        public bool IsDeleted { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ownership> Ownership { get; set; }
@@ -69,5 +70,6 @@ namespace ROWM.Dal
         public virtual ICollection<RoeConditions> RoeConditions { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Status_Activity> Status_Activity { get; set; }
+        public virtual Parcel_Status Parcel_Status1 { get; set; }
     }
 }
