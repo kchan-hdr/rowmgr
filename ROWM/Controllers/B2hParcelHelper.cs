@@ -49,7 +49,7 @@ namespace ROWM.Controllers
 
             if (o.DisplayOrder < s.DisplayOrder)
             {
-                p.ParcelStatusCode = s.Code;
+                p.RoeStatusCode = s.Code;
                 _ = AddHistory(p.ParcelId, o.Code, code, dt);
                 touched = true;
             }
