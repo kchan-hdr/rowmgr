@@ -149,7 +149,13 @@
     <Compile Include="Parcel.cs">
       <DependentUpon>Model.tt</DependentUpon>
     </Compile>
+    <Compile Include="Parcel_Allocation.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
     <Compile Include="Parcel_Status.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Project_Part.cs">
       <DependentUpon>Model.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -158,6 +164,8 @@
     </Compile>
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\DeleteHelper.cs" />
+    <Compile Include="Repository\B2hFilteredStatisticsRepository.cs" />
+    <Compile Include="Repository\IStatisticsRepository.cs" />
     <Compile Include="Repository\OwnerRepository.cs" />
     <Compile Include="Repository\StatisticsRepository.cs" />
     <Compile Include="RoeConditions.cs">

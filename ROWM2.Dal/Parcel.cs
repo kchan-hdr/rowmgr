@@ -22,6 +22,7 @@ namespace ROWM.Dal
             this.Document = new HashSet<Document>();
             this.RoeConditions = new HashSet<RoeConditions>();
             this.Status_Activity = new HashSet<Status_Activity>();
+            this.Parcel_Allocation = new HashSet<Parcel_Allocation>();
         }
     
         public System.Guid ParcelId { get; set; }
@@ -57,6 +58,7 @@ namespace ROWM.Dal
         public Nullable<int> Landowner_Score { get; set; }
         public string ClearanceCode { get; set; }
         public bool IsDeleted { get; set; }
+        public string Tracking_Number { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ownership> Ownership { get; set; }
@@ -71,5 +73,7 @@ namespace ROWM.Dal
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Status_Activity> Status_Activity { get; set; }
         public virtual Parcel_Status Parcel_Status1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Parcel_Allocation> Parcel_Allocation { get; set; }
     }
 }

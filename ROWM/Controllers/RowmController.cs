@@ -24,14 +24,14 @@ namespace ROWM.Controllers
 
         #region ctor
         readonly OwnerRepository _repo;
-        readonly StatisticsRepository _statistics;
+        readonly IStatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
         readonly DeleteHelper _delete;
         readonly IFeatureUpdate _featureUpdate;
         readonly ISharePointCRUD _spDocument;
         readonly B2hParcelHelper _helper;
 
-        public RowmController(OwnerRepository r, StatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
+        public RowmController(OwnerRepository r, IStatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
         {
             _repo = r;
             _delete = del;
@@ -794,15 +794,16 @@ namespace ROWM.Controllers
         public Compensation InitialEasementOffer { get; set; }
         public Compensation FinalEasementOffer { get; set; }
 
-
         public IEnumerable<OwnerDto> Owners { get; set; }
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
+        public string Allocations { get; set; }
+
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
             ParcelId = p.Assessor_Parcel_Number;
-            TractNo = p.Assessor_Parcel_Number;
+            TractNo = p.Tracking_Number;
             ParcelStatusCode = p.ParcelStatusCode;
             ClearanceCode = p.ClearanceCode;
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
@@ -823,6 +824,11 @@ namespace ROWM.Controllers
             Owners = p.Ownership.Select( ox => new OwnerDto(ox.Owner));
             ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
             Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
+
+            if (p.Parcel_Allocation.Any())
+            {
+                Allocations = string.Join(" | ", p.Parcel_Allocation.Select(pa => pa.Project_Part.Caption).OrderBy(pp => pp));
+            }
         }
     }
     #endregion

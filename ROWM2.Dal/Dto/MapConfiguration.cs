@@ -26,5 +26,7 @@ namespace ROWM.Dal
         public string LayerId { get; set; }
 
         public int DisplayOrder { get; set; }
+
+        public int ProjectPartId { get; set; }
     }
 }

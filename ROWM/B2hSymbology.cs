@@ -27,7 +27,7 @@ namespace ROWM
 
             this.RoeSymbols = await _renderer.GetDomainValues("parcels by roe status");
             this.ClearanceSymbols = await _renderer.GetDomainValues("parcels by clearance status");
-            this.AcquisitionSymbols = await _renderer.GetDomainValues(80); // "parcels by acquisition status");
+            this.AcquisitionSymbols = await _renderer.GetDomainValues("parcels by acquisition status");
             this.OutreachSymbols = new List<DomainValue>();
 
             return true;

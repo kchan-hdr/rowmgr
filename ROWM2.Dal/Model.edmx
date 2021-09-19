@@ -15,6 +15,8 @@
           <Property Name="AgsUrl" Type="nvarchar" MaxLength="2048" />
           <Property Name="LayerId" Type="nvarchar" MaxLength="10" />
           <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="ProjectPartId" Type="int" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Agent">
           <Key>
@@ -245,6 +247,20 @@
           <Property Name="Landowner_Score" Type="int" />
           <Property Name="ClearanceCode" Type="varchar" MaxLength="50" />
           <Property Name="IsDeleted" Type="bit" Nullable="false" />
+          <Property Name="Tracking_Number" Type="nchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="Parcel_Allocation">
+          <Key>
+            <PropertyRef Name="AllocationId" />
+          </Key>
+          <Property Name="AllocationId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ProjectPartId" Type="int" Nullable="false" />
+          <Property Name="ParcelId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="TrackingNumber" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" Nullable="false" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -278,6 +294,23 @@
           </Key>
           <Property Name="Parcel_ParcelId" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Document_DocumentId" Type="uniqueidentifier" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Project_Part">
+          <Key>
+            <PropertyRef Name="ProjectPartId" />
+          </Key>
+          <Property Name="ProjectPartId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Caption" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="DisplayOrder" Type="int" Nullable="false" />
+          <Property Name="ScheduleStart" Type="datetimeoffset" Precision="7" />
+          <Property Name="ScheduleCompletion" Type="datetimeoffset" Precision="7" />
+          <Property Name="ActualStart" Type="datetimeoffset" Precision="7" />
+          <Property Name="ActualCompletion" Type="datetimeoffset" Precision="7" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" Nullable="false" />
         </EntityType>
         <EntityType Name="Repesentation_Type">
           <Key>
@@ -498,6 +531,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Parcel">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="1" />
+          <End Role="Parcel_Allocation" Type="Self.Parcel_Allocation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Parcel_Allocation">
+              <PropertyRef Name="ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Parcel_Status_Activity">
           <End Role="Parcel" Type="Self.Parcel" Multiplicity="1" />
           <End Role="Status_Activity" Type="Self.Status_Activity" Multiplicity="*" />
@@ -531,6 +576,30 @@
             </Principal>
             <Dependent Role="Parcel_Status1">
               <PropertyRef Name="Code" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Part">
+          <End Role="Project_Part" Type="Self.Project_Part" Multiplicity="1" />
+          <End Role="Parcel_Allocation" Type="Self.Parcel_Allocation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project_Part">
+              <PropertyRef Name="ProjectPartId" />
+            </Principal>
+            <Dependent Role="Parcel_Allocation">
+              <PropertyRef Name="ProjectPartId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Project_Part">
+          <End Role="Project_Part" Type="Self.Project_Part" Multiplicity="0..1" />
+          <End Role="Map" Type="Self.Map" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project_Part">
+              <PropertyRef Name="ProjectPartId" />
+            </Principal>
+            <Dependent Role="Map">
+              <PropertyRef Name="ProjectPartId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -713,7 +782,7 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="ROWMDalStoreContainer">
-          <EntitySet Name="Map" EntityType="Self.Map" Schema="App" store:Type="Tables" />
+          <EntitySet Name="Map" EntityType="Self.Map" Schema="app" store:Type="Tables" />
           <EntitySet Name="Agent" EntityType="Self.Agent" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Contact_Channel" EntityType="Self.Contact_Channel" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Contact_Purpose" EntityType="Self.Contact_Purpose" Schema="ROWM" store:Type="Tables" />
@@ -730,9 +799,11 @@
           <EntitySet Name="OwnerDocuments" EntityType="Self.OwnerDocuments" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Ownership" EntityType="Self.Ownership" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Parcel" EntityType="Self.Parcel" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Parcel_Allocation" EntityType="Self.Parcel_Allocation" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Parcel_Status" EntityType="Self.Parcel_Status" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="ParcelContactLogs" EntityType="Self.ParcelContactLogs" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="ParcelDocuments" EntityType="Self.ParcelDocuments" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Project_Part" EntityType="Self.Project_Part" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Repesentation_Type" EntityType="Self.Repesentation_Type" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Roe_Status" EntityType="Self.Roe_Status" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="RoeConditions" EntityType="Self.RoeConditions" Schema="ROWM" store:Type="Tables" />
@@ -786,6 +857,10 @@
             <End Role="Parcel" EntitySet="Parcel" />
             <End Role="RoeConditions" EntitySet="RoeConditions" />
           </AssociationSet>
+          <AssociationSet Name="FK_Parcel" Association="Self.FK_Parcel">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Parcel_Allocation" EntitySet="Parcel_Allocation" />
+          </AssociationSet>
           <AssociationSet Name="FK_Parcel_Status_Activity" Association="Self.FK_Parcel_Status_Activity">
             <End Role="Parcel" EntitySet="Parcel" />
             <End Role="Status_Activity" EntitySet="Status_Activity" />
@@ -797,6 +872,14 @@
           <AssociationSet Name="FK_Parcel_Status_Milestone" Association="Self.FK_Parcel_Status_Milestone">
             <End Role="Parcel_Status" EntitySet="Parcel_Status" />
             <End Role="Parcel_Status1" EntitySet="Parcel_Status" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Part" Association="Self.FK_Part">
+            <End Role="Project_Part" EntitySet="Project_Part" />
+            <End Role="Parcel_Allocation" EntitySet="Parcel_Allocation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Project_Part" Association="Self.FK_Project_Part">
+            <End Role="Project_Part" EntitySet="Project_Part" />
+            <End Role="Map" EntitySet="Map" />
           </AssociationSet>
           <AssociationSet Name="FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" Association="Self.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId">
             <End Role="Owner" EntitySet="Owner" />
@@ -1089,6 +1172,8 @@
           <Property Name="ClearanceCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Parcel_Status1" Relationship="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1" FromRole="Parcel" ToRole="Parcel_Status" />
+          <Property Name="Tracking_Number" Type="String" MaxLength="100" FixedLength="true" Unicode="true" />
+          <NavigationProperty Name="Parcel_Allocation" Relationship="ROWM.Dal.FK_Parcel" FromRole="Parcel" ToRole="Parcel_Allocation" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -1377,7 +1462,6 @@
             <End Role="Parcel" EntitySet="Parcel" />
           </AssociationSet>
           <EntitySet Name="Landowner_Score" EntityType="ROWM.Dal.Landowner_Score" />
-          <EntitySet Name="Map" EntityType="ROWM.Dal.Map" />
           <EntitySet Name="RoeConditions" EntityType="ROWM.Dal.RoeConditions" />
           <EntitySet Name="Status_Activity" EntityType="ROWM.Dal.Status_Activity" />
           <EntitySet Name="Status_Category" EntityType="ROWM.Dal.Status_Category" />
@@ -1417,6 +1501,21 @@
             <End Role="Parcel_Status" EntitySet="Parcel_Status" />
             <End Role="Parcel" EntitySet="Parcel" />
           </AssociationSet>
+          <EntitySet Name="MapSet" EntityType="ROWM.Dal.Map" />
+          <EntitySet Name="Parcel_Allocation" EntityType="ROWM.Dal.Parcel_Allocation" />
+          <EntitySet Name="Project_Part" EntityType="ROWM.Dal.Project_Part" />
+          <AssociationSet Name="FK_Project_Part" Association="ROWM.Dal.FK_Project_Part">
+            <End Role="Project_Part" EntitySet="Project_Part" />
+            <End Role="Map1" EntitySet="MapSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Parcel" Association="ROWM.Dal.FK_Parcel">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Parcel_Allocation" EntitySet="Parcel_Allocation" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Part" Association="ROWM.Dal.FK_Part">
+            <End Role="Project_Part" EntitySet="Project_Part" />
+            <End Role="Parcel_Allocation" EntitySet="Parcel_Allocation" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Landowner_Score">
           <Key>
@@ -1427,17 +1526,6 @@
           <Property Name="Caption" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="DisplayOrder" Type="Int32" />
           <Property Name="IsActive" Type="Boolean" />
-        </EntityType>
-        <EntityType Name="Map">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="Guid" Nullable="false" />
-          <Property Name="Caption" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="LayerType" Type="Int32" Nullable="false" />
-          <Property Name="AgsUrl" Type="String" MaxLength="2048" FixedLength="false" Unicode="true" />
-          <Property Name="LayerId" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
-          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
         </EntityType>
         <EntityType Name="RoeConditions">
           <Key>
@@ -1587,6 +1675,90 @@
             </Principal>
             <Dependent Role="Parcel">
               <PropertyRef Name="RoeStatusCode" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Map">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Guid" Nullable="false" />
+          <Property Name="Caption" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="LayerType" Type="Int32" Nullable="false" />
+          <Property Name="AgsUrl" Type="String" MaxLength="2048" FixedLength="false" Unicode="true" />
+          <Property Name="LayerId" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="ProjectPartId" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Project_Part" Relationship="ROWM.Dal.FK_Project_Part" FromRole="Map1" ToRole="Project_Part" />
+        </EntityType>
+        <EntityType Name="Parcel_Allocation">
+          <Key>
+            <PropertyRef Name="AllocationId" />
+          </Key>
+          <Property Name="AllocationId" Type="Guid" Nullable="false" />
+          <Property Name="ProjectPartId" Type="Int32" Nullable="false" />
+          <Property Name="ParcelId" Type="Guid" Nullable="false" />
+          <Property Name="TrackingNumber" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Parcel" Relationship="ROWM.Dal.FK_Parcel" FromRole="Parcel_Allocation" ToRole="Parcel" />
+          <NavigationProperty Name="Project_Part" Relationship="ROWM.Dal.FK_Part" FromRole="Parcel_Allocation" ToRole="Project_Part" />
+        </EntityType>
+        <EntityType Name="Project_Part">
+          <Key>
+            <PropertyRef Name="ProjectPartId" />
+          </Key>
+          <Property Name="ProjectPartId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Caption" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayOrder" Type="Int32" Nullable="false" />
+          <Property Name="ScheduleStart" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ScheduleCompletion" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ActualStart" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ActualCompletion" Type="DateTimeOffset" Precision="7" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Map" Relationship="ROWM.Dal.FK_Project_Part" FromRole="Project_Part" ToRole="Map1" />
+          <NavigationProperty Name="Parcel_Allocation" Relationship="ROWM.Dal.FK_Part" FromRole="Project_Part" ToRole="Parcel_Allocation" />
+        </EntityType>
+        <Association Name="FK_Project_Part">
+          <End Type="ROWM.Dal.Project_Part" Role="Project_Part" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.Map" Role="Map1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project_Part">
+              <PropertyRef Name="ProjectPartId" />
+            </Principal>
+            <Dependent Role="Map1">
+              <PropertyRef Name="ProjectPartId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Parcel">
+          <End Type="ROWM.Dal.Parcel" Role="Parcel" Multiplicity="1" />
+          <End Type="ROWM.Dal.Parcel_Allocation" Role="Parcel_Allocation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Parcel_Allocation">
+              <PropertyRef Name="ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Part">
+          <End Type="ROWM.Dal.Project_Part" Role="Project_Part" Multiplicity="1" />
+          <End Type="ROWM.Dal.Parcel_Allocation" Role="Parcel_Allocation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Project_Part">
+              <PropertyRef Name="ProjectPartId" />
+            </Principal>
+            <Dependent Role="Parcel_Allocation">
+              <PropertyRef Name="ProjectPartId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1768,6 +1940,7 @@
           <EntitySetMapping Name="Parcel">
             <EntityTypeMapping TypeName="ROWM.Dal.Parcel">
               <MappingFragment StoreEntitySet="Parcel">
+                <ScalarProperty Name="Tracking_Number" ColumnName="Tracking_Number" />
                 <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="ClearanceCode" ColumnName="ClearanceCode" />
                 <ScalarProperty Name="Landowner_Score" ColumnName="Landowner_Score" />
@@ -1894,18 +2067,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Map">
-            <EntityTypeMapping TypeName="ROWM.Dal.Map">
-              <MappingFragment StoreEntitySet="Map">
-                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
-                <ScalarProperty Name="LayerId" ColumnName="LayerId" />
-                <ScalarProperty Name="AgsUrl" ColumnName="AgsUrl" />
-                <ScalarProperty Name="LayerType" ColumnName="LayerType" />
-                <ScalarProperty Name="Caption" ColumnName="Caption" />
-                <ScalarProperty Name="ID" ColumnName="ID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="RoeConditions">
             <EntityTypeMapping TypeName="ROWM.Dal.RoeConditions">
               <MappingFragment StoreEntitySet="RoeConditions">
@@ -1942,6 +2103,52 @@
                 <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="CategoryCode" ColumnName="CategoryCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MapSet">
+            <EntityTypeMapping TypeName="ROWM.Dal.Map">
+              <MappingFragment StoreEntitySet="Map">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ProjectPartId" ColumnName="ProjectPartId" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="LayerId" ColumnName="LayerId" />
+                <ScalarProperty Name="AgsUrl" ColumnName="AgsUrl" />
+                <ScalarProperty Name="LayerType" ColumnName="LayerType" />
+                <ScalarProperty Name="Caption" ColumnName="Caption" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Parcel_Allocation">
+            <EntityTypeMapping TypeName="ROWM.Dal.Parcel_Allocation">
+              <MappingFragment StoreEntitySet="Parcel_Allocation">
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="TrackingNumber" ColumnName="TrackingNumber" />
+                <ScalarProperty Name="ParcelId" ColumnName="ParcelId" />
+                <ScalarProperty Name="ProjectPartId" ColumnName="ProjectPartId" />
+                <ScalarProperty Name="AllocationId" ColumnName="AllocationId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Project_Part">
+            <EntityTypeMapping TypeName="ROWM.Dal.Project_Part">
+              <MappingFragment StoreEntitySet="Project_Part">
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ActualCompletion" ColumnName="ActualCompletion" />
+                <ScalarProperty Name="ActualStart" ColumnName="ActualStart" />
+                <ScalarProperty Name="ScheduleCompletion" ColumnName="ScheduleCompletion" />
+                <ScalarProperty Name="ScheduleStart" ColumnName="ScheduleStart" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="Caption" ColumnName="Caption" />
+                <ScalarProperty Name="ProjectPartId" ColumnName="ProjectPartId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

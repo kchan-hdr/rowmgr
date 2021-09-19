@@ -13,14 +13,16 @@ namespace ROWM.Dal
         public AppRepository(ROWM_Context c) => this._Context = c;
 
         public IEnumerable<MapConfiguration> GetLayers() => // new List<MapConfiguration>();   // b2h needs db upgrade
-            this._Context.Map.AsNoTracking()
+            this._Context.MapSet.AsNoTracking()
+                .Where(mx => mx.IsActive)
                 .Select(mx => new MapConfiguration
                 {
                     AgsUrl = mx.AgsUrl,
                     Caption = mx.Caption,
                     DisplayOrder = mx.DisplayOrder,
                     LayerId = mx.LayerId,
-                    LayerType = (LayerType)mx.LayerType
+                    LayerType = (LayerType)mx.LayerType,
+                    ProjectPartId = mx.ProjectPartId ?? 0
                 })
                 .ToList();
     }

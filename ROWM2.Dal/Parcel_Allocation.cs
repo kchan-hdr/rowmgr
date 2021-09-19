@@ -12,17 +12,18 @@ namespace ROWM.Dal
     using System;
     using System.Collections.Generic;
     
-    public partial class Map
+    public partial class Parcel_Allocation
     {
-        public System.Guid ID { get; set; }
-        public string Caption { get; set; }
-        public int LayerType { get; set; }
-        public string AgsUrl { get; set; }
-        public string LayerId { get; set; }
-        public int DisplayOrder { get; set; }
-        public Nullable<int> ProjectPartId { get; set; }
+        public System.Guid AllocationId { get; set; }
+        public int ProjectPartId { get; set; }
+        public System.Guid ParcelId { get; set; }
+        public string TrackingNumber { get; set; }
         public bool IsActive { get; set; }
+        public System.DateTimeOffset Created { get; set; }
+        public System.DateTimeOffset LastModified { get; set; }
+        public string ModifiedBy { get; set; }
     
+        public virtual Parcel Parcel { get; set; }
         public virtual Project_Part Project_Part { get; set; }
     }
 }

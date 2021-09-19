@@ -42,6 +42,30 @@ namespace ROWM.Controllers
             return r;
         }
 
+        [HttpGet("api/v2/map")]
+        public async Task<Map> GetMapLayers()
+        {
+            var r = new Map();
+
+            r.Parcel_Fc = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Parcel).FirstOrDefault();
+
+            // not used in v2 (OPPD)
+            //r.Reference_MapLayer = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Reference).FirstOrDefault();
+
+            // switchable layers
+            r.References = _repo.GetLayers().Where(lx => lx.LayerType == LayerType.Reference).ToArray();
+
+            var(t, d) = await _ags.Token();
+            r.Token = t;
+            r.Expiration = d;
+
+            return r;
+        }
+
+        [HttpGet("api/v2/parts"), ResponseCache(Duration = 60 * 60)]
+        public IEnumerable<Lookup> GetProjectParts() =>
+            _Context.Project_Part.Where(pp => pp.IsActive).OrderBy(pp => pp.DisplayOrder).Select(pp => new Lookup { Code = pp.ProjectPartId.ToString(), Description = pp.Caption, DisplayOrder = pp.DisplayOrder });
+
         [HttpGet("api/vocabulary")]
         public Vocabulary Get()
         {
@@ -117,6 +141,7 @@ namespace ROWM.Controllers
         {
             public MapConfiguration Parcel_Fc { get; set; }
             public MapConfiguration Reference_MapLayer { get; set; }
+            public MapConfiguration[] References { get; set; }
             public string Token { get; set; }
             public DateTimeOffset Expiration { get; set; }
         }

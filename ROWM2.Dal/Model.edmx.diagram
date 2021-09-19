@@ -21,17 +21,13 @@
         <EntityTypeShape EntityType="ROWM.Dal.Repesentation_Type" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Roe_Status" Width="1.5" PointX="10.875" PointY="2.125" IsExpanded="true" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" ManuallyRouted="true" >
-          <ConnectorPoint PointX="5.125" PointY="7.8167936197916665" />
+          <ConnectorPoint PointX="5.125" PointY="6.4870239225774675" />
           <ConnectorPoint PointX="11" PointY="42.886344373920515" />
           <ConnectorPoint PointX="11" PointY="5.375" />
           <ConnectorPoint PointX="11.729166666666666" PointY="5.3749999999999991" />
           <ConnectorPoint PointX="11.895833333333334" PointY="5.375" />
-          <ConnectorPoint PointX="13.166666666666666" PointY="5.3749999999999991" />
-          <ConnectorPoint PointX="13.333333333333334" PointY="5.375" />
-          <ConnectorPoint PointX="14.541666666666666" PointY="5.3749999999999991" />
-          <ConnectorPoint PointX="14.708333333333334" PointY="5.375" />
           <ConnectorPoint PointX="19.625" PointY="5.375" />
-          <ConnectorPoint PointX="19.625" PointY="6.5000000000000009" />
+          <ConnectorPoint PointX="19.625" PointY="6.50000000000003" />
         </AssociationConnector>
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" ManuallyRouted="false" />
@@ -50,7 +46,6 @@
         <AssociationConnector Association="ROWM.Dal.ParcelContactLogs" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.ParcelDocuments" ManuallyRouted="false" />
         <EntityTypeShape EntityType="ROWM.Dal.Landowner_Score" Width="1.5" PointX="0.75" PointY="3.75" />
-        <EntityTypeShape EntityType="ROWM.Dal.Map" Width="1.5" PointX="0.75" PointY="6.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.RoeConditions" Width="1.5" PointX="22" PointY="8.25" />
         <EntityTypeShape EntityType="ROWM.Dal.Status_Activity" Width="1.5" PointX="13.875" PointY="5.875" />
         <EntityTypeShape EntityType="ROWM.Dal.Status_Category" Width="1.5" PointX="7.125" PointY="4.125" />
@@ -63,6 +58,12 @@
         <AssociationConnector Association="ROWM.Dal.FK_Status_Activity_Original_Status" />
         <AssociationConnector Association="ROWM.Dal.FK_Status_Activity_Status" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1" />
+        <EntityTypeShape EntityType="ROWM.Dal.Map" Width="1.5" PointX="3" PointY="22.625" />
+        <EntityTypeShape EntityType="ROWM.Dal.Parcel_Allocation" Width="1.5" PointX="16.875" PointY="15.5" />
+        <EntityTypeShape EntityType="ROWM.Dal.Project_Part" Width="1.5" PointX="0.75" PointY="18.5" />
+        <AssociationConnector Association="ROWM.Dal.FK_Project_Part" />
+        <AssociationConnector Association="ROWM.Dal.FK_Parcel" />
+        <AssociationConnector Association="ROWM.Dal.FK_Part" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

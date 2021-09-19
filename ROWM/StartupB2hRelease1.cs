@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using geographia.ags;
+using MaximeRouiller.Azure.AppService.EasyAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Microsoft.AspNetCore.Http.Features;
-using geographia.ags;
-using SharePointInterface;
-using MaximeRouiller.Azure.AppService.EasyAuth;
 using ROWM.Controllers;
+using ROWM.Dal;
+using ROWM.Dal.Repository;
+using SharePointInterface;
 
 namespace ROWM
 {
@@ -66,8 +61,9 @@ namespace ROWM
             });
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
-            services.AddScoped<ROWM.Dal.StatisticsRepository>();
+            services.AddScoped<IStatisticsRepository, B2hFilteredStatisticsRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
+            services.AddScoped<Dal.DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
             services.AddScoped<B2hParcelHelper>();
