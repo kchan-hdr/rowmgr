@@ -651,6 +651,7 @@ namespace ROWM.Controllers
     {
         public Guid ContactLogId { get; set; }
         public IEnumerable<string> ParcelIds { get; set; }
+        public IEnumerable<ParcelIdentifier> Identity { get; set; }
         public IEnumerable<ContactInfoDto> ContactIds { get; set; }
         public DateTimeOffset DateAdded { get; set; }
         public string ContactType { get; set; }
@@ -668,6 +669,7 @@ namespace ROWM.Controllers
             ContactType = log.ContactChannel;
 
             ParcelIds = log.Parcel.Select(px => px.Assessor_Parcel_Number);
+            Identity = log.Parcel.Select(px => new ParcelIdentifier(px));
             ContactIds = log.ContactInfo.Select(cx => new ContactInfoDto(cx));
 
             Phase = log.ProjectPhase;
@@ -750,12 +752,13 @@ namespace ROWM.Controllers
         public string SitusAddress { get; set; }
         public bool IsPrimaryOwner { get; set; }
 
-        public Compensation InitialROEOffer { get; set; }
-        public Compensation FinalROEOffer { get; set; }
-        public Compensation InitialOptionOffer { get; set; }
-        public Compensation FinalOptionOffer { get; set; }
-        public Compensation InitialEasementOffer { get; set; }
-        public Compensation FinalEasementOffer { get; set; }
+        public ParcelIdentifier Identifier { get; set; }
+        //public Compensation InitialROEOffer { get; set; }
+        //public Compensation FinalROEOffer { get; set; }
+        //public Compensation InitialOptionOffer { get; set; }
+        //public Compensation FinalOptionOffer { get; set; }
+        //public Compensation InitialEasementOffer { get; set; }
+        //public Compensation FinalEasementOffer { get; set; }
 
         internal ParcelHeaderDto(Ownership o)
         {
@@ -763,14 +766,29 @@ namespace ROWM.Controllers
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.IsPrimary(); // .Ownership_t == Ownership.OwnershipType.Primary;
 
-            InitialEasementOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialEasement");
-            InitialOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialOption");
-            InitialROEOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialROE");
-            FinalEasementOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalEasement");
-            FinalOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalOption");
-            FinalROEOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalROE");
+            Identifier = new ParcelIdentifier(o.Parcel);
+            //InitialEasementOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialEasement");
+            //InitialOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialOption");
+            //InitialROEOffer = OfferHelper.MakeCompensation(o.Parcel, "InitialROE");
+            //FinalEasementOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalEasement");
+            //FinalOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalOption");
+            //FinalROEOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalROE");
         }
 
+    }
+
+    public class ParcelIdentifier
+    {
+        public Guid ParcelId { get; set; }
+        public string Apn { get; set; }
+        public string TractNo { get; set; }
+
+        public ParcelIdentifier(Parcel p)
+        {
+            ParcelId = p.ParcelId;
+            Apn = p.Assessor_Parcel_Number;
+            TractNo = p.Tracking_Number;
+        }
     }
     #endregion
     #region parcel graph
@@ -798,10 +816,13 @@ namespace ROWM.Controllers
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
 
+        public ParcelIdentifier Identifier { get; set; }
         public string Allocations { get; set; }
 
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
+            Identifier = new ParcelIdentifier(p);
+
             ParcelId = p.Assessor_Parcel_Number;
             TractNo = p.Tracking_Number;
             ParcelStatusCode = p.ParcelStatusCode;
