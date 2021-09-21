@@ -25,12 +25,12 @@ namespace ROWM.Controllers
 
             bool touched = false;
 
-            if (o.DisplayOrder < s.DisplayOrder)
-            {
-                p.ParcelStatusCode = s.Code;
+            //if (o.DisplayOrder < s.DisplayOrder)
+            //{
+            //    p.ParcelStatusCode = s.Code;
                 _ = AddHistory(p.ParcelId, o.Code, code, dt);   
                 touched = true;
-            }
+            //}
 
             return (touched, s.DomainValue ?? 0);
         }
@@ -47,12 +47,12 @@ namespace ROWM.Controllers
 
             bool touched = false;
 
-            if (o.DisplayOrder < s.DisplayOrder)
-            {
+            //if (o.DisplayOrder < s.DisplayOrder)
+            //{
                 p.RoeStatusCode = s.Code;
                 _ = AddHistory(p.ParcelId, o.Code, code, dt);
                 touched = true;
-            }
+            //}
 
             return (touched, s.DomainValue ?? 0);
         }
@@ -69,12 +69,12 @@ namespace ROWM.Controllers
 
             bool touched = false;
 
-            if (o.DisplayOrder < s.DisplayOrder)
-            {
+            //if (o.DisplayOrder < s.DisplayOrder)
+            //{
                 p.ClearanceCode = s.Code;
                 _ = AddHistory(p.ParcelId, o.Code, code, dt);
                 touched = true;
-            }
+            //}
 
             return (touched, s.DomainValue ?? 0);
         }
