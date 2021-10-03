@@ -91,9 +91,9 @@ namespace ROWM.Dal
                    select new SubTotal { Title = b.Title, Caption = b.Caption, Count = sub?.Count ?? 0 };
         }
         #region helper
-        private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "acquisition").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
-        private IEnumerable<SubTotal> MakeBaseRoes() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "roe").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
-        private IEnumerable<SubTotal> MakeBaseClearances() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "clearance").OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseParcels() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "acquisition" && px.ShowInPie == true).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseRoes() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "roe" && px.ShowInPie == true).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code , Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
+        private IEnumerable<SubTotal> MakeBaseClearances() => _context.Parcel_Status.Where(px => px.IsActive && px.Category == "clearance" && px.ShowInPie == true).OrderBy(px => px.DisplayOrder).Select(px => new SubTotal { Title = px.Code, Caption = px.Description, DomainValue = px.DomainValue.ToString(), Count = 0 }).ToArray();
 
         public async Task<IEnumerable<SubTotal>> Snapshot(string cat, int? part = null)
         {
