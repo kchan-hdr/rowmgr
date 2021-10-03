@@ -117,6 +117,7 @@
     <Compile Include="Dto\DocType.cs" />
     <Compile Include="Dto\MapConfiguration.cs" />
     <Compile Include="Dto\ParcelGraph_Dto.cs" />
+    <Compile Include="Dto\ParcelLabel.cs" />
     <Compile Include="Dto\ParcelRepository.cs" />
     <Compile Include="Landowner_Score.cs">
       <DependentUpon>Model.tt</DependentUpon>

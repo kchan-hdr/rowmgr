@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using ROWM.Dal;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ROWM.Controllers
@@ -12,9 +14,11 @@ namespace ROWM.Controllers
     [Produces("application/json")]
     public class ExportController : Controller
     {
-        OwnerRepository _repo;
-        IFileProvider _file;
-        string LogoPath;
+        readonly OwnerRepository _repo;
+        readonly IFileProvider _file;
+        readonly string LogoPath;
+
+        readonly LineListComparer linelistComparer = new LineListComparer();
 
         public ExportController(OwnerRepository repo, IFileProvider fileProvider)
         {
@@ -42,7 +46,7 @@ namespace ROWM.Controllers
             // to do. inject export engine
             try
             {
-                var d = logs.SelectMany(lx => lx.Parcel.Select(p =>
+                var d = logs.SelectMany(lx => lx.Parcel.Where(px => px.IsActive).Select(p =>
                 {
                     var rgi = lx.Landowner_Score?.ToString() ?? "";
                     var l = new ExcelExport.AgentLogExport.AgentLog
@@ -53,7 +57,7 @@ namespace ROWM.Controllers
                         notes = lx.Notes?.TrimEnd(',') ?? "",
                         ownerfirstname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
                         ownerlastname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
-                        parcelid = p.Assessor_Parcel_Number,
+                        parcelid = p.Label,
                         parcelstatus = p.Parcel_Status.Description,
                         parcelstatuscode = p.ParcelStatusCode,
                         projectphase = lx.ProjectPhase,
@@ -64,7 +68,7 @@ namespace ROWM.Controllers
                     return l;
                 }));
 
-                var e = new ExcelExport.AgentLogExport(d, LogoPath);
+                var e = new ExcelExport.AgentLogExport(d.OrderBy(dx => dx.parcelid, linelistComparer), LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "logs.xlsx");
             }
@@ -93,7 +97,7 @@ namespace ROWM.Controllers
         /// <param name="f"></param>
         /// <returns></returns>
         [HttpGet("export/documents")]
-        public async Task<IActionResult> ExportDocumentg(string f)
+        public async Task<IActionResult> ExportDocument(string f)
         {
             const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
@@ -160,12 +164,12 @@ namespace ROWM.Controllers
             // to do. inject export engine
             try
             {
-                var data = parcels.OrderBy(px => px.Assessor_Parcel_Number).Select(px => {
+                var data = parcels.Where(px => px.IsActive).OrderBy(px => px.Label, linelistComparer).Select(px => {
                     var os = px.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                     var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
                     var p = new ExcelExport.RoeListExport.ParcelList
                     {
-                        Parcel_ID = px.Assessor_Parcel_Number,
+                        Parcel_ID = px.Label,
                         Owner = oname,
                         ROE = px.Roe_Status.Description,
                         Date = px.LastModified
@@ -184,7 +188,7 @@ namespace ROWM.Controllers
                     {
                         writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
 
-                        foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
+                        foreach (var p in parcels.OrderBy(px => px.Tracking_Number ?? "").ThenBy(px => px.Assessor_Parcel_Number))
                         {
                             var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                             var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
@@ -213,12 +217,12 @@ namespace ROWM.Controllers
 
             try
             {
-                var data = parcels.OrderBy(px => px.Assessor_Parcel_Number).Select(px => {
+                var data = parcels.Where(px => px.IsActive).OrderBy(px => px.Label, linelistComparer).Select(px => {
                     var os = px.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                     var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
                     var p = new ExcelExport.RgiListExport.ParcelList
                     {
-                        Parcel_ID = px.Assessor_Parcel_Number,
+                        Parcel_ID = px.Label,
                         Owner = oname,
                         RGI = px.Landowner_Score ?? 0,
                         Date = px.LastModified
@@ -237,7 +241,7 @@ namespace ROWM.Controllers
                     {
                         writer.WriteLine("Parcel ID,Owner,RGI,Date");
 
-                        foreach (var p in parcels.OrderBy(px => px.Assessor_Parcel_Number))
+                        foreach (var p in parcels.OrderBy(px => px.Label))
                         {
                             var os = p.Ownership.OrderBy(ox => ox.IsPrimary() ? 1 : 2).FirstOrDefault();
                             var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
@@ -429,7 +433,7 @@ namespace ROWM.Controllers
 
             public static IEnumerable<ContactExport2> Export(IGrouping<Guid, Ownership> og)
             {
-                var relatedParcels = og.Select(p => p.Parcel.Assessor_Parcel_Number).OrderBy(p => p).ToArray<string>();
+                var relatedParcels = og.Select(p => p.Parcel.Label).OrderBy(p => p).ToArray<string>();
 
                 var ox = og.First();
                 return ox.Owner.ContactInfo.Select(cx =>  new ContactExport2
@@ -480,7 +484,7 @@ namespace ROWM.Controllers
             {
                 return op.Owner.ContactInfo.Select(cx => new ContactExport
                 {
-                    ParcelId = op.Parcel.Assessor_Parcel_Number,
+                    ParcelId = op.Parcel.Label,
                     PartyName = op.Owner.PartyName?.TrimEnd(',') ?? "",
                     IsPrimary = cx.IsPrimaryContact,
                     FirstName = cx.OwnerFirstName?.TrimEnd(',') ?? "",
@@ -503,5 +507,37 @@ namespace ROWM.Controllers
                 $"=\"{ParcelId}\",\"{PartyName}\",{IsPrimary},\"{FirstName}\",\"{LastName}\",{Email},{CellPhone},{HomePhone},\"{StreetAddress}\",{City},{State},{ZIP},{Representation}";
         }
         #endregion
+    }
+
+    internal class LineListComparer : IComparer<string>
+    {
+        readonly Regex lx = new Regex(@"^(\d+.\d+)\s");
+        readonly Comparer<float> lc = Comparer<float>.Default;
+        readonly CaseInsensitiveComparer c = new CaseInsensitiveComparer();
+
+        public int Compare(string x, string y)
+        {
+            var xLineList = ExtractLineList(x);
+            var yLineList = ExtractLineList(y);
+
+            if (xLineList == yLineList)
+                return c.Compare(x, y);
+
+            return lc.Compare(xLineList, yLineList);
+        }
+
+        float ExtractLineList(string label)
+        {
+            var matches = lx.Match(label);
+            if (matches.Success)
+            {
+                if (matches.Groups.Count > 0)
+                {
+                    return float.Parse(matches.Groups[0].Value);
+                }
+            }
+
+            return 0;
+        }
     }
 }

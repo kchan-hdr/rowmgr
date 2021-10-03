@@ -15,6 +15,8 @@ namespace DailyActivitySummary.Dal
         [Column("Assessor_Parcel_Number")]
         [StringLength(128)]
         public string AssessorParcelNumber { get; set; }
+        [Column("Tracking_Number")]
+        public string TrackingNumber { get; set; }
         [Required]
         [Column("County_FIPS")]
         [StringLength(5)]

@@ -43,7 +43,7 @@ namespace ExcelExport
             WriteText(hr, GetColumnCode(c++), "Check No", 1);
             WriteText(hr, GetColumnCode(c++), "Date Recorded", 1);
 
-            foreach (var doc in items)
+            foreach (var doc in items.OrderBy(dx => dx.parcelid))
             {
                 var r = InsertRow(row++, d);
                 c = 0;

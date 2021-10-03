@@ -16,8 +16,7 @@ namespace DailySummary.Test
         {
             _log = helper;
 
-            var b = new DbContextOptionsBuilder<DailyActivitySummary.Dal.DailySummaryContext>()
-                .UseSqlServer("data source=tcp:b2h.database.windows.net;initial catalog=b2h_prod_v2;persist security info=True;user id=stella;password=e2020!!fRed; MultipleActiveResultSets=True;App=Functions");
+            var b = new DbContextOptionsBuilder<DailyActivitySummary.Dal.DailySummaryContext>();
             
             _context = new DailyActivitySummary.Dal.DailySummaryContext(b.Options);
         }
@@ -33,9 +32,10 @@ namespace DailySummary.Test
         }
 
         [Theory]
+        [InlineData("9-29-2021", true)]
         [InlineData("4-3-2021", true)]
         [InlineData("4-4-2021", false)]
-        [InlineData("4-5-2021", false)]
+        [InlineData("4-5-2021", true)]
         [InlineData("4-6-2021", true)]
         [InlineData("1-1-2100", false)]
         public async Task Known_Days(string d, bool hadActivity)
