@@ -59,6 +59,7 @@ namespace ROWM.Dal
         public string ClearanceCode { get; set; }
         public bool IsDeleted { get; set; }
         public string Tracking_Number { get; set; }
+        public string CornerstoneAgent { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Ownership> Ownership { get; set; }

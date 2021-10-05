@@ -32,6 +32,9 @@ namespace DailyActivitySummary
             var statuses = await GetStatusChanges2();
             var logs = await GetLogs2();
             var docs = await GetDocuments2();
+            //var statuses = await GetStatusChanges();
+            //var logs = await GetLogs();
+            //var docs = await GetDocuments();
 
             var parcels = statuses.Select(s => s.APN)
                 .Union(logs.Select(l => l.APN))
@@ -77,7 +80,7 @@ namespace DailyActivitySummary
         {
             var q = from p in _Context.Parcel.AsNoTracking()
                     where p.IsActive
-                    select new OwnerDto { APN = p.AssessorParcelNumber, Namees = p.Ownership.Where(os => os.OwnershipT == 1).Select(os => os.Owner.PartyName) };
+                    select new OwnerDto { APN = MakeLabel(p), Namees = p.Ownership.Where(os => os.OwnershipT == 1).Select(os => os.Owner.PartyName) };
 
             return await q.ToArrayAsync();
         }
@@ -90,7 +93,7 @@ namespace DailyActivitySummary
                     join st0 in _Context.ParcelStatus.AsNoTracking() on c.OriginalStatusCode equals st0.Code into st0g
                     from st0c in st0g.DefaultIfEmpty()
                     where c.ActivityDate >= _start && c.ActivityDate < _end
-                    select new StatusChangeDto {  APN = p.AssessorParcelNumber, AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "", ChangeId = c.ActivityId };
+                    select new StatusChangeDto {  APN = MakeLabel(p), AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "", ChangeId = c.ActivityId };
 
             return await q.ToListAsync();
         }
@@ -108,7 +111,7 @@ namespace DailyActivitySummary
                     join st in _Context.ParcelStatus.AsNoTracking() on c.StatusCode equals st.Code
                     join st0 in _Context.ParcelStatus.AsNoTracking() on c.OriginalStatusCode equals st0.Code into st0g
                     from st0c in st0g.DefaultIfEmpty()
-                    select new StatusChangeDto { APN = p.AssessorParcelNumber, AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "", ChangeId = c.ActivityId };
+                    select new StatusChangeDto { APN = MakeLabel(p), AgentName = c.Agent.AgentName, Category = st.Category, StatusCode = st.Description, OldStatusCode = st0c.Description ?? "", ChangeId = c.ActivityId };
 
             return await q.ToListAsync();
         }
@@ -119,7 +122,7 @@ namespace DailyActivitySummary
                     join pl in _Context.ParcelContactLogs.AsNoTracking() on l.ContactLogId equals pl.ContactLogContactLogId
                     join cl in _Context.ContactInfoContactLogs.AsNoTracking() on l.ContactLogId equals cl.ContactLogContactLogId
                     where l.DateAdded >= _start && l.DateAdded < _end
-                    select new LogDto { Title=  l.Title, APN = pl.ParcelParcel.AssessorParcelNumber, FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName, LogId = l.ContactLogId };
+                    select new LogDto { Title=  l.Title, APN = MakeLabel(pl.ParcelParcel), FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName, LogId = l.ContactLogId };
 
             return await q.ToListAsync();
         }
@@ -131,7 +134,7 @@ namespace DailyActivitySummary
             var q = from l in _Context.ContactLog.FromSqlRaw(Q).Include(cl => cl.ContactInfoContactLogs).AsNoTracking()
                     join pl in _Context.ParcelContactLogs.AsNoTracking() on l.ContactLogId equals pl.ContactLogContactLogId
                     join cl in _Context.ContactInfoContactLogs.AsNoTracking() on l.ContactLogId equals cl.ContactLogContactLogId
-                    select new LogDto { Title = l.Title, APN = pl.ParcelParcel.AssessorParcelNumber, FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName, LogId = l.ContactLogId };
+                    select new LogDto { Title = l.Title, APN = MakeLabel(pl.ParcelParcel), FirstName = cl.ContactInfoContact.OwnerFirstName, LastName = cl.ContactInfoContact.OwnerLastName, AgentName = l.ContactAgent.AgentName, LogId = l.ContactLogId };
 
             return await q.ToListAsync();
         }
@@ -142,7 +145,7 @@ namespace DailyActivitySummary
                     join pd in _Context.ParcelDocuments.AsNoTracking() on da.ParentDocumentId equals pd.DocumentDocumentId
                     join p in _Context.Parcel.AsNoTracking() on pd.ParcelParcelId equals p.ParcelId
                     where da.ActivityDate >= _start && da.ActivityDate < _end
-                    select new DocumentDto { APN = p.AssessorParcelNumber, Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
+                    select new DocumentDto { APN = MakeLabel(p), Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
 
             return await q.ToListAsync();
         }
@@ -154,10 +157,12 @@ namespace DailyActivitySummary
             var q = from da in _Context.DocumentActivity.FromSqlRaw(Q).AsNoTracking()
                     join pd in _Context.ParcelDocuments.AsNoTracking() on da.ParentDocumentId equals pd.DocumentDocumentId
                     join p in _Context.Parcel.AsNoTracking() on pd.ParcelParcelId equals p.ParcelId
-                    select new DocumentDto { APN = p.AssessorParcelNumber, Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
+                    select new DocumentDto { APN = MakeLabel(p), Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
 
             return await q.ToListAsync();
         }
+
+        static string MakeLabel(Parcel p) => $"{p.TrackingNumber?.Trim() ?? "..."} ({p.AssessorParcelNumber})";
     }
 
     public class ParcelSummary

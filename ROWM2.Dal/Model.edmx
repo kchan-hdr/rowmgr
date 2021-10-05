@@ -247,7 +247,8 @@
           <Property Name="Landowner_Score" Type="int" />
           <Property Name="ClearanceCode" Type="varchar" MaxLength="50" />
           <Property Name="IsDeleted" Type="bit" Nullable="false" />
-          <Property Name="Tracking_Number" Type="nchar" MaxLength="100" />
+          <Property Name="Tracking_Number" Type="nvarchar" MaxLength="100" />
+          <Property Name="CornerstoneAgent" Type="nvarchar" MaxLength="100" />
         </EntityType>
         <EntityType Name="Parcel_Allocation">
           <Key>
@@ -1172,8 +1173,9 @@
           <Property Name="ClearanceCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Parcel_Status1" Relationship="ROWM.Dal.FK_ROWM_Parcel_ROWM_Roe_Status_RoeStatusCode1" FromRole="Parcel" ToRole="Parcel_Status" />
-          <Property Name="Tracking_Number" Type="String" MaxLength="100" FixedLength="true" Unicode="true" />
+          <Property Name="Tracking_Number" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Parcel_Allocation" Relationship="ROWM.Dal.FK_Parcel" FromRole="Parcel" ToRole="Parcel_Allocation" />
+          <Property Name="CornerstoneAgent" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -1940,6 +1942,7 @@
           <EntitySetMapping Name="Parcel">
             <EntityTypeMapping TypeName="ROWM.Dal.Parcel">
               <MappingFragment StoreEntitySet="Parcel">
+                <ScalarProperty Name="CornerstoneAgent" ColumnName="CornerstoneAgent" />
                 <ScalarProperty Name="Tracking_Number" ColumnName="Tracking_Number" />
                 <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
                 <ScalarProperty Name="ClearanceCode" ColumnName="ClearanceCode" />

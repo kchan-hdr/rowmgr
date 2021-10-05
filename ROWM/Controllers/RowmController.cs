@@ -818,6 +818,7 @@ namespace ROWM.Controllers
 
         public ParcelIdentifier Identifier { get; set; }
         public string Allocations { get; set; }
+        public string CornerstoneAgent { get; set; }
 
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
@@ -846,6 +847,7 @@ namespace ROWM.Controllers
             ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
             Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
 
+            CornerstoneAgent = p.CornerstoneAgent;
             if (p.Parcel_Allocation.Any())
             {
                 Allocations = string.Join(" | ", p.Parcel_Allocation.Select(pa => pa.Project_Part.Caption).OrderBy(pp => pp));
