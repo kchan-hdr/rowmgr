@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.SqlServer.Server;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor;
+using Newtonsoft.Json;
 
 namespace ROWM.Controllers
 {
@@ -21,8 +22,12 @@ namespace ROWM.Controllers
     public class RowmController : Controller
     {
         static readonly string _APP_NAME = "ROWM";
+        static readonly Guid _DEFAULT_AGENT = Guid.Parse("3C75F249-F5C1-47F9-913B-A0FB8CFD57E0");
+
+        static IEnumerable<Parcel_Status> MasterParcelStatus;
 
         #region ctor
+        readonly ROWM_Context _ctx;
         readonly OwnerRepository _repo;
         readonly IStatisticsRepository _statistics;
         readonly ParcelStatusHelper _statusHelper;
@@ -31,8 +36,9 @@ namespace ROWM.Controllers
         readonly ISharePointCRUD _spDocument;
         readonly B2hParcelHelper _helper;
 
-        public RowmController(OwnerRepository r, IStatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
+        public RowmController(ROWM_Context ctx, OwnerRepository r, IStatisticsRepository sr, DeleteHelper del, ParcelStatusHelper h, IFeatureUpdate f, ISharePointCRUD s, B2hParcelHelper h2)
         {
+            _ctx = ctx;
             _repo = r;
             _delete = del;
             _statistics = sr;
@@ -147,6 +153,94 @@ namespace ROWM.Controllers
 
             return Json( new ParcelGraph(p, await _repo.GetDocumentsForParcel(pid)));
         }
+
+        [Route("parcels/{pid}/status"), HttpGet]
+        public async Task<ActionResult<ParcelStatusHistoryDto>> GetParcelStatus(string pid)
+        {
+            var st = await _repo.GetStatusForParcel(pid);
+            if (st == null)
+                return BadRequest();
+
+            if (MasterParcelStatus == null)
+            {
+                MasterParcelStatus = _ctx.Parcel_Status.AsNoTracking().Where(s => s.IsActive).ToArray();
+            }
+
+            var q = from s in MasterParcelStatus
+                    join sx in st on s.Code equals sx.StatusCode into h
+                    from evt in h.DefaultIfEmpty()
+                    orderby s.DisplayOrder
+                    select new StatusDto
+                    {
+                        Code = s.Code,
+                        Label = s.Description,
+                        Category = s.Category,
+                        ParentCode = s.ParentStatusCode,
+                        DisplayOrder = s.DisplayOrder ?? 0,
+                        IsSet = evt != null,
+                        Stage = (evt?.ActivityDate == null) ? StatusDto.StageCode.Pending.ToString() : s.IsAbort == true ? StatusDto.StageCode.Aborted.ToString() : StatusDto.StageCode.Completed.ToString(),
+                        ActivityDate = evt?.ActivityDate.UtcDateTime ?? null,
+                        StatusAgent = evt?.AgentId ?? null,
+                        StatusHistory = evt?.ActivityId ?? null
+                    };
+
+            var history = q.Where(x => x.Code != "No_Activity").ToArray();
+            foreach (var stage in history.Where(s => !string.IsNullOrEmpty(s.ParentCode) && s.IsSet))
+            {
+                var mum = history.FirstOrDefault(sx => sx.Code == stage.ParentCode);
+                if (mum == null)
+                    throw new IndexOutOfRangeException();
+
+                if (mum.IsSet) continue;    // 
+                mum.Stage = StatusDto.StageCode.InProgress.ToString();
+            }
+
+            foreach (var milestone in MasterParcelStatus.Where(s => (s.IsAbort == true) || (s.IsComplete == true)))
+            {
+                var child = history.FirstOrDefault(sx => sx.Code == milestone.Code);
+                if (child != null && child.Stage != StatusDto.StageCode.Pending.ToString())
+                {
+                    var mum = history.FirstOrDefault(sx => sx.Code == child.ParentCode);
+                    if (mum == null)
+                        throw new IndexOutOfRangeException();
+
+                    if (mum.IsSet) continue;    // 
+
+                    mum.Stage = (milestone.IsComplete == true) ? StatusDto.StageCode.Completed.ToString()
+                        : (milestone.IsAbort == true) ? StatusDto.StageCode.Aborted.ToString()
+                        : StatusDto.StageCode.InProgress.ToString();
+                }
+            }
+
+            var current = st.OrderByDescending(sx => sx.ActivityDate).FirstOrDefault()?.StatusCode ?? "";
+            var status = MasterParcelStatus.SingleOrDefault(sx => sx.Code == current) ?? MasterParcelStatus.First();
+            var statusCode = string.IsNullOrEmpty(status.ParentStatusCode) ? status.Code : status.ParentStatusCode;
+
+            return new ParcelStatusHistoryDto
+            {
+                ParcelUrl = Url.Action("GetParcel", new { pid }),
+                Status = statusCode,
+                History = history
+            };
+        }
+
+        //[HttpGet("status/{milestone}/parcels")]
+        //public async Task<ActionResult<IEnumerable<ParcelHistory>>> GetParcelsByStatus(string milestone)
+        //{
+        //    if (_parcelList == null)
+        //        return NoContent();
+
+        //    var keys = await _parcelList.GetStages(milestone);
+        //    var parcels = await _parcelList.GetParcelList(milestone);
+
+        //    foreach (var p in parcels)
+        //    {
+        //        p.ParcelUrl = Url.Action("GetParcel", new { pid = p.Tracking_Number });
+        //    }
+
+        //    return parcels.ToArray();
+        //}
+
         #region offer
         [Route("parcels/{pid}/initialOffer"), HttpPut]
         [ProducesResponseType(typeof(ParcelGraph), 202)]
@@ -266,7 +360,7 @@ namespace ROWM.Controllers
             // acquisition
             if (!string.IsNullOrWhiteSpace(req.ParcelStatus))
             {
-                var (upd, dv) = await _helper.UpdateAcquisition(p, req.ParcelStatus, req.EffectiveDate);
+                var (upd, dv) = await _helper.UpdateAcquisition(p, req.AgentId ?? _DEFAULT_AGENT, req.ParcelStatus, req.ChangeDate);
 
                 if (upd)
                 {
@@ -278,7 +372,7 @@ namespace ROWM.Controllers
             // roe
             if (!string.IsNullOrWhiteSpace(req.RoeStatus))
             {
-                var (upd, dv) = await _helper.UpdateEntry(p, req.RoeStatus, req.EffectiveDate);
+                var (upd, dv) = await _helper.UpdateEntry(p, req.AgentId ?? _DEFAULT_AGENT, req.RoeStatus, req.ChangeDate, req.RoeCondition, req.EffectiveStartDate, req.EffectiveEndDate);
 
                 if (upd)
                 {
@@ -287,10 +381,10 @@ namespace ROWM.Controllers
                 }
             }
 
-            // clearance
+            // survey (aka clearance)
             if (!string.IsNullOrWhiteSpace(req.Clearance))
             {
-                var (upd, dv) = await _helper.UpdateClearance(p, req.Clearance, req.EffectiveDate);
+                var (upd, dv) = await _helper.UpdateClearance(p, req.AgentId ?? _DEFAULT_AGENT, req.Clearance, req.ChangeDate);
 
                 if (upd)
                 {
@@ -596,10 +690,12 @@ namespace ROWM.Controllers
 
     public class UpdateStatusRequest
     {
-        public DateTimeOffset EffectiveDate { get; set; }
+        public DateTimeOffset ChangeDate { get; set; }
         public string ParcelStatus { get; set; }
         public string RoeStatus { get; set; }
         public string RoeCondition { get; set; }
+        public DateTimeOffset? EffectiveStartDate { get; set; }
+        public DateTimeOffset? EffectiveEndDate { get; set; }
         public string Clearance { get; set; }
         public Guid? AgentId { get; set; }
     }
@@ -774,7 +870,46 @@ namespace ROWM.Controllers
             //FinalOptionOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalOption");
             //FinalROEOffer = OfferHelper.MakeCompensation(o.Parcel, "FinalROE");
         }
+    }
 
+    public class ParcelStatusHistoryDto
+    {
+        public IEnumerable<StatusDto> History { get; set; }
+        public string Status { get; set; }
+        public string ParcelUrl { get; set; }
+    }
+
+    public class StatusDto
+    {
+        public enum StageCode { Pending, InProgress, Completed, Aborted };
+        public string Label { get; set; }
+        public string Code { get; set; }
+        public string Category { get; set; }
+        public string ParentCode { get; set; }
+        public int DisplayOrder { get; set; }
+        public string Stage { get; set; }
+        public bool IsSet { get; set; } = false;
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public Guid? StatusHistory { get; set; } = null;
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public Guid? StatusAgent { get; set; } = null;
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? ActivityDate { get; set; } = null;
+
+        public string Condition { get; set; }
+        public DateTime? EffectiveStart { get; set; }
+        public DateTime? EffectiveEnd { get; set; }
+
+        public string Action { get; set; }
+        public DateTime? DueDate { get; set; }
+    }
+
+    public class ActionItemDto
+    {
+        public Guid ActionItemId { get; set; }
+        public string Action { get; set; }
+        public string StatusCode { get; set; }
+        public DateTimeOffset? DueDate { get; set; }
     }
 
     public class ParcelIdentifier

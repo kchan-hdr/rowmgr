@@ -4,6 +4,7 @@ using ROWM.Dal;
 using SharePointInterface;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,14 +18,16 @@ namespace ROWM.Controllers
         private readonly DocTypes _docTypes;
         private readonly ISharePointCRUD _sp;
         private readonly IFeatureUpdate _ags;
+        private readonly IRenderer _renderer;
 
-        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp, IFeatureUpdate ags)
+        public VocabularyController(ROWM_Context c, AppRepository a, DocTypes d, ISharePointCRUD sp, IFeatureUpdate ags, IRenderer r)
         {
             _Context = c;
             _repo = a;
             _docTypes = d;
             _sp = sp;
             _ags = ags;
+            _renderer = r;
         }
 
         [HttpGet("api/map")]
@@ -84,6 +87,20 @@ namespace ROWM.Controllers
             return new Vocabulary(agents,channels,purposes,rels, pStatus, rStatus, cStatus, llScore);
         }
 
+        [HttpGet("/api/parcelStatus")]
+        public async Task<IEnumerable<VStatusDto>> GetParcelStatus()
+        {
+            var pStatus = await _Context.Parcel_Status.AsNoTracking()
+                .Where(p => p.IsActive)
+                .OrderBy(p => p.Category).ThenBy(p => p.DisplayOrder)
+                .ToListAsync();
+
+            var ss = from p in pStatus
+                     select new VStatusDto(p.DisplayOrder ?? 0, p.Code, p.Description, p.ParentStatusCode, p.Category, "#ffffff");
+
+            return ss;
+        }
+
         [HttpGet("api/DocTypes")]
         public IEnumerable<DocType> GetDocTypes() => _docTypes.Types;
 
@@ -94,7 +111,20 @@ namespace ROWM.Controllers
         /// <returns></returns>
         [HttpGet("SharePoint/{folder}")]
         public string GetSharePoint(string folder) => _sp.GetParcelFolderURL(folder, string.Empty);
-        
+
+        public class VStatusDto
+        {
+            public int DisplayOrder { get; private set; }
+            public string Code { get; private set; }
+            public string Caption { get; private set; }
+            public string Color { get; private set; }
+
+            public string Category { get; private set; }
+            public string ParentCode { get; private set; }
+
+            internal VStatusDto(int i, string value, string label, string parent, string category, string hex) => (DisplayOrder, Code, Caption, ParentCode, Category, Color) = (i, value, label, parent, category, hex);
+        }
+
         #region lookups
         public class Lookup
         {

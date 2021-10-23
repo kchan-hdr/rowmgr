@@ -65,6 +65,23 @@ namespace ROWM.Dal
         }
         #endregion
 
+        public async Task<IEnumerable<Status_Activity>> GetStatusForParcel(string pid)
+        {
+            var p = await _ctx.Parcel.AsNoTracking()
+                .Include(px => px.Status_Activity)
+                .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
+
+            if (p == null)
+                throw new KeyNotFoundException($"cannot find parcel <{pid}>");
+
+            var q = from a in p.Status_Activity
+                    group a by a.StatusCode into ag
+                    select ag.OrderByDescending(ax => ax.ActivityDate).Take(1);
+
+            return q.SelectMany(qx => qx);
+        }
+
+
         public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
         public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).AsNoTracking();
 
