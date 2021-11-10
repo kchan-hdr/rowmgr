@@ -99,54 +99,56 @@ namespace ROWM.Controllers
         [HttpGet("export/documents")]
         public async Task<IActionResult> ExportDocument(string f)
         {
-            const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
-
             if ("excel" != f)
                 return BadRequest($"not supported export '{f}'");
 
-            var d = await this._repo.GetDocs();
+            var d = await this._repo.GetDocs2();
+            // var d = await this._repo.GetDocs();
             if (d.Count() <= 0)
                 return NoContent();
 
             // to do. inject export engine
             try
             {
-                var data = d.OrderBy(dh => dh.Parcel_ParcelId).Select(dh => new ExcelExport.DocListExport.DocumentList
-                {
-                    parcelid = dh.Parcel_ParcelId,
-                    title=dh.Title,
-                    contenttype =dh.ContentType,
-                    sentdate=dh.SentDate,
-                    delivereddate=dh.DeliveredDate,
-                    clienttrackingnumber=dh.ClientTrackingNumber,
-                    signeddate = dh.SignedDate,
-                    checkno=dh.CheckNo,
-                    receiveddate=dh.ReceivedDate 
-                });
+                //var data = d.OrderBy(dh => dh.Parcel_ParcelId).Select(dh => new ExcelExport.DocListExport.DocumentList
+                //{
+                //    parcelid = dh.Parcel_ParcelId,
+                //    title=dh.Title,
+                //    contenttype =dh.ContentType,
+                //    sentdate=dh.SentDate,
+                //    delivereddate=dh.DeliveredDate,
+                //    clienttrackingnumber=dh.ClientTrackingNumber,
+                //    signeddate = dh.SignedDate,
+                //    checkno=dh.CheckNo,
+                //    receiveddate=dh.ReceivedDate 
+                //});
 
-                var e = new ExcelExport.DocListExport(data, LogoPath);
+                var e = new ExcelExport.B2hDocListExport(d, LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "documents.xlsx");
             }
             catch (Exception)
             {
-                var lines = d.OrderBy(dh => dh.Parcel_ParcelId)
-                    .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
+                throw;
+                const string DOCUMENT_HEADER = "Parcel Id,Title,Content Type,Date Sent,Date Delivered,Client Tracking Number,Date Received,Date Signed,Check No,Date Recorded,Document ID";
 
-                using (var s = new MemoryStream())
-                {
-                    using (var writer = new StreamWriter(s))
-                    {
-                        writer.WriteLine(DOCUMENT_HEADER);
+                //var lines = d
+                //    .Select(dh => $"=\"{dh.Parcel_ParcelId}\",\"{dh.Title}\",{dh.ContentType},{dh.SentDate?.Date.ToShortDateString() ?? ""},{dh.DeliveredDate?.Date.ToShortDateString() ?? ""},{dh.ClientTrackingNumber},{dh.ReceivedDate?.Date.ToShortDateString() ?? ""},{dh.SignedDate?.Date.ToShortDateString() ?? ""},=\"{dh.CheckNo}\",{dh.DateRecorded?.Date.ToShortDateString() ?? ""},=\"{dh.DocumentId}\"");
 
-                        foreach (var l in lines)
-                            writer.WriteLine(l);
+                //using (var s = new MemoryStream())
+                //{
+                //    using (var writer = new StreamWriter(s))
+                //    {
+                //        writer.WriteLine(DOCUMENT_HEADER);
 
-                        writer.Close();
-                    }
+                //        foreach (var l in lines)
+                //            writer.WriteLine(l);
 
-                    return File(s.GetBuffer(), "text/csv", "documents.csv");
-                }
+                //        writer.Close();
+                //    }
+
+                //    return File(s.GetBuffer(), "text/csv", "documents.csv");
+                //}
             }
         }
 

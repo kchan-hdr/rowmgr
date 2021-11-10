@@ -154,6 +154,63 @@ namespace ROWM.Dal
         public IEnumerable<Ownership> GetContacts() => _ctx.Parcel.Where(p => p.IsActive).SelectMany(p => p.Ownership);
 
         public IEnumerable<ContactLog> GetLogs() =>_ctx.ContactLog.Where(c => c.Parcel.Any(p => p.IsActive));
+
+        public async Task<IEnumerable<DocHead2>> GetDocs2()
+        {
+            var parcels = await _ctx.Parcel
+                .Where(px => px.IsActive)
+                .Include(px => px.Ownership)
+                .Include(px => px.Parcel_Allocation)
+                .Include(px => px.Document)
+                .Select(p => new
+                {
+                    p.Assessor_Parcel_Number,
+                    p.Tracking_Number,
+                    p.Parcel_Allocation,
+
+                    p.Ownership,
+
+                    docx = p.Document.Select(dx => new
+                    {
+                        dx.DocumentId,
+                        dx.Title,
+                        dx.SourceFilename,
+                        dx.ContentType,
+                        dx.DateRecorded,
+                        dx.DocumentActivity
+                    })
+                })
+                .ToArrayAsync();
+
+            var list = new List<DocHead2>();
+
+            foreach(var p in parcels)
+            {
+                if (p.docx.Any())
+                {
+                    var owner = string.Join(" | ", p.Ownership.Select(ox => ox.Owner.PartyName));
+                    var priority = string.Join(" | ", p.Parcel_Allocation.Select(pa => pa.Project_Part.Caption).OrderBy(pp => pp));
+                    foreach (var d in p.docx)
+                    {
+                        var h = new DocHead2
+                        {
+                             Apn = p.Assessor_Parcel_Number,
+                             LineList = p.Tracking_Number,
+                             Priority = priority,
+                             OwnerName = owner,
+                             DocumentId = d.DocumentId,
+                             Title = d.Title,
+                             Filename = d.SourceFilename,
+                             Uploaded = d.DocumentActivity.Min(da => da.ActivityDate)
+                        };
+                        list.Add(h);
+                    }
+                }
+            }
+
+            return list;
+        }
+
         public async Task<IEnumerable<DocHead>> GetDocs()
         {
             try
@@ -169,6 +226,35 @@ namespace ROWM.Dal
                 throw;
             }
         }
+
+        public class DocHead2 
+        { 
+            public string Apn { get; set; }
+            public string LineList { get; set; }
+            public string Priority { get; set; }
+            public string OwnerName { get; set; }
+            public Guid DocumentId { get; set; }
+            public string Title { get; set; }
+            public string Filename { get; set; }
+            public DateTimeOffset Uploaded { get; set; }
+
+            public float LineListSort {
+                get
+                {
+                    if (string.IsNullOrEmpty(LineList)) return 0;
+                    try
+                    {
+                        return float.Parse(LineList);
+                    } 
+                    catch (FormatException)
+                    {
+                        return 0;
+                    }
+
+
+               }
+            }
+        };
 
         public class DocHead
         {

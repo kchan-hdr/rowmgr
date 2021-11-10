@@ -77,22 +77,19 @@ namespace ROWM.Controllers
         {
             _ = p ?? throw new ArgumentNullException();
 
-            if (p.ClearanceCode == code)
-                return (false, 0);
+            await _context.Entry(p).Collection(px => px.Status_Activity).LoadAsync();
 
             var o = await Find("clearance", p.ClearanceCode);
             var s = await Find("clearance", code);
+            _ = AddHistory(p.ParcelId, agentId, o.Code, code, dt);
 
-            bool touched = false;
+            var aggregate = await Aggregate(p);
 
-            //if (o.DisplayOrder < s.DisplayOrder)
-            //{
-                p.ClearanceCode = s.Code;
-                _ = AddHistory(p.ParcelId, agentId, o.Code, code, dt);
-                touched = true;
-            //}
+            var touched = p.ClearanceCode != aggregate.Code;
+            if (touched)
+                p.ClearanceCode = aggregate.Code;
 
-            return (touched, s.DomainValue ?? 0);
+            return (true, aggregate.DomainValue ?? 0);  // return true to save history
         }
 
         async Task<Parcel_Status> Find(string category, string code ) =>
@@ -108,5 +105,34 @@ namespace ROWM.Controllers
                     OriginalStatusCode = oldCode,
                     StatusCode = newCode
                 });
+
+        #region private handle surveys aggregation
+        readonly string _IN_PROGRESS = "Clearance_in_Progress";
+        readonly string _ALL_COMPLETED = "Complete_Clearance";
+        async Task<Parcel_Status> Aggregate(Parcel p)
+        {
+            var allSurveys = await _context.Parcel_Status.Where(sx => sx.IsActive && sx.Category == "Clearance").ToListAsync();
+            var required = allSurveys.Where(sx => ( sx.IsRequired ?? false) && string.IsNullOrEmpty(sx.ParentStatusCode));
+            var q = from s in required
+                    join sa in allSurveys on s.Code equals sa.ParentStatusCode into SurveyMarker
+                    select new { Survey = s.Code, Completion = SurveyMarker.Where(sz => sz.IsComplete ?? false) };
+
+            foreach(var s in q)
+            {
+                if (s.Completion.Any(cx => p.Status_Activity.Any(sz => sz.StatusCode.Equals(cx.Code))))
+                {
+                    System.Diagnostics.Trace.WriteLine($"done {s.Survey}");
+                }
+                else
+                {
+                    System.Diagnostics.Trace.WriteLine($"not done {s.Survey}");
+                    return _context.Parcel_Status.Find(_IN_PROGRESS);
+                }
+            }
+                
+            // if all completed
+            return _context.Parcel_Status.Find(_ALL_COMPLETED);
+        }
+        #endregion
     }
 }

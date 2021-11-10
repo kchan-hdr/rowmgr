@@ -393,7 +393,7 @@ namespace ROWM.Controllers
                     // TODO: Return error to user?
                     Trace.WriteLine(string.Format("Error uploading document {0} type {1} to Sharepoint for {2}", sourceFilename, header.DocumentType, parcelName));
 #if DEBUG
-                    throw;
+                    //throw;
 #endif
                 }
             }

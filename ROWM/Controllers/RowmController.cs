@@ -571,6 +571,8 @@ namespace ROWM.Controllers
         /// <returns></returns>
         async Task<bool> RecordParcelFirstContact(IEnumerable<string> parcelIds)
         {
+            return false; // disabled in b2h
+
             var good = true;
             var tasks = new List<Task>();
             foreach( var pid in parcelIds)

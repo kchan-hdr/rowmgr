@@ -150,6 +150,7 @@
   <ItemGroup>
     <Compile Include="AgentLogExport.cs" />
     <Compile Include="ContactListExport.cs" />
+    <Compile Include="B2hDocListExport.cs" />
     <Compile Include="RgiListExport.cs" />
     <Compile Include="RoeListExport.cs" />
     <Compile Include="DocListExport.cs" />
