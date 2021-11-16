@@ -159,25 +159,27 @@ namespace ROWM.Dal
         {
             var parcels = await _ctx.Parcel
                 .Where(px => px.IsActive)
-                .Include(px => px.Ownership)
-                .Include(px => px.Parcel_Allocation)
-                .Include(px => px.Document)
+                //.Include(px => px.Ownership)
+                //.Include(px => px.Parcel_Allocation)
+                //.Include(px => px.Document)
                 .Select(p => new
                 {
                     p.Assessor_Parcel_Number,
                     p.Tracking_Number,
                     p.Parcel_Allocation,
-
+                    p.CornerstoneAgent,
                     p.Ownership,
 
                     docx = p.Document.Select(dx => new
                     {
                         dx.DocumentId,
                         dx.Title,
+                        dx.DocumentType,
                         dx.SourceFilename,
                         dx.ContentType,
                         dx.DateRecorded,
-                        dx.DocumentActivity
+                        dx.DocumentActivity,
+                        dx.Agent
                     })
                 })
                 .ToArrayAsync();
@@ -201,6 +203,8 @@ namespace ROWM.Dal
                              DocumentId = d.DocumentId,
                              Title = d.Title,
                              Filename = d.SourceFilename,
+                             DocumentType = d.DocumentType,
+                             AgentName = p.CornerstoneAgent, // string.Join(" | ", d.Agent.Select(ax => ax.AgentName)),
                              Uploaded = d.DocumentActivity.Min(da => da.ActivityDate)
                         };
                         list.Add(h);
@@ -236,6 +240,8 @@ namespace ROWM.Dal
             public Guid DocumentId { get; set; }
             public string Title { get; set; }
             public string Filename { get; set; }
+            public string DocumentType { get; set; }
+            public string AgentName { get; set; }
             public DateTimeOffset Uploaded { get; set; }
 
             public float LineListSort {

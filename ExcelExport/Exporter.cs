@@ -177,6 +177,15 @@ namespace ExcelExport
 
         static SpreadsheetDocument MakeDoc(string path) => SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
 
+        static protected Cell WriteDate(Row row, string c, DateTime date)
+        {
+            var cell = InsertCell(row, c);
+            cell.CellValue = new CellValue(date.ToOADate().ToString());
+            cell.DataType = CellValues.Number;
+            cell.StyleIndex = 2;
+            return cell;
+        }
+
         static protected Cell WriteNumber(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Number);
         static protected Cell WriteTrueFalse(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Boolean);
         static protected Cell WriteText(Row row, string c, string text, uint? styleIndex = null)
@@ -268,9 +277,15 @@ namespace ExcelExport
             {
                 FontId = 1
             };
+            var cellformatDate = new CellFormat
+            {
+                NumberFormatId = 14,
+                ApplyNumberFormat = true
+            };
             var cellformats = new CellFormats();
             cellformats.Append(cellformat0);
             cellformats.Append(cellformat1);
+            cellformats.Append(cellformatDate);
 
             styles.Append(fonts);
             styles.Append(fills);

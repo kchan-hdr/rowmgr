@@ -32,6 +32,7 @@ namespace ExcelExport
             var hr = InsertRow(row++, d);
             var c = 0;
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
+            WriteText(hr, GetColumnCode(c++), "Line List", 1);
             WriteText(hr, GetColumnCode(c++), "RGI", 1);
             WriteText(hr, GetColumnCode(c++), "Contact Name", 1);
             WriteText(hr, GetColumnCode(c++), "Date", 1);
@@ -46,6 +47,7 @@ namespace ExcelExport
                 var r = InsertRow(row++, d);
                 c = 0;
                 WriteText(r, GetColumnCode(c++), log.parcelid);
+                WriteText(r, GetColumnCode(c++), log.LineList);
                 WriteText(r, GetColumnCode(c++), log.roestatus);
                 WriteText(r, GetColumnCode(c++), log.ownerfirstname ?? "");     // this is a heck. to do
                 WriteText(r, GetColumnCode(c++), log.dateadded.Date.ToShortDateString());
@@ -76,6 +78,7 @@ namespace ExcelExport
             public string projectphase { get; set; }
             public string title { get; set; }
             public string notes { get; set; }
+            public string LineList { get; set; }
         }
         #endregion
     }

@@ -33,12 +33,15 @@ namespace ExcelExport
             var hr = InsertRow(row++, d);
             var c = 0;
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
-            WriteText(hr, GetColumnCode(c++), "Line List");
-            WriteText(hr, GetColumnCode(c++), "Owner");
+            WriteText(hr, GetColumnCode(c++), "Line List", 1);
+            WriteText(hr, GetColumnCode(c++), "Owner", 1);
             WriteText(hr, GetColumnCode(c++), "Priority", 1);
             WriteText(hr, GetColumnCode(c++), "Title", 1);
             WriteText(hr, GetColumnCode(c++), "Filename", 1);
+            WriteText(hr, GetColumnCode(c++), "Document Type", 1);
             WriteText(hr, GetColumnCode(c++), "Date Uploaded", 1);
+            WriteText(hr, GetColumnCode(c++), "Agent", 1);
+
 
             foreach (var doc in items.OrderBy(dx => dx.LineListSort).ThenBy(dx => dx.Apn).ThenBy(dx => dx.Uploaded))
             {
@@ -50,7 +53,9 @@ namespace ExcelExport
                 WriteText(r, GetColumnCode(c++), doc.Priority);
                 WriteText(r, GetColumnCode(c++), doc.Title);
                 WriteText(r, GetColumnCode(c++), doc.Filename);
-                WriteText(r, GetColumnCode(c++), doc.Uploaded.LocalDateTime.ToShortDateString());
+                WriteText(r, GetColumnCode(c++), doc.DocumentType);
+                WriteDate(r, GetColumnCode(c++), doc.Uploaded.LocalDateTime);
+                WriteText(r, GetColumnCode(c++), doc.AgentName);
             }
 
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = pageId, Name = "Documents" });

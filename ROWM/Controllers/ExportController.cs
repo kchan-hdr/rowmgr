@@ -57,7 +57,8 @@ namespace ROWM.Controllers
                         notes = lx.Notes?.TrimEnd(',') ?? "",
                         ownerfirstname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
                         ownerlastname = p.Ownership.FirstOrDefault()?.Owner.PartyName?.TrimEnd(',') ?? "",
-                        parcelid = p.Label,
+                        parcelid = p.Assessor_Parcel_Number,
+                        LineList = p.LineList,
                         parcelstatus = p.Parcel_Status.Description,
                         parcelstatuscode = p.ParcelStatusCode,
                         projectphase = lx.ProjectPhase,
@@ -68,7 +69,7 @@ namespace ROWM.Controllers
                     return l;
                 }));
 
-                var e = new ExcelExport.AgentLogExport(d.OrderBy(dx => dx.parcelid, linelistComparer), LogoPath);
+                var e = new ExcelExport.AgentLogExport(d.OrderBy(dx => dx.LineList, linelistComparer), LogoPath);
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "logs.xlsx");
             }
