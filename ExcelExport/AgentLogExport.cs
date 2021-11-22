@@ -33,7 +33,7 @@ namespace ExcelExport
             var c = 0;
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
             WriteText(hr, GetColumnCode(c++), "Line List", 1);
-            WriteText(hr, GetColumnCode(c++), "RGI", 1);
+            WriteText(hr, GetColumnCode(c++), "Priority", 1);
             WriteText(hr, GetColumnCode(c++), "Contact Name", 1);
             WriteText(hr, GetColumnCode(c++), "Date", 1);
             WriteText(hr, GetColumnCode(c++), "Channel", 1);
@@ -50,7 +50,7 @@ namespace ExcelExport
                 WriteText(r, GetColumnCode(c++), log.LineList);
                 WriteText(r, GetColumnCode(c++), log.roestatus);
                 WriteText(r, GetColumnCode(c++), log.ownerfirstname ?? "");     // this is a heck. to do
-                WriteText(r, GetColumnCode(c++), log.dateadded.Date.ToShortDateString());
+                WriteDate(r, GetColumnCode(c++), log.dateadded.Date);
                 WriteText(r, GetColumnCode(c++), log.contactchannel);
                 WriteText(r, GetColumnCode(c++), log.projectphase);
                 WriteText(r, GetColumnCode(c++), log.title);

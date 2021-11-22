@@ -48,7 +48,9 @@ namespace ROWM.Controllers
             {
                 var d = logs.SelectMany(lx => lx.Parcel.Where(px => px.IsActive).Select(p =>
                 {
-                    var rgi = lx.Landowner_Score?.ToString() ?? "";
+                    var priority = string.Join(" | ", p.Parcel_Allocation.Select(pa => pa.Project_Part.Caption).OrderBy(pp => pp));
+
+                    // var rgi = lx.Landowner_Score?.ToString() ?? "";
                     var l = new ExcelExport.AgentLogExport.AgentLog
                     {
                         agentname = lx.Agent.AgentName,
@@ -62,7 +64,7 @@ namespace ROWM.Controllers
                         parcelstatus = p.Parcel_Status.Description,
                         parcelstatuscode = p.ParcelStatusCode,
                         projectphase = lx.ProjectPhase,
-                        roestatus = rgi, // p.Roe_Status.Description,
+                        roestatus = priority,
                         roestatuscode = p.RoeStatusCode,
                         title = lx.Title?.TrimEnd(',') ?? ""
                     };
