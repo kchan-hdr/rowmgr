@@ -21,7 +21,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "AtcChcRelease1",
+        "ASPNETCORE_ENVIRONMENT": "AtcQ43Release1",
         "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONENABLED": "false",
         "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONVAULT": "https://atc-rowm-key.vault.azure.net"
       },

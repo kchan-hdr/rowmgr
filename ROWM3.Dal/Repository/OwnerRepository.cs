@@ -51,7 +51,17 @@ namespace ROWM.Dal
             var p = await ActiveParcels()
                 .Include(px => px.Ownership.Select( o=>o.Owner.ContactLog))
                 .Include(px => px.ContactLog)
-                .FirstOrDefaultAsync(px => px.Assessor_Parcel_Number == pid);
+                .FirstOrDefaultAsync(px => px.Tracking_Number == pid);
+
+            return p;
+        }
+
+        public async Task<Parcel> GetParcelByTrackingNumber(string number)
+        {
+            var p = await ActiveParcels()
+                .Include(px => px.Ownership.Select(o => o.Owner.ContactLog))
+                .Include(px => px.ContactLog)
+                .FirstOrDefaultAsync(px => px.Tracking_Number == number);
 
             return p;
         }
@@ -70,7 +80,7 @@ AND p.parcelid = p2.parcelid", new SqlParameter("@pid", pid));
 
         public async Task<List<Document>> GetDocumentsForParcel(string pid)
         {
-            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Assessor_Parcel_Number.Equals(pid));
+            var p = await ActiveParcels().FirstOrDefaultAsync(px => px.Tracking_Number.Equals(pid));
             if ( p == null)
             {
                 throw new IndexOutOfRangeException($"cannot find parcel <{pid}>");

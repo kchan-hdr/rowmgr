@@ -24,4 +24,9 @@
     {
         public string SiteTitle() => "ATC Cardinal-Hickory Creek";
     }
+
+    public class AtcQ43 : SiteDecoration
+    {
+        public string SiteTitle() => "ATC Q43";
+    }
 }

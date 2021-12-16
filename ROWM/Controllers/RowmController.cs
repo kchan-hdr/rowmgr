@@ -901,7 +901,7 @@ namespace ROWM.Controllers
 
         internal ParcelHeaderDto(Ownership o)
         {
-            ParcelId = o.Parcel.Assessor_Parcel_Number;
+            ParcelId = o.Parcel.Tracking_Number;
             SitusAddress = o.Parcel.SitusAddress;
             IsPrimaryOwner = o.IsPrimary(); // .Ownership_t == Ownership.OwnershipType.Primary;
 
