@@ -38,8 +38,8 @@ namespace ROWM.Controllers
         {
             _ = p ?? throw new ArgumentNullException();
 
-            if (p.RoeStatusCode == code)
-                return (false, 0);
+            //if (p.RoeStatusCode == code)
+            //    return (false, 0);
 
             var o = await Find("roe", p.RoeStatusCode);
             var s = await Find("roe", code);
@@ -58,7 +58,7 @@ namespace ROWM.Controllers
                 // TODO: check for other update situations
                 if (!found)
                 {
-                    p.RoeConditions.Add(new RoeConditions { Condition = conditions, EffectiveStartDate = start, EffectiveEndDate = end, Created = now, LastModified = now, ModifiedBy = "UpdateEntry" });
+                    p.RoeConditions.Add(new RoeConditions { ConditionId = Guid.NewGuid(), Condition = conditions, EffectiveStartDate = start, EffectiveEndDate = end, IsActive=true, Created = now, LastModified = now, ModifiedBy = "UpdateEntry" });
                     touched = true;
                 }
             }

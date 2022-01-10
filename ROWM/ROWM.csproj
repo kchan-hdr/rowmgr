@@ -55,6 +55,7 @@
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ActionItemNotification\ActionItemNotification.csproj" />
     <ProjectReference Include="..\AgsFeatureUpdate\AgsFeatureUpdate.csproj" />
     <ProjectReference Include="..\ExcelExport\ExcelExport.csproj" />
     <ProjectReference Include="..\ROWM2.Dal\ROWM2.Dal.csproj" />

@@ -18,12 +18,79 @@
           <Property Name="ProjectPartId" Type="int" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="Action_Item">
+          <Key>
+            <PropertyRef Name="ActionItemId" />
+          </Key>
+          <Property Name="ActionItemId" Type="uniqueidentifier" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="ParcelId" Type="uniqueidentifier" />
+          <Property Name="AssignedGroupId" Type="uniqueidentifier" />
+          <Property Name="ActivityId" Type="uniqueidentifier" />
+          <Property Name="Action" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="DueDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="Status" Type="int" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Action_Item_Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="uniqueidentifier" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="ActionItemId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Action" Type="nvarchar" MaxLength="1000" />
+          <Property Name="OriginalAction" Type="nvarchar" MaxLength="1000" />
+          <Property Name="Status" Type="int" Nullable="false" />
+          <Property Name="OriginalStatus" Type="int" />
+          <Property Name="DueDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="OriginalDueDate" Type="datetimeoffset" Precision="7" />
+          <Property Name="Assigned" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="OriginalAssigned" Type="uniqueidentifier" />
+          <Property Name="UpdateAgentId" Type="uniqueidentifier" />
+          <Property Name="ActivityDate" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Action_Item_Group">
+          <Key>
+            <PropertyRef Name="ActionItemGroupId" />
+          </Key>
+          <Property Name="ActionItemGroupId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="GroupName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="GroupNameCaption" Type="nvarchar" MaxLength="200" />
+          <Property Name="Company" Type="nvarchar" MaxLength="200" />
+          <Property Name="CanCreateItem" Type="bit" Nullable="false" />
+          <Property Name="CanPerformItem" Type="bit" Nullable="false" />
+          <Property Name="CanCloseItem" Type="bit" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="DisplayOrder" Type="int" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Action_Item_Group_Member">
+          <Key>
+            <PropertyRef Name="ActionGroupMemberId" />
+          </Key>
+          <Property Name="ActionGroupMemberId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ParentGroupId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="MemberName" Type="nvarchar" MaxLength="200" />
+          <Property Name="Email" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="MessageNumber" Type="varchar" MaxLength="50" />
+          <Property Name="IsSend" Type="bit" Nullable="false" />
+          <Property Name="IsDeleted" Type="bit" Nullable="false" />
+          <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
+          <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
         <EntityType Name="Agent">
           <Key>
             <PropertyRef Name="AgentId" />
           </Key>
           <Property Name="AgentId" Type="uniqueidentifier" Nullable="false" StoreGeneratedPattern="Identity" />
           <Property Name="AgentName" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="AADObjectId" Type="uniqueidentifier" />
+          <Property Name="AgentEmail" Type="varchar" MaxLength="200" />
           <Property Name="Created" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="LastModified" Type="datetimeoffset" Precision="7" Nullable="false" />
           <Property Name="ModifiedBy" Type="nvarchar" MaxLength="50" />
@@ -368,6 +435,70 @@
           <Property Name="DisplayOrder" Type="int" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
+        <Association Name="ACTION_ITEM_GROUP_MEMBERSHIP">
+          <End Role="Action_Item_Group" Type="Self.Action_Item_Group" Multiplicity="1" />
+          <End Role="Action_Item_Group_Member" Type="Self.Action_Item_Group_Member" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Action_Item_Group">
+              <PropertyRef Name="ActionItemGroupId" />
+            </Principal>
+            <Dependent Role="Action_Item_Group_Member">
+              <PropertyRef Name="ParentGroupId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ACTION_ITEM">
+          <End Role="Status_Activity" Type="Self.Status_Activity" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Action_Item" Type="Self.Action_Item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status_Activity">
+              <PropertyRef Name="ActivityId" />
+            </Principal>
+            <Dependent Role="Action_Item">
+              <PropertyRef Name="ActivityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Action_Item_Activity_Action_Item">
+          <End Role="Action_Item" Type="Self.Action_Item" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Action_Item_Activity" Type="Self.Action_Item_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Action_Item">
+              <PropertyRef Name="ActionItemId" />
+            </Principal>
+            <Dependent Role="Action_Item_Activity">
+              <PropertyRef Name="ActionItemId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Action_Item_Assignment">
+          <End Role="Action_Item_Group" Type="Self.Action_Item_Group" Multiplicity="0..1" />
+          <End Role="Action_Item" Type="Self.Action_Item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Action_Item_Group">
+              <PropertyRef Name="ActionItemGroupId" />
+            </Principal>
+            <Dependent Role="Action_Item">
+              <PropertyRef Name="AssignedGroupId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Action_Item_Parcel">
+          <End Role="Parcel" Type="Self.Parcel" Multiplicity="0..1" />
+          <End Role="Action_Item" Type="Self.Action_Item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Action_Item">
+              <PropertyRef Name="ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_CONDITIONS_CONTACTINFO">
           <End Role="ContactInfo" Type="Self.ContactInfo" Multiplicity="0..1" />
           <End Role="RoeConditions" Type="Self.RoeConditions" Multiplicity="*" />
@@ -784,6 +915,10 @@
         </Association>
         <EntityContainer Name="ROWMDalStoreContainer">
           <EntitySet Name="Map" EntityType="Self.Map" Schema="app" store:Type="Tables" />
+          <EntitySet Name="Action_Item" EntityType="Self.Action_Item" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Action_Item_Activity" EntityType="Self.Action_Item_Activity" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Action_Item_Group" EntityType="Self.Action_Item_Group" Schema="ROWM" store:Type="Tables" />
+          <EntitySet Name="Action_Item_Group_Member" EntityType="Self.Action_Item_Group_Member" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Agent" EntityType="Self.Agent" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Contact_Channel" EntityType="Self.Contact_Channel" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Contact_Purpose" EntityType="Self.Contact_Purpose" Schema="ROWM" store:Type="Tables" />
@@ -810,6 +945,26 @@
           <EntitySet Name="RoeConditions" EntityType="Self.RoeConditions" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Status_Activity" EntityType="Self.Status_Activity" Schema="ROWM" store:Type="Tables" />
           <EntitySet Name="Status_Category" EntityType="Self.Status_Category" Schema="ROWM" store:Type="Tables" />
+          <AssociationSet Name="ACTION_ITEM_GROUP_MEMBERSHIP" Association="Self.ACTION_ITEM_GROUP_MEMBERSHIP">
+            <End Role="Action_Item_Group" EntitySet="Action_Item_Group" />
+            <End Role="Action_Item_Group_Member" EntitySet="Action_Item_Group_Member" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ACTION_ITEM" Association="Self.FK_ACTION_ITEM">
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+            <End Role="Action_Item" EntitySet="Action_Item" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Action_Item_Activity_Action_Item" Association="Self.FK_Action_Item_Activity_Action_Item">
+            <End Role="Action_Item" EntitySet="Action_Item" />
+            <End Role="Action_Item_Activity" EntitySet="Action_Item_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Action_Item_Assignment" Association="Self.FK_Action_Item_Assignment">
+            <End Role="Action_Item_Group" EntitySet="Action_Item_Group" />
+            <End Role="Action_Item" EntitySet="Action_Item" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Action_Item_Parcel" Association="Self.FK_Action_Item_Parcel">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Action_Item" EntitySet="Action_Item" />
+          </AssociationSet>
           <AssociationSet Name="FK_CONDITIONS_CONTACTINFO" Association="Self.FK_CONDITIONS_CONTACTINFO">
             <End Role="ContactInfo" EntitySet="ContactInfo" />
             <End Role="RoeConditions" EntitySet="RoeConditions" />
@@ -957,6 +1112,8 @@
           <NavigationProperty Name="DocumentActivity" Relationship="Self.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" FromRole="Agent" ToRole="DocumentActivity" />
           <NavigationProperty Name="Document" Relationship="Self.DocumentAgents" FromRole="Agent" ToRole="Document" />
           <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_Status_Activity_Agent" FromRole="Agent" ToRole="Status_Activity" />
+          <Property Name="AADObjectId" Type="Guid" />
+          <Property Name="AgentEmail" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="Contact_Channel">
           <Key>
@@ -1176,6 +1333,7 @@
           <Property Name="Tracking_Number" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Parcel_Allocation" Relationship="ROWM.Dal.FK_Parcel" FromRole="Parcel" ToRole="Parcel_Allocation" />
           <Property Name="CornerstoneAgent" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Action_Item" Relationship="ROWM.Dal.FK_Action_Item_Parcel" FromRole="Parcel" ToRole="Action_Item" />
         </EntityType>
         <EntityType Name="Parcel_Status">
           <Key>
@@ -1518,6 +1676,30 @@
             <End Role="Project_Part" EntitySet="Project_Part" />
             <End Role="Parcel_Allocation" EntitySet="Parcel_Allocation" />
           </AssociationSet>
+          <EntitySet Name="Action_Item" EntityType="ROWM.Dal.Action_Item" />
+          <EntitySet Name="Action_Item_Activity" EntityType="ROWM.Dal.Action_Item_Activity" />
+          <EntitySet Name="Action_Item_Group" EntityType="ROWM.Dal.Action_Item_Group" />
+          <EntitySet Name="Action_Item_Group_Member" EntityType="ROWM.Dal.Action_Item_Group_Member" />
+          <AssociationSet Name="FK_ACTION_ITEM" Association="ROWM.Dal.FK_ACTION_ITEM">
+            <End Role="Status_Activity" EntitySet="Status_Activity" />
+            <End Role="Action_Item" EntitySet="Action_Item" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Action_Item_Activity_Action_Item" Association="ROWM.Dal.FK_Action_Item_Activity_Action_Item">
+            <End Role="Action_Item" EntitySet="Action_Item" />
+            <End Role="Action_Item_Activity" EntitySet="Action_Item_Activity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Action_Item_Assignment" Association="ROWM.Dal.FK_Action_Item_Assignment">
+            <End Role="Action_Item_Group" EntitySet="Action_Item_Group" />
+            <End Role="Action_Item" EntitySet="Action_Item" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Action_Item_Parcel" Association="ROWM.Dal.FK_Action_Item_Parcel">
+            <End Role="Parcel" EntitySet="Parcel" />
+            <End Role="Action_Item" EntitySet="Action_Item" />
+          </AssociationSet>
+          <AssociationSet Name="ACTION_ITEM_GROUP_MEMBERSHIP" Association="ROWM.Dal.ACTION_ITEM_GROUP_MEMBERSHIP">
+            <End Role="Action_Item_Group" EntitySet="Action_Item_Group" />
+            <End Role="Action_Item_Group_Member" EntitySet="Action_Item_Group_Member" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Landowner_Score">
           <Key>
@@ -1561,6 +1743,7 @@
           <NavigationProperty Name="Parcel" Relationship="ROWM.Dal.FK_Parcel_Status_Activity" FromRole="Status_Activity" ToRole="Parcel" />
           <NavigationProperty Name="Parcel_Status" Relationship="ROWM.Dal.FK_Status_Activity_Original_Status" FromRole="Status_Activity" ToRole="Parcel_Status" />
           <NavigationProperty Name="Parcel_Status1" Relationship="ROWM.Dal.FK_Status_Activity_Status" FromRole="Status_Activity" ToRole="Parcel_Status" />
+          <NavigationProperty Name="Action_Item" Relationship="ROWM.Dal.FK_ACTION_ITEM" FromRole="Status_Activity" ToRole="Action_Item" />
         </EntityType>
         <EntityType Name="Status_Category">
           <Key>
@@ -1764,6 +1947,143 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Action_Item">
+          <Key>
+            <PropertyRef Name="ActionItemId" />
+          </Key>
+          <Property Name="ActionItemId" Type="Guid" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ParcelId" Type="Guid" />
+          <Property Name="AssignedGroupId" Type="Guid" />
+          <Property Name="ActivityId" Type="Guid" />
+          <Property Name="Action" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="DueDate" Type="DateTimeOffset" Precision="7" Nullable="true" />
+          <Property Name="Status" Type="Int32" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Status_Activity" Relationship="ROWM.Dal.FK_ACTION_ITEM" FromRole="Action_Item" ToRole="Status_Activity" />
+          <NavigationProperty Name="Action_Item_Activity" Relationship="ROWM.Dal.FK_Action_Item_Activity_Action_Item" FromRole="Action_Item" ToRole="Action_Item_Activity" />
+          <NavigationProperty Name="Action_Item_Group" Relationship="ROWM.Dal.FK_Action_Item_Assignment" FromRole="Action_Item" ToRole="Action_Item_Group" />
+          <NavigationProperty Name="Parcel" Relationship="ROWM.Dal.FK_Action_Item_Parcel" FromRole="Action_Item" ToRole="Parcel" />
+        </EntityType>
+        <EntityType Name="Action_Item_Activity">
+          <Key>
+            <PropertyRef Name="ActivityId" />
+          </Key>
+          <Property Name="ActivityId" Type="Guid" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ActionItemId" Type="Guid" Nullable="false" />
+          <Property Name="Action" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="OriginalAction" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="Status" Type="Int32" Nullable="false" />
+          <Property Name="OriginalStatus" Type="Int32" />
+          <Property Name="DueDate" Type="DateTimeOffset" Nullable="true" Precision="7" />
+          <Property Name="OriginalDueDate" Type="DateTimeOffset" Precision="7" />
+          <Property Name="Assigned" Type="Guid" Nullable="false" />
+          <Property Name="OriginalAssigned" Type="Guid" />
+          <Property Name="UpdateAgentId" Type="Guid" />
+          <Property Name="ActivityDate" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Action_Item" Relationship="ROWM.Dal.FK_Action_Item_Activity_Action_Item" FromRole="Action_Item_Activity" ToRole="Action_Item" />
+        </EntityType>
+        <EntityType Name="Action_Item_Group">
+          <Key>
+            <PropertyRef Name="ActionItemGroupId" />
+          </Key>
+          <Property Name="ActionItemGroupId" Type="Guid" Nullable="false" />
+          <Property Name="GroupName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="GroupNameCaption" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Company" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CanCreateItem" Type="Boolean" Nullable="false" />
+          <Property Name="CanPerformItem" Type="Boolean" Nullable="false" />
+          <Property Name="CanCloseItem" Type="Boolean" Nullable="false" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="DisplayOrder" Type="Int32" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Action_Item" Relationship="ROWM.Dal.FK_Action_Item_Assignment" FromRole="Action_Item_Group" ToRole="Action_Item" />
+          <NavigationProperty Name="Action_Item_Group_Member" Relationship="ROWM.Dal.ACTION_ITEM_GROUP_MEMBERSHIP" FromRole="Action_Item_Group" ToRole="Action_Item_Group_Member" />
+        </EntityType>
+        <EntityType Name="Action_Item_Group_Member">
+          <Key>
+            <PropertyRef Name="ActionGroupMemberId" />
+          </Key>
+          <Property Name="ActionGroupMemberId" Type="Guid" Nullable="false" />
+          <Property Name="ParentGroupId" Type="Guid" Nullable="false" />
+          <Property Name="MemberName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="MessageNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsSend" Type="Boolean" Nullable="false" />
+          <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
+          <Property Name="Created" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="LastModified" Type="DateTimeOffset" Nullable="false" Precision="7" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Action_Item_Group" Relationship="ROWM.Dal.ACTION_ITEM_GROUP_MEMBERSHIP" FromRole="Action_Item_Group_Member" ToRole="Action_Item_Group" />
+        </EntityType>
+        <Association Name="FK_ACTION_ITEM">
+          <End Type="ROWM.Dal.Status_Activity" Role="Status_Activity" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ROWM.Dal.Action_Item" Role="Action_Item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Status_Activity">
+              <PropertyRef Name="ActivityId" />
+            </Principal>
+            <Dependent Role="Action_Item">
+              <PropertyRef Name="ActivityId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Action_Item_Activity_Action_Item">
+          <End Type="ROWM.Dal.Action_Item" Role="Action_Item" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ROWM.Dal.Action_Item_Activity" Role="Action_Item_Activity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Action_Item">
+              <PropertyRef Name="ActionItemId" />
+            </Principal>
+            <Dependent Role="Action_Item_Activity">
+              <PropertyRef Name="ActionItemId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Action_Item_Assignment">
+          <End Type="ROWM.Dal.Action_Item_Group" Role="Action_Item_Group" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.Action_Item" Role="Action_Item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Action_Item_Group">
+              <PropertyRef Name="ActionItemGroupId" />
+            </Principal>
+            <Dependent Role="Action_Item">
+              <PropertyRef Name="AssignedGroupId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Action_Item_Parcel">
+          <End Type="ROWM.Dal.Parcel" Role="Parcel" Multiplicity="0..1" />
+          <End Type="ROWM.Dal.Action_Item" Role="Action_Item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parcel">
+              <PropertyRef Name="ParcelId" />
+            </Principal>
+            <Dependent Role="Action_Item">
+              <PropertyRef Name="ParcelId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ACTION_ITEM_GROUP_MEMBERSHIP">
+          <End Type="ROWM.Dal.Action_Item_Group" Role="Action_Item_Group" Multiplicity="1" />
+          <End Type="ROWM.Dal.Action_Item_Group_Member" Role="Action_Item_Group_Member" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Action_Item_Group">
+              <PropertyRef Name="ActionItemGroupId" />
+            </Principal>
+            <Dependent Role="Action_Item_Group_Member">
+              <PropertyRef Name="ParentGroupId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1773,6 +2093,8 @@
           <EntitySetMapping Name="Agent">
             <EntityTypeMapping TypeName="ROWM.Dal.Agent">
               <MappingFragment StoreEntitySet="Agent">
+                <ScalarProperty Name="AgentEmail" ColumnName="AgentEmail" />
+                <ScalarProperty Name="AADObjectId" ColumnName="AADObjectId" />
                 <ScalarProperty Name="AgentId" ColumnName="AgentId" />
                 <ScalarProperty Name="AgentName" ColumnName="AgentName" />
                 <ScalarProperty Name="Created" ColumnName="Created" />
@@ -2152,6 +2474,75 @@
                 <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
                 <ScalarProperty Name="Caption" ColumnName="Caption" />
                 <ScalarProperty Name="ProjectPartId" ColumnName="ProjectPartId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Action_Item">
+            <EntityTypeMapping TypeName="ROWM.Dal.Action_Item">
+              <MappingFragment StoreEntitySet="Action_Item">
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+                <ScalarProperty Name="AssignedGroupId" ColumnName="AssignedGroupId" />
+                <ScalarProperty Name="ParcelId" ColumnName="ParcelId" />
+                <ScalarProperty Name="ActionItemId" ColumnName="ActionItemId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Action_Item_Activity">
+            <EntityTypeMapping TypeName="ROWM.Dal.Action_Item_Activity">
+              <MappingFragment StoreEntitySet="Action_Item_Activity">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="ActivityDate" ColumnName="ActivityDate" />
+                <ScalarProperty Name="UpdateAgentId" ColumnName="UpdateAgentId" />
+                <ScalarProperty Name="OriginalAssigned" ColumnName="OriginalAssigned" />
+                <ScalarProperty Name="Assigned" ColumnName="Assigned" />
+                <ScalarProperty Name="OriginalDueDate" ColumnName="OriginalDueDate" />
+                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
+                <ScalarProperty Name="OriginalStatus" ColumnName="OriginalStatus" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="OriginalAction" ColumnName="OriginalAction" />
+                <ScalarProperty Name="Action" ColumnName="Action" />
+                <ScalarProperty Name="ActionItemId" ColumnName="ActionItemId" />
+                <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Action_Item_Group">
+            <EntityTypeMapping TypeName="ROWM.Dal.Action_Item_Group">
+              <MappingFragment StoreEntitySet="Action_Item_Group">
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="DisplayOrder" ColumnName="DisplayOrder" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="CanCloseItem" ColumnName="CanCloseItem" />
+                <ScalarProperty Name="CanPerformItem" ColumnName="CanPerformItem" />
+                <ScalarProperty Name="CanCreateItem" ColumnName="CanCreateItem" />
+                <ScalarProperty Name="Company" ColumnName="Company" />
+                <ScalarProperty Name="GroupNameCaption" ColumnName="GroupNameCaption" />
+                <ScalarProperty Name="GroupName" ColumnName="GroupName" />
+                <ScalarProperty Name="ActionItemGroupId" ColumnName="ActionItemGroupId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Action_Item_Group_Member">
+            <EntityTypeMapping TypeName="ROWM.Dal.Action_Item_Group_Member">
+              <MappingFragment StoreEntitySet="Action_Item_Group_Member">
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="LastModified" ColumnName="LastModified" />
+                <ScalarProperty Name="Created" ColumnName="Created" />
+                <ScalarProperty Name="IsDeleted" ColumnName="IsDeleted" />
+                <ScalarProperty Name="IsSend" ColumnName="IsSend" />
+                <ScalarProperty Name="MessageNumber" ColumnName="MessageNumber" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="MemberName" ColumnName="MemberName" />
+                <ScalarProperty Name="ParentGroupId" ColumnName="ParentGroupId" />
+                <ScalarProperty Name="ActionGroupMemberId" ColumnName="ActionGroupMemberId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -85,6 +85,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Action_Item.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Action_Item_Activity.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Action_Item_Group.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Action_Item_Group_Member.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
     <Compile Include="Agent.cs">
       <DependentUpon>Model.tt</DependentUpon>
     </Compile>
@@ -163,6 +175,7 @@
     <Compile Include="Repesentation_Type.cs">
       <DependentUpon>Model.tt</DependentUpon>
     </Compile>
+    <Compile Include="Repository\ActionItemRepository.cs" />
     <Compile Include="Repository\AppRepository.cs" />
     <Compile Include="Repository\DeleteHelper.cs" />
     <Compile Include="Repository\B2hFilteredStatisticsRepository.cs" />

@@ -21,13 +21,13 @@
         <EntityTypeShape EntityType="ROWM.Dal.Repesentation_Type" Width="1.5" PointX="4.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="ROWM.Dal.Roe_Status" Width="1.5" PointX="10.875" PointY="2.125" IsExpanded="true" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactLog_ROWM_Agent_ContactAgentId" ManuallyRouted="true" >
-          <ConnectorPoint PointX="5.125" PointY="6.4870239225774675" />
+          <ConnectorPoint PointX="4.3566204619140318" PointY="8.2013964843749978" />
           <ConnectorPoint PointX="11" PointY="42.886344373920515" />
           <ConnectorPoint PointX="11" PointY="5.375" />
           <ConnectorPoint PointX="11.729166666666666" PointY="5.3749999999999991" />
           <ConnectorPoint PointX="11.895833333333334" PointY="5.375" />
           <ConnectorPoint PointX="19.625" PointY="5.375" />
-          <ConnectorPoint PointX="19.625" PointY="6.50000000000003" />
+          <ConnectorPoint PointX="19.625" PointY="6.5000000000010356" />
         </AssociationConnector>
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_DocumentActivity_ROWM_Agent_AgentId" ManuallyRouted="false" />
         <AssociationConnector Association="ROWM.Dal.FK_ROWM_ContactInfo_ROWM_Owner_ContactOwnerId" ManuallyRouted="false" />
@@ -64,6 +64,15 @@
         <AssociationConnector Association="ROWM.Dal.FK_Project_Part" />
         <AssociationConnector Association="ROWM.Dal.FK_Parcel" />
         <AssociationConnector Association="ROWM.Dal.FK_Part" />
+        <EntityTypeShape EntityType="ROWM.Dal.Action_Item" Width="1.5" PointX="19.125" PointY="11.625" />
+        <EntityTypeShape EntityType="ROWM.Dal.Action_Item_Activity" Width="1.5" PointX="21.375" PointY="12.625" />
+        <EntityTypeShape EntityType="ROWM.Dal.Action_Item_Group" Width="1.5" PointX="16.875" PointY="19.625" />
+        <EntityTypeShape EntityType="ROWM.Dal.Action_Item_Group_Member" Width="1.5" PointX="19.125" PointY="19.875" />
+        <AssociationConnector Association="ROWM.Dal.FK_ACTION_ITEM" />
+        <AssociationConnector Association="ROWM.Dal.FK_Action_Item_Activity_Action_Item" />
+        <AssociationConnector Association="ROWM.Dal.FK_Action_Item_Assignment" />
+        <AssociationConnector Association="ROWM.Dal.FK_Action_Item_Parcel" />
+        <AssociationConnector Association="ROWM.Dal.ACTION_ITEM_GROUP_MEMBERSHIP" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

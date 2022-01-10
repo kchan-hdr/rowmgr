@@ -29,6 +29,8 @@ namespace ROWM.Dal
         public System.DateTimeOffset LastModified { get; set; }
         public string ModifiedBy { get; set; }
         public bool IsActive { get; set; }
+        public Nullable<System.Guid> AADObjectId { get; set; }
+        public string AgentEmail { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContactLog> ContactLog { get; set; }

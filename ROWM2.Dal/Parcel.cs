@@ -23,6 +23,7 @@ namespace ROWM.Dal
             this.RoeConditions = new HashSet<RoeConditions>();
             this.Status_Activity = new HashSet<Status_Activity>();
             this.Parcel_Allocation = new HashSet<Parcel_Allocation>();
+            this.Action_Item = new HashSet<Action_Item>();
         }
     
         public System.Guid ParcelId { get; set; }
@@ -76,5 +77,7 @@ namespace ROWM.Dal
         public virtual Parcel_Status Parcel_Status1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Parcel_Allocation> Parcel_Allocation { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Action_Item> Action_Item { get; set; }
     }
 }

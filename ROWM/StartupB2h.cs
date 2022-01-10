@@ -74,6 +74,8 @@ namespace ROWM
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<IStatisticsRepository, B2hFilteredStatisticsRepository>();
+            services.AddScoped<IActionItemRepository, ActionItemRepository>();
+            services.AddScoped<ActionItemNotification.Notification>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<Dal.DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));

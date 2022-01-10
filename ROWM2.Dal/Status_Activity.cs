@@ -14,6 +14,12 @@ namespace ROWM.Dal
     
     public partial class Status_Activity
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Status_Activity()
+        {
+            this.Action_Item = new HashSet<Action_Item>();
+        }
+    
         public System.Guid ActivityId { get; set; }
         public System.DateTimeOffset ActivityDate { get; set; }
         public System.Guid ParentParcelId { get; set; }
@@ -26,5 +32,7 @@ namespace ROWM.Dal
         public virtual Parcel Parcel { get; set; }
         public virtual Parcel_Status Parcel_Status { get; set; }
         public virtual Parcel_Status Parcel_Status1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Action_Item> Action_Item { get; set; }
     }
 }

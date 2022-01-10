@@ -47,5 +47,9 @@ namespace ROWM.Dal
         public virtual DbSet<Map> MapSet { get; set; }
         public virtual DbSet<Parcel_Allocation> Parcel_Allocation { get; set; }
         public virtual DbSet<Project_Part> Project_Part { get; set; }
+        public virtual DbSet<Action_Item> Action_Item { get; set; }
+        public virtual DbSet<Action_Item_Activity> Action_Item_Activity { get; set; }
+        public virtual DbSet<Action_Item_Group> Action_Item_Group { get; set; }
+        public virtual DbSet<Action_Item_Group_Member> Action_Item_Group_Member { get; set; }
     }
 }

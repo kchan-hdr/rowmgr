@@ -33,6 +33,9 @@ namespace ExcelExport
             var hr = InsertRow(row++, d);
             var c = 0;
             WriteText(hr, GetColumnCode(c++), "Parcel ID", 1);
+            WriteText(hr, GetColumnCode(c++), "Line List", 1);
+            WriteText(hr, GetColumnCode(c++), "Priority", 1);
+            WriteText(hr, GetColumnCode(c++), "Agent", 1);
             WriteText(hr, GetColumnCode(c++), "Owner", 1);
             WriteText(hr, GetColumnCode(c++), "ROE Status", 1);
             WriteText(hr, GetColumnCode(c++), "Date", 1);
@@ -42,9 +45,12 @@ namespace ExcelExport
                 var r = InsertRow(row++, d);
                 c = 0;
                 WriteText(r, GetColumnCode(c++), doc.Parcel_ID);
+                WriteText(r, GetColumnCode(c++), doc.LineList);
+                WriteText(r, GetColumnCode(c++), doc.Priority);
+                WriteText(r, GetColumnCode(c++), doc.Agent);
                 WriteText(r, GetColumnCode(c++), doc.Owner);
                 WriteText(r, GetColumnCode(c++), doc.ROE);
-                WriteText(r, GetColumnCode(c++), doc.Date.HasValue ? doc.Date.Value.Date.ToShortDateString() : "");
+                WriteDate(r, GetColumnCode(c++), doc.Date);
             }
 
             sheets.Append(new Sheet { Id = bookPart.GetIdOfPart(p), SheetId = pageId, Name = "Parcel ROE" });
@@ -55,6 +61,9 @@ namespace ExcelExport
         public partial class ParcelList
         {
             public string Parcel_ID { get; set; }
+            public string LineList { get; set; }
+            public string Priority { get; set; }
+            public string Agent { get; set; }
             public string Owner { get; set; }
             public string ROE { get; set; }
             public Nullable<System.DateTimeOffset> Date { get; set; }

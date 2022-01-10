@@ -83,7 +83,7 @@ namespace ROWM.Dal
 
 
         public IEnumerable<string> GetParcels() => _ctx.Parcel.AsNoTracking().Select(px => px.Assessor_Parcel_Number);
-        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select( o => o.Owner )).AsNoTracking();
+        public IEnumerable<Parcel> GetParcels2() => _ctx.Parcel.Include(px => px.Ownership.Select(o => o.Owner)).Include(px => px.Parcel_Allocation).AsNoTracking();
 
         public async Task<Parcel> UpdateParcel (Parcel p)
         {
@@ -159,9 +159,6 @@ namespace ROWM.Dal
         {
             var parcels = await _ctx.Parcel
                 .Where(px => px.IsActive)
-                //.Include(px => px.Ownership)
-                //.Include(px => px.Parcel_Allocation)
-                //.Include(px => px.Document)
                 .Select(p => new
                 {
                     p.Assessor_Parcel_Number,

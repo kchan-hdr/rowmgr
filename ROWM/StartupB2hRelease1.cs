@@ -62,10 +62,12 @@ namespace ROWM
 
             services.AddScoped<ROWM.Dal.OwnerRepository>();
             services.AddScoped<IStatisticsRepository, B2hFilteredStatisticsRepository>();
+            services.AddScoped<IActionItemRepository, ActionItemRepository>();
             services.AddScoped<ROWM.Dal.AppRepository>();
             services.AddScoped<Dal.DeleteHelper>();
             services.AddScoped<ROWM.Dal.DocTypes>(fac => new Dal.DocTypes(new Dal.ROWM_Context(cs)));
             services.AddScoped<Controllers.ParcelStatusHelper>();
+            services.AddScoped<ActionItemNotification.Notification>();
             services.AddScoped<B2hParcelHelper>();
 
             var feat = new B2hParcel("https://maps.hdrgateway.com/arcgis/rest/services/Idaho/B2H_ROW_Parcels_FS/FeatureServer");

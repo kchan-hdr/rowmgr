@@ -186,6 +186,25 @@ namespace ExcelExport
             return cell;
         }
 
+        static protected Cell WriteDate(Row row, string c, DateTimeOffset? date)
+        {
+            CellValue myValue;
+            if (date == null)
+            {
+                myValue = new CellValue("");
+            }
+            else
+            {
+                myValue = new CellValue(date.Value.LocalDateTime.ToOADate().ToString());
+            }
+
+            var cell = InsertCell(row, c);
+            cell.CellValue = myValue;
+            cell.DataType = CellValues.Number;
+            cell.StyleIndex = 2;
+            return cell;
+        }
+
         static protected Cell WriteNumber(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Number);
         static protected Cell WriteTrueFalse(Row row, string c, string text) => WriteCell(row, c, text, CellValues.Boolean);
         static protected Cell WriteText(Row row, string c, string text, uint? styleIndex = null)

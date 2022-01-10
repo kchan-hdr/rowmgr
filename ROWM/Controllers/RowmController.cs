@@ -937,6 +937,8 @@ namespace ROWM.Controllers
         public string ParcelStatus => this.ParcelStatusCode;        // to be removed
         public string RoeStatusCode { get; set; }
         public string RoeCondition { get; set; }
+        public DateTime? RoeConditionStart { get; set; }
+        public DateTime? RoeConditionEnd { get; set; }
         public string ClearanceCode { get; set; }
         public int? LandownerScore { get; set; }
         public string SitusAddress { get; set; }
@@ -952,10 +954,28 @@ namespace ROWM.Controllers
         public IEnumerable<OwnerDto> Owners { get; set; }
         public IEnumerable<ContactLogDto> ContactsLog { get; set; }
         public IEnumerable<DocumentHeader> Documents { get; set; }
+        public IEnumerable<ActionItemDto> ActionItems { get; set; }
 
         public ParcelIdentifier Identifier { get; set; }
         public string Allocations { get; set; }
         public string CornerstoneAgent { get; set; }
+
+        RoeConditions ActiveCondition(IEnumerable<RoeConditions> conditions)
+        {
+            if (conditions.Any() == false)
+                return default;
+
+            if (conditions.Count() == 1)
+                return conditions.First();
+
+            var today = DateTimeOffset.UtcNow;
+
+            var q = from c in conditions
+                    where (c.EffectiveStartDate < today || c.EffectiveStartDate == null) && (c.EffectiveEndDate == null || c.EffectiveEndDate > today)
+                    select c;
+
+            return q.Any() ? q.OrderBy(cx => cx.EffectiveStartDate).FirstOrDefault() : default;
+        }
 
         internal ParcelGraph( Parcel p, IEnumerable<Document> d)
         {
@@ -968,6 +988,16 @@ namespace ROWM.Controllers
             //ParcelStatus = Enum.GetName(typeof(Parcel.RowStatus), p.ParcelStatus);
             RoeStatusCode = p.RoeStatusCode;
             RoeCondition = "";
+
+            var cod = ActiveCondition(p.RoeConditions.ToArray());
+            if (cod != null)
+            {
+                // RoeCondition = p.Conditions.FirstOrDefault()?.Condition ?? "";
+                RoeCondition = cod.Condition;
+                RoeConditionStart = cod.EffectiveStartDate?.LocalDateTime;
+                RoeConditionEnd = cod.EffectiveEndDate?.LocalDateTime;
+            }
+
             SitusAddress = p.SitusAddress;
 
             LandownerScore = p.Landowner_Score;
@@ -984,6 +1014,7 @@ namespace ROWM.Controllers
             ContactsLog = p.ContactLog.Where(cx => !cx.IsDeleted).Select(cx => new ContactLogDto(cx));
             Documents = d.Where(dx => !dx.IsDeleted).Select(dx => new DocumentHeader(dx));
 
+            ActionItems = p.Action_Item.Select(ax => new ActionItemDto { ActionItemId = ax.ActionItemId, Action = ax.Action, StatusCode = Enum.GetName(typeof(ActionStatus), ax.Status), DueDate = ax.DueDate });
             CornerstoneAgent = p.CornerstoneAgent;
             if (p.Parcel_Allocation.Any())
             {
