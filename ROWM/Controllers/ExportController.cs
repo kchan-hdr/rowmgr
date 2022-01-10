@@ -174,9 +174,12 @@ namespace ROWM.Controllers
                     var oname = os?.Owner.PartyName?.TrimEnd(',') ?? "";
                     var p = new ExcelExport.RoeListExport.ParcelList
                     {
-                        Parcel_ID = px.Label,
+                        Parcel_ID = px.Assessor_Parcel_Number,
+                        LineList = px.LineList,
+                        Priority = string.Join(" | ", px.Parcel_Allocation.Select(ax => ax.Project_Part.Caption)),
+                        Agent = px.CornerstoneAgent,
                         Owner = oname,
-                        ROE = px.Roe_Status.Description,
+                        ROE = px.Roe_Status?.Description ?? "",
                         Date = px.LastModified
                     };
                     return p;
@@ -185,13 +188,13 @@ namespace ROWM.Controllers
                 var bytes = e.Export();
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "roe.xlsx");
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 using (var s = new MemoryStream())
                 {
                     using (var writer = new StreamWriter(s))
                     {
-                        writer.WriteLine("Parcel ID,Owner,ROE Status,Date");
+                        writer.WriteLine("Parcel ID,Line List,Agent,Owner,ROE Status,Date");
 
                         foreach (var p in parcels.OrderBy(px => px.Tracking_Number ?? "").ThenBy(px => px.Assessor_Parcel_Number))
                         {

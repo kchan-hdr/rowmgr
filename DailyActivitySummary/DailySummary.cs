@@ -157,6 +157,7 @@ namespace DailyActivitySummary
             var q = from da in _Context.DocumentActivity.FromSqlRaw(Q).AsNoTracking()
                     join pd in _Context.ParcelDocuments.AsNoTracking() on da.ParentDocumentId equals pd.DocumentDocumentId
                     join p in _Context.Parcel.AsNoTracking() on pd.ParcelParcelId equals p.ParcelId
+                    where "Uploaded".Equals(da.Activity)
                     select new DocumentDto { APN = MakeLabel(p), Title = da.ParentDocument.Title, Activity = da.Activity, DocId = da.ParentDocumentId };
 
             return await q.ToListAsync();
@@ -191,7 +192,9 @@ namespace DailyActivitySummary
 
         public override string ToString()
         {
-            return $"{Category.ToUpper()} ({this.StatusCode}) from: {this.OldStatusCode}";
+            return (string.IsNullOrWhiteSpace(this.OldStatusCode))
+                ? $"{Category?.ToUpper() ?? string.Empty} ({this.StatusCode})"
+                : $"{Category?.ToUpper() ?? string.Empty} ({this.StatusCode}) from: {this.OldStatusCode}";
         }
     }
 

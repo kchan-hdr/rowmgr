@@ -29,11 +29,9 @@ namespace DailyActivitySummary
             ILogger log)
         {
             var dt = DateTime.UtcNow;
-
             log.LogInformation($"Summary triggered at {dt} ( {myTimer.IsPastDue})");
 
             var summary = await _Helper.GetSummary(dt);
-
             if (summary.Any())
             {
                 log.LogInformation($"sending notification {summary.Count()}");
@@ -44,6 +42,28 @@ namespace DailyActivitySummary
                 return;
             }
 
+            var (dot, dox) = PrepareContent(summary);
+
+            SendGridMessage message = new SendGridMessage()
+            {
+                Subject = $"B2H LCD Daily Summary ({dt.ToLocalTime().ToShortDateString()})"
+            };
+            message.SetFrom(new EmailAddress("NO-REPLY@hdrinc.com", "B2H LCD"));
+
+            var recipients = await _Helper.GetRecipients();
+            message.AddTos(recipients.Where(rx => !rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
+            message.AddCcs(recipients.Where(rx => rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
+            message.AddBccs(new List<EmailAddress> { new EmailAddress("kelly.chan@hdrinc.com"), new EmailAddress("tui.chan@gmail.com", "b2h") });
+            
+            message.AddContent(MimeType.Html, dox.ToString());
+            message.AddContent(MimeType.Text, dot.ToString());
+
+            await msg.AddAsync(message);
+
+        }
+
+        public static (string Html, string PlainTxt) PrepareContent(IEnumerable<ParcelSummary> summary)
+        {
             var dot = new StringBuilder();
             var dox = new StringBuilder();
             foreach (ParcelSummary s in summary.OrderBy(sx => sx.Names).ThenBy(sx => sx.APN))
@@ -60,14 +80,13 @@ namespace DailyActivitySummary
                 {
                     var cnt = s.Statuses.Select(sx => sx.ChangeId).Distinct().Count();
                     var statusT = "Status Change".ToQuantity(cnt);
+                    foreach (var status in s.Statuses)
+                    {
+                        statusT += $" | {status}";
+                    }
+
                     dot.AppendLine(statusT);
                     summaryText.Add(statusT);
-                    
-                    //dox.Append("<h2>Status Changes</h2>");
-                    //foreach (var status in s.Statuses)
-                    //{
-                    //    dox.Append($"<span>{status}</span><br />");
-                    //}
                 }
 
                 if (s.Logs.Any())
@@ -100,29 +119,7 @@ namespace DailyActivitySummary
                 dox.Append($"<span>{tt}</span>");
             }
 
-            SendGridMessage message = new SendGridMessage()
-            {
-                Subject = $"B2H LCD Daily Summary ({dt.ToShortDateString()})"
-            };
-            message.SetFrom(new EmailAddress("NO-REPLY@hdrinc.com", "B2H LCD"));
-
-            var recipients = await _Helper.GetRecipients();
-            message.AddTos(recipients.Where(rx => !rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
-            message.AddCcs(recipients.Where(rx => rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
-            //message.AddTo("jstippel@idahopower.com");
-            //message.AddTo("jmaffuccio@idahopower.com");
-            //message.AddTo("kfunke@idahopower.com");
-            //message.AddTo("Brandon.Jones@hdrinc.com");
-            //message.AddCc("James.Buker@hdrinc.com");
-            //message.AddCc("yuying.li@hdrinc.com");
-
-            message.AddBccs(new List<EmailAddress> { new EmailAddress("kelly.chan@hdrinc.com"), new EmailAddress("tui.chan@gmail.com", "b2h") });
-            
-            message.AddContent(MimeType.Html, dox.ToString());
-            message.AddContent(MimeType.Text, dot.ToString());
-
-            await msg.AddAsync(message);
-
+            return (dox.ToString(), dot.ToString());
         }
     }
 }
