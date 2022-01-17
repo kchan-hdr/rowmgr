@@ -24,7 +24,7 @@ namespace DailyActivitySummary
 
         [FunctionName("DailyNotification")]
         public async Task Run(
-            [TimerTrigger("0 0 18 * * *")]TimerInfo myTimer,
+            [TimerTrigger("0 0 18 * * *", RunOnStartup =false)]TimerInfo myTimer,
             [SendGrid()] IAsyncCollector<SendGridMessage> msg,
             ILogger log)
         {
@@ -55,8 +55,8 @@ namespace DailyActivitySummary
             message.AddCcs(recipients.Where(rx => rx.IsCopy).OrderBy(rx => rx.IsHdr ? 2 : 1).ThenBy(rx => rx.Email).Select(rx => new EmailAddress(rx.Email)).ToList());
             message.AddBccs(new List<EmailAddress> { new EmailAddress("kelly.chan@hdrinc.com"), new EmailAddress("tui.chan@gmail.com", "b2h") });
             
-            message.AddContent(MimeType.Html, dox.ToString());
-            message.AddContent(MimeType.Text, dot.ToString());
+            message.AddContent(MimeType.Html, dot.ToString());
+            message.AddContent(MimeType.Text, dox.ToString());
 
             await msg.AddAsync(message);
 

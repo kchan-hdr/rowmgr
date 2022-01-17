@@ -41,38 +41,14 @@ namespace DailyActivitySummary
                 .Union(docs.Select(d => d.APN))
                 .Distinct();
 
-            var q = from p in parcels
-                    join o in owners on p equals o.APN
-                    join s in statuses on p equals s.APN into stg
-                    from st in stg.DefaultIfEmpty()
-                    join l in logs on p equals l.APN into log
-                    from lo in log.DefaultIfEmpty()
-                    join d in docs on p equals d.APN into dog
-                    from doc in dog.DefaultIfEmpty()
-                    select new { p, o.Namees, st, lo, doc };
-
-            var list = new List<ParcelSummary>();
-
-            foreach( var g in q.GroupBy(p => p.p))
+            var list = parcels.Select(par =>
             {
-                var px = new ParcelSummary { APN = g.Key };
-                list.Add(px);
-
-                foreach(var s in g)
-                {
-                    px.Names = string.Join(", ", s.Namees);
-
-                    if (s.doc!= null)
-                        px.Docs.Add(s.doc);
-
-                    if (s.lo != null)
-                        px.Logs.Add(s.lo);
-
-                    if (s.st != null)
-                        px.Statuses.Add(s.st);
-                }
-            }
-
+                var px = new ParcelSummary { APN = par };
+                px.Statuses.AddRange(statuses.Where(sx => sx.APN == par));
+                px.Docs.AddRange(docs.Where(dx => dx.APN == par));
+                px.Logs.AddRange(logs.Where(lx => lx.APN == par));
+                return px;
+            });
             return list;
         }
 

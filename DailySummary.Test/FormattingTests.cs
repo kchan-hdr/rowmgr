@@ -52,5 +52,27 @@ namespace DailySummary.Test
             html.Should().NotBeNullOrWhiteSpace();
             txt.Should().NotBeNullOrWhiteSpace();
         }
+
+        /// <summary>
+        /// debug duplicated status message, when there are multiple document uploads
+        /// </summary>
+        [Fact]
+        public void Should_Not_Duplicate()
+        {
+            var par = new List<ParcelSummary>
+            {
+                new ParcelSummary{ APN = "xxx", 
+                    Statuses = new List<StatusChangeDto> { new StatusChangeDto { APN = "xxx", Category = "zzz", OldStatusCode = "old status", StatusCode = "new status" } },
+                    Docs = new List<DocumentDto>{ 
+                        new DocumentDto { APN = "xxx", Activity = "Uploaded", Title = "1", DocId = Guid.NewGuid()}, 
+                        new DocumentDto { APN = "xxx", Activity = "Uploaded", Title = "2", DocId = Guid.NewGuid()} 
+                    }
+                }
+            };
+            var (html, txt) = DailyNotification.PrepareContent(par);
+
+            txt.Should().NotBeEmpty();
+            txt.Split().Count(x => x == "ZZZ").Should().Equals(1);
+        }
     }
 }
