@@ -71,8 +71,8 @@ namespace DailyActivitySummary
                 dot.AppendLine(s.Names);
                 dot.AppendLine(s.APN);
 
-                dox.Append($"<h3>{s.Names}</h3>");
-                dox.Append($"<h4>{s.APN}</h4>");
+                // dox.Append($"<h3>{s.Names}</h3>");
+                dox.Append($"<h4>{s.Names} ({s.APN})</h4>");
 
                 var summaryText = new List<string>();
 

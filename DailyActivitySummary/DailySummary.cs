@@ -43,7 +43,9 @@ namespace DailyActivitySummary
 
             var list = parcels.Select(par =>
             {
-                var px = new ParcelSummary { APN = par };
+                var oname = owners.FirstOrDefault(ox => ox.APN == par);
+
+                var px = new ParcelSummary { APN = par, Names = string.Join(',', oname.Namees) };
                 px.Statuses.AddRange(statuses.Where(sx => sx.APN == par));
                 px.Docs.AddRange(docs.Where(dx => dx.APN == par));
                 px.Logs.AddRange(logs.Where(lx => lx.APN == par));

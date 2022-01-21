@@ -16,7 +16,7 @@ namespace DailySummary.Test
         {
             var par = new List<ParcelSummary>
             {
-                new ParcelSummary{ APN = "xxx", Statuses = new List<StatusChangeDto> { new StatusChangeDto { APN = "xxx", Category = "zzz", OldStatusCode = "old status", StatusCode = "new status" } } }
+                new ParcelSummary{ APN = "xxx", Names = "Whoever, Whut", Statuses = new List<StatusChangeDto> { new StatusChangeDto { APN = "xxx", Category = "zzz", OldStatusCode = "old status", StatusCode = "new status" } } }
             };
             var (html, txt) = DailyNotification.PrepareContent(par);
 
